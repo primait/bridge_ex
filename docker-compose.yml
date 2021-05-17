@@ -1,0 +1,11 @@
+version: "3"
+services:
+  lib:
+    build: .
+    container_name: graphql_bridge
+    volumes:
+      - .:/$PWD
+      - "~/.ssh:/home/app/.ssh"
+      - "~/.gitconfig:/home/app/.gitconfig"
+      - ".:/code"
+    working_dir: $PWD
