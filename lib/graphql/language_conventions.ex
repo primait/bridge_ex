@@ -1,4 +1,4 @@
-defmodule BridgeEx.LanguageConventions do
+defmodule BridgeEx.Graphql.LanguageConventions do
   @moduledoc """
   This defines an adapter that supports GraphQL query documents in their
   conventional (in JS) camelcase notation, while allowing the schema to be

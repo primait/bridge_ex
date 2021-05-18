@@ -1,16 +1,17 @@
-defmodule BridgeEx.Utils do
+defmodule BridgeEx.Graphql.Utils do
   @moduledoc """
   Misc utils for handling Graphql requests/responses.
   """
 
-  alias BridgeEx.LanguageConventions
+  alias BridgeEx.Graphql.LanguageConventions
+  alias BridgeEx.Graphql.Client
   require Logger
 
   @spec decode_response(
           {:ok, HTTPoison.Response.t() | HTTPoison.AsyncResponse.t()}
           | {:error, HTTPoison.Error.t()},
           String.t()
-        ) :: BridgeEx.Client.client_response()
+        ) :: Client.client_response()
   def decode_response({:ok, %HTTPoison.Response{status_code: 200, body: body_string}}, _) do
     Jason.decode(body_string, keys: :atoms)
   end
@@ -36,8 +37,8 @@ defmodule BridgeEx.Utils do
     {:error, "HTTP_ERROR"}
   end
 
-  @spec parse_response(BridgeEx.Client.graphql_response()) ::
-          BridgeEx.Client.client_response()
+  @spec parse_response(Client.graphql_response()) ::
+          Client.client_response()
   def parse_response({:error, error}) when is_binary(error), do: {:error, error}
 
   def parse_response({:ok, %{errors: errors}}) do

@@ -1,10 +1,10 @@
-defmodule BridgeEx.Client do
+defmodule BridgeEx.Graphql.Client do
   @moduledoc """
   Documentation for `BridgeEx`.
   """
 
   require Logger
-  alias BridgeEx.Utils
+  alias BridgeEx.Graphql.Utils
 
   @type bridge_response :: {:ok, term()} | {:error, String.t()}
 
