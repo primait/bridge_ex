@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-docker build -t graphql_bridge . && docker run -it graphql_bridge
+docker build -t bridge_ex . && docker run -it bridge_ex

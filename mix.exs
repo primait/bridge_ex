@@ -1,11 +1,12 @@
-defmodule GraphqlBridge.MixProject do
+defmodule BridgeEx.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :graphql_bridge,
+      app: :bridge_ex,
       version: "0.1.0",
       elixir: "~> 1.10",
+      elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
@@ -18,6 +19,9 @@ defmodule GraphqlBridge.MixProject do
     ]
   end
 
+  defp elixirc_paths(env) when env in [:dev, :test], do: ["lib", "test/support", "example"]
+  defp elixirc_paths(_), do: ["lib"]
+
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
@@ -25,7 +29,8 @@ defmodule GraphqlBridge.MixProject do
       {:telepoison, "~> 0.1.1"},
       {:credo, "~> 1.2", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1.0", only: [:dev, :test], runtime: false},
-      {:mox, "~> 1.0.0", only: [:dev, :test]}
+      {:mox, "~> 1.0.0", only: [:dev, :test]},
+      {:absinthe, "~> 1.6"}
     ]
   end
 end
