@@ -29,15 +29,16 @@ defmodule MyApp.SomeServiceBridge do
   @behaviour MyApp.SomeService
 
   use BridgeEx.Graphql, [
-    # mandatory settings (values of `http_headers` might differ for your use case)
+    # mandatory settings
     endpoint: "http://some_service.example.com",
+
+    # optional settings (with defaults)
     http_headers: %{
       "User-Agent" => "microservice-myapp/myapp-version",
       "Content-type" => "application/json",
       "X-Client-Id" => "myapp",
       "X-Client-Secret" => "myapp_secret"
     },
-    # optional settings (with defaults)
     http_options: [timeout: 1_000, recv_timeout: 16_000],
     max_attempts: 1,
     encode_variables: false

@@ -50,36 +50,7 @@ defmodule BridgeEx.Graphql.Client do
           max_attempts :: integer()
         ) :: bridge_response()
   def call(url, query, variables, http_options, http_headers, max_attempts) do
-    do_call(
-      %{query: String.trim(query), variables: Jason.encode!(variables)},
-      url,
-      http_options,
-      http_headers,
-      max_attempts
-    )
-  end
-
-  @spec call_no_variables_encoding(
-          url :: String.t(),
-          query :: String.t(),
-          variables :: map(),
-          http_options :: Keyword.t(),
-          http_headers :: map(),
-          max_attempts :: integer()
-        ) ::
-          bridge_response()
-  def call_no_variables_encoding(url, query, variables, http_options, http_headers, max_attempts) do
-    do_call(
-      %{query: String.trim(query), variables: variables},
-      url,
-      http_options,
-      http_headers,
-      max_attempts
-    )
-  end
-
-  defp do_call(query_and_variables, url, http_options, http_headers, max_attempts) do
-    query_and_variables
+    %{query: String.trim(query), variables: variables}
     |> Jason.encode()
     |> Utils.retry(
       fn query ->

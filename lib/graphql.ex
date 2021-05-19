@@ -6,13 +6,14 @@ defmodule BridgeEx.Graphql do
   defmacro __using__(opts) when is_list(opts) do
     quote do
       alias BridgeEx.Graphql.Client
-
       # mandatory opts
       @endpoint Keyword.fetch!(unquote(opts), :endpoint)
-      @http_headers Keyword.fetch!(unquote(opts), :http_headers)
 
       # optional opts with defaults
       @http_options Keyword.get(unquote(opts), :http_options, timeout: 1_000, recv_timeout: 16_000)
+      @http_headers Keyword.get(unquote(opts), :http_headers, %{
+                      "Content-type" => "application/json"
+                    })
       @max_attempts Keyword.get(unquote(opts), :max_attemps, 1)
       @encode_variables Keyword.get(unquote(opts), :encode_variables, false)
 
@@ -27,20 +28,13 @@ defmodule BridgeEx.Graphql do
         %{options: http_options, headers: http_headers, max_attempts: max_attempts} =
           Enum.into(options, @defaults)
 
-        call_func =
+        request_variables =
           case @encode_variables do
-            false -> :call_no_variables_encoding
-            true -> :call
+            false -> variables
+            true -> Jason.encode!(variables)
           end
 
-        apply(Client, call_func, [
-          @endpoint,
-          query,
-          variables,
-          http_options,
-          http_headers,
-          max_attempts
-        ])
+        Client.call(@endpoint, query, request_variables, http_options, http_headers, max_attempts)
       end
     end
   end
