@@ -29,7 +29,6 @@ defmodule BridgeEx.MixProject do
       {:telepoison, "~> 0.1.1"},
       {:credo, "~> 1.2", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1.0", only: [:dev, :test], runtime: false},
-      {:mox, "~> 1.0.0", only: [:dev, :test]},
       {:absinthe, "~> 1.6"}
     ]
   end
