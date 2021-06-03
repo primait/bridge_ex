@@ -67,5 +67,6 @@ defmodule BridgeEx.Graphql.Client do
     Enum.map(response, &format_response(&1))
   end
 
-  def format_response(response), do: Utils.normalize_inner_fields(response)
+  def format_response(response) when is_map(response), do: Utils.normalize_inner_fields(response)
+
 end

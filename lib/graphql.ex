@@ -40,8 +40,8 @@ defmodule BridgeEx.Graphql do
         |> format_response(@format_response)
       end
 
-      defp format_response(response, true), do: Client.format_response(response)
-      defp format_response(response, false), do: response
+      defp format_response({ret, response}, true), do: {ret, Client.format_response(response)}
+      defp format_response({ret, response}, false), do: {ret, response}
     end
   end
 end
