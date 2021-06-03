@@ -42,22 +42,6 @@ defmodule BridgeEx.Graphql.Client do
     )
   end
 
-  @spec handle_response({:ok, any()} | {:error, any()}, String.t()) ::
-          {:ok, any()} | {:error, any()}
-  def handle_response(response, service_name) do
-    case response do
-      {:error, error} ->
-        Logger.error("#{service_name}: api call error", message: error)
-        {:error, error}
-
-      {:ok, %{error: error}} ->
-        {:error, error}
-
-      val ->
-        val
-    end
-  end
-
   @doc """
   formats a GraphQL query response to make it Absinthe compliant
   """
@@ -68,5 +52,5 @@ defmodule BridgeEx.Graphql.Client do
   end
 
   def format_response(response) when is_map(response), do: Utils.normalize_inner_fields(response)
-
+  def format_response(response), do: response
 end
