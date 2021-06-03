@@ -3,5 +3,5 @@ defmodule BridgeEx.Example.SomeService do
   Bridge definition for SomeService
   """
 
-  @callback my_cool_query(any()) :: boolean()
+  @callback my_cool_query(map()) :: any()
 end

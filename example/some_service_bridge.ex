@@ -10,19 +10,19 @@ defmodule BridgeEx.Example.SomeServiceBridge do
     endpoint: "http://some_service.example.com",
     http_headers: %{
       "User-Agent" => "microservice-myapp/myapp-version",
-      "Content-type" => "application/json",
-      "X-Client-Id" => "myapp",
-      "X-Client-Secret" => "myapp_secret"
+      "Content-type" => "application/json"
     },
 
     # optional settings (with defaults)
     http_options: [timeout: 1_000, recv_timeout: 16_000],
     max_attempts: 1,
-    encode_variables: false
+    encode_variables: false,
+    format_response: true
   ]
 
-  def my_cool_query(%{} = variables) do
-    call("query", variables)
-    false
+  def my_cool_query(%{id: "12345"} = variables) do
+    "#{__DIR__}/some_service/my_cool_query.graphql"
+    |> File.read!()
+    |> call(variables)
   end
 end
