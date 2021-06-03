@@ -16,6 +16,7 @@ defmodule BridgeEx.Graphql do
                     })
       @max_attempts Keyword.get(unquote(opts), :max_attemps, 1)
       @encode_variables Keyword.get(unquote(opts), :encode_variables, false)
+      @format_response Keyword.get(unquote(opts), :format_response, false)
 
       @defaults %{options: @http_options, headers: @http_headers, max_attempts: @max_attempts}
 
@@ -34,8 +35,13 @@ defmodule BridgeEx.Graphql do
             true -> Jason.encode!(variables)
           end
 
-        Client.call(@endpoint, query, request_variables, http_options, http_headers, max_attempts)
+        @endpoint
+        |> Client.call(query, request_variables, http_options, http_headers, max_attempts)
+        |> format_response(@format_response)
       end
+
+      defp format_response(response, true), do: Client.format_response(response)
+      defp format_response(response, false), do: response
     end
   end
 end

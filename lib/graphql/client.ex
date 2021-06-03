@@ -8,19 +8,6 @@ defmodule BridgeEx.Graphql.Client do
 
   @type bridge_response :: {:ok, term()} | {:error, String.t()}
 
-  @type graphql_response ::
-          {:error, String.t()}
-          | {:ok, %{data: term()}}
-          | {
-              :ok,
-              %{
-                error: [
-                  %{message: String.t(), locations: [%{line: integer(), column: integer()}]}
-                ],
-                data: term()
-              }
-            }
-
   @doc """
   Calls a GraphQL endpoint
 
@@ -32,14 +19,6 @@ defmodule BridgeEx.Graphql.Client do
 
     * `:max_attempts` - Defines number of retries before returning error
   """
-
-  # @spec call!(String.t(), String.t(), map(), Keyword.t()) :: term()
-  # def call!(graphql_url, query, variables, options \\ []) do
-  #   case call(graphql_url, query, variables, options) do
-  #     {:ok, data} -> data
-  #     {:error, error} -> raise error
-  #   end
-  # end
 
   @spec call(
           url :: String.t(),
@@ -56,7 +35,7 @@ defmodule BridgeEx.Graphql.Client do
       fn query ->
         url
         |> Telepoison.post(query, http_headers, http_options)
-        |> Utils.decode_response(query)
+        |> Utils.decode_http_response(query)
         |> Utils.parse_response()
       end,
       max_attempts

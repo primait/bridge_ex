@@ -4,19 +4,33 @@ defmodule BridgeEx.Graphql.Utils do
   """
 
   alias BridgeEx.Graphql.LanguageConventions
-  alias BridgeEx.Graphql.Client
   require Logger
 
-  @spec decode_response(
+  @type client_response :: {:ok, any()} | {:error, any()}
+
+  @type graphql_response ::
+          {:error, String.t()}
+          | {:ok, %{data: term()}}
+          | {
+              :ok,
+              %{
+                error: [
+                  %{message: String.t(), locations: [%{line: integer(), column: integer()}]}
+                ],
+                data: term()
+              }
+            }
+
+  @spec decode_http_response(
           {:ok, HTTPoison.Response.t() | HTTPoison.AsyncResponse.t()}
           | {:error, HTTPoison.Error.t()},
           String.t()
-        ) :: Client.client_response()
-  def decode_response({:ok, %HTTPoison.Response{status_code: 200, body: body_string}}, _) do
+        ) :: client_response()
+  def decode_http_response({:ok, %HTTPoison.Response{status_code: 200, body: body_string}}, _) do
     Jason.decode(body_string, keys: :atoms)
   end
 
-  def decode_response(
+  def decode_http_response(
         {:ok,
          %HTTPoison.Response{status_code: code, body: body_string, request_url: request_url}},
         query
@@ -31,14 +45,14 @@ defmodule BridgeEx.Graphql.Utils do
     {:error, "BAD_RESPONSE"}
   end
 
-  def decode_response({:error, %HTTPoison.Error{reason: reason}}, query) do
+  def decode_http_response({:error, %HTTPoison.Error{reason: reason}}, query) do
     Logger.error("GraphQL: HTTP error", reason: inspect(reason), request_body: query)
 
     {:error, "HTTP_ERROR"}
   end
 
-  @spec parse_response(Client.graphql_response()) ::
-          Client.client_response()
+  @spec parse_response(graphql_response()) ::
+          client_response()
   def parse_response({:error, error}) when is_binary(error), do: {:error, error}
 
   def parse_response({:ok, %{errors: errors}}) do
@@ -60,7 +74,7 @@ defmodule BridgeEx.Graphql.Utils do
           {:ok, String.t()} | {:error, Jason.EncodeError.t() | Exception.t()},
           (any() -> {:error, String.t()} | {:ok, any()}),
           integer()
-        ) :: Utils.response()
+        ) :: client_response()
   def retry({:error, %Jason.EncodeError{message: message}}, _fun, _attempt) do
     {:error, message}
   end

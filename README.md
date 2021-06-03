@@ -41,7 +41,8 @@ defmodule MyApp.SomeServiceBridge do
     },
     http_options: [timeout: 1_000, recv_timeout: 16_000],
     max_attempts: 1,
-    encode_variables: false
+    encode_variables: false,
+    format_response: true # formats keys from CamelCase to snake_case
   ]
 
   def my_cool_query(%{} = variables) do
@@ -65,7 +66,7 @@ defmodule MyApp.SomeServiceBridgeMock do
   def my_cool_query(%{} = variables) do
     File.read!("some_mock_file.json")
     |> Json.decode!(keys: :atoms)
-    |> BridgeEx.Graphql.Client.format_response()
+    # |> BridgeEx.Graphql.Client.format_response() # optional, if you want to format response
   end
 end
 ```
