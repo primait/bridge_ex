@@ -19,7 +19,7 @@ defmodule BridgeEx.MixProject do
     ]
   end
 
-  defp elixirc_paths(env) when env in [:dev, :test], do: ["lib", "test/support", "example"]
+  defp elixirc_paths(env) when env in [:dev, :test], do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
   # Run "mix help deps" to learn about dependencies.
