@@ -48,25 +48,25 @@ defmodule BridgeEx.Graphql.LanguageConventions do
   @doc """
   Converts a camelCase to snake_case
 
-  iex> #{__MODULE__}.to_internal_name("test", :read)
+  iex> to_internal_name("test", :read)
   "test"
 
-  iex> #{__MODULE__}.to_internal_name("testTTT", :read)
+  iex> to_internal_name("testTTT", :read)
   "test_t_t_t"
 
-  iex> #{__MODULE__}.to_internal_name("testTest", :read)
+  iex> to_internal_name("testTest", :read)
   "test_test"
 
-  iex> #{__MODULE__}.to_internal_name("testTest1", :read)
+  iex> to_internal_name("testTest1", :read)
   "test_test_1"
 
-  iex> #{__MODULE__}.to_internal_name("testTest11", :read)
+  iex> to_internal_name("testTest11", :read)
   "test_test_11"
 
-  iex> #{__MODULE__}.to_internal_name("testTest11Pippo", :read)
+  iex> to_internal_name("testTest11Pippo", :read)
   "test_test_11_pippo"
 
-  iex> #{__MODULE__}.to_internal_name("camelCase23Snake4344", :read)
+  iex> to_internal_name("camelCase23Snake4344", :read)
   "camel_case_23_snake_4344"
   """
   def to_internal_name(nil, _role) do
