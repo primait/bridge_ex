@@ -15,9 +15,6 @@ defmodule BridgeEx.Graphql do
                       "Content-type" => "application/json"
                     })
       @max_attempts Keyword.get(unquote(opts), :max_attemps, 1)
-      @encode_variables Keyword.get(unquote(opts), :encode_variables, false)
-      @format_response Keyword.get(unquote(opts), :format_response, false)
-
       @defaults %{options: @http_options, headers: @http_headers, max_attempts: @max_attempts}
 
       @spec call(
@@ -29,19 +26,29 @@ defmodule BridgeEx.Graphql do
         %{options: http_options, headers: http_headers, max_attempts: max_attempts} =
           Enum.into(options, @defaults)
 
-        request_variables =
-          case @encode_variables do
-            false -> variables
-            true -> Jason.encode!(variables)
-          end
-
         @endpoint
-        |> Client.call(query, request_variables, http_options, http_headers, max_attempts)
-        |> format_response(@format_response)
+        |> Client.call(
+          query,
+          encode_variables(variables),
+          http_options,
+          http_headers,
+          max_attempts
+        )
+        |> format_response()
       end
 
-      defp format_response({ret, response}, true), do: {ret, Client.format_response(response)}
-      defp format_response({ret, response}, false), do: {ret, response}
+      # define helpers at compile-time, to avoid dialyzer errors about pattern matching constants
+      if Keyword.get(unquote(opts), :encode_variables, false) do
+        defp encode_variables(variables), do: Jason.encode!(variables)
+      else
+        defp encode_variables(variables), do: variables
+      end
+
+      if Keyword.get(unquote(opts), :format_response, false) do
+        defp format_response({ret, response}), do: {ret, Client.format_response(response)}
+      else
+        defp format_response({ret, response}), do: {ret, response}
+      end
     end
   end
 end
