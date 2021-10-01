@@ -1,6 +1,6 @@
 # BridgeEx
 
-A library to build graphql bridges to other services.
+A library to build bridges to other services (actually only graphql ones are supported).
 
 ## Usage
 
@@ -47,6 +47,21 @@ defmodule MyApp.SomeServiceBridge do
 
   def my_cool_query(%{} = variables) do
     call("a graphql query or mutation", variables)
+
+    # or, if you need more granularity (ex: different endpoint or options):
+
+    # BridgeEx.Graphql.Client.call(
+    #   "https://another-url.com/graphql",
+    #   "graphql query or mutation",
+    #   variables,
+    #   encode_variables: false,
+    #   [timeout: 1_000, recv_timeout: 16_000],
+    #   %{
+    #     "Some-Header" => "some-value",
+    #   },
+    #   1
+    # )
+
   end
 end
 ```
@@ -63,9 +78,13 @@ As a good practice, if you want to mock your bridge for testing, you _should_ im
 defmodule MyApp.SomeServiceBridgeMock do
   @behaviour MyApp.SomeService
 
+  alias BridgeEx.Graphql.Utils
+
+
   def my_cool_query(%{} = variables) do
     File.read!("some_mock_file.json")
     |> Json.decode!(keys: :atoms)
+    |> Utils.parse_response() # required to parse data
     # |> BridgeEx.Graphql.Client.format_response() # optional, if you want to format response
   end
 end
