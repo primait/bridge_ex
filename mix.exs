@@ -26,7 +26,7 @@ defmodule BridgeEx.MixProject do
   defp deps do
     [
       {:jason, "~> 1.2"},
-      {:telepoison, "~> 0.1.1"},
+      {:telepoison, "~> 1.0.0-rc.4"},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       {:absinthe, "~> 1.6"}
