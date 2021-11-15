@@ -25,6 +25,7 @@ defmodule BridgeEx.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:bypass, "~> 2.1", only: :test},
       {:jason, "~> 1.2"},
       {:telepoison, "~> 1.0.0-rc.4"},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
