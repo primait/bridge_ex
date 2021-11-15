@@ -14,7 +14,7 @@ defmodule BridgeEx.Graphql do
       @http_headers Keyword.get(unquote(opts), :http_headers, %{
                       "Content-type" => "application/json"
                     })
-      @max_attempts Keyword.get(unquote(opts), :max_attemps, 1)
+      @max_attempts Keyword.get(unquote(opts), :max_attempts, 1)
       @defaults %{options: @http_options, headers: @http_headers, max_attempts: @max_attempts}
 
       @spec call(
