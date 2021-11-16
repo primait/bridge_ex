@@ -25,12 +25,13 @@ defmodule BridgeEx.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:absinthe, "~> 1.6"},
+      {:auth0_ex, git: "git@github.com:primait/auth0_ex.git", tag: "0.2.4"},
       {:bypass, "~> 2.1", only: :test},
-      {:jason, "~> 1.2"},
-      {:telepoison, "~> 1.0.0-rc.4"},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
-      {:absinthe, "~> 1.6"}
+      {:jason, "~> 1.2"},
+      {:telepoison, "~> 1.0.0-rc.4"}
     ]
   end
 end

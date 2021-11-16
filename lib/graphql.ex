@@ -5,11 +5,14 @@ defmodule BridgeEx.Graphql do
 
   defmacro __using__(opts) when is_list(opts) do
     quote do
+      alias BridgeEx.Auth0AuthorizationProvider
       alias BridgeEx.Graphql.Client
+
       # mandatory opts
       @endpoint Keyword.fetch!(unquote(opts), :endpoint)
 
       # optional opts with defaults
+      @audience Keyword.get(unquote(opts), :audience)
       @http_options Keyword.get(unquote(opts), :http_options, timeout: 1_000, recv_timeout: 16_000)
       @http_headers Keyword.get(unquote(opts), :http_headers, %{
                       "Content-type" => "application/json"
@@ -26,15 +29,17 @@ defmodule BridgeEx.Graphql do
         %{options: http_options, headers: http_headers, max_attempts: max_attempts} =
           Enum.into(options, @defaults)
 
-        @endpoint
-        |> Client.call(
-          query,
-          encode_variables(variables),
-          http_options,
-          http_headers,
-          max_attempts
-        )
-        |> format_response()
+        with {:ok, http_headers} <- with_authorization_headers(http_headers, @audience) do
+          @endpoint
+          |> Client.call(
+            query,
+            encode_variables(variables),
+            http_options,
+            http_headers,
+            max_attempts
+          )
+          |> format_response()
+        end
       end
 
       # define helpers at compile-time, to avoid dialyzer errors about pattern matching constants
@@ -48,6 +53,15 @@ defmodule BridgeEx.Graphql do
         defp format_response({ret, response}), do: {ret, Client.format_response(response)}
       else
         defp format_response({ret, response}), do: {ret, response}
+      end
+
+      defp with_authorization_headers(headers, nil), do: {:ok, headers}
+
+      defp with_authorization_headers(headers, audience) do
+        with {:ok, authorization_headers} <-
+               Auth0AuthorizationProvider.authorization_headers(audience) do
+          {:ok, Enum.into(authorization_headers, headers)}
+        end
       end
     end
   end
