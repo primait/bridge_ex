@@ -112,6 +112,19 @@ And use it in your app from configuration:
 
 See [example](example) directory for an implementation, it also works in `dev` and `test` environments.
 
+### Authenticating calls via Auth0
+
+`bridge_ex` supports authentication of machine-to-machine calls via Auth0, through the (auth0_ex)[https://github.com/primait/auth0_ex] library.
+
+To use this feature, simply configure your bridge with the audience of the target service:
+
+```elixir
+  use BridgeEx.Graphql, [endpoint: "...", audience: "target_audience"]
+```
+
+For this feature to work, your `config.exs` must be updated with the configuration for the `auth0_ex` library.
+You can refer to [the library's README](https://github.com/primait/auth0_ex/blob/master/README.md#configuration) for more information on the supported configuration.
+
 ## Development
 
 `mix deps.get && mix test`
