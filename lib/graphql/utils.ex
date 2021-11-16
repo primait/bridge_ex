@@ -7,19 +7,7 @@ defmodule BridgeEx.Graphql.Utils do
   require Logger
 
   @type client_response :: {:ok, any()} | {:error, any()}
-
-  @type graphql_response ::
-          {:error, String.t()}
-          | {:ok, %{data: term()}}
-          | {
-              :ok,
-              %{
-                error: [
-                  %{message: String.t(), locations: [%{line: integer(), column: integer()}]}
-                ],
-                data: term()
-              }
-            }
+  @type graphql_response :: {:ok, %{String.t() => term()}} | {:error, String.t()}
 
   @spec decode_http_response(
           {:ok, HTTPoison.Response.t() | HTTPoison.AsyncResponse.t()}
@@ -27,7 +15,7 @@ defmodule BridgeEx.Graphql.Utils do
           String.t()
         ) :: client_response()
   def decode_http_response({:ok, %HTTPoison.Response{status_code: 200, body: body_string}}, _) do
-    Jason.decode(body_string, keys: :atoms)
+    Jason.decode(body_string)
   end
 
   def decode_http_response(
@@ -51,8 +39,7 @@ defmodule BridgeEx.Graphql.Utils do
     {:error, "HTTP_ERROR"}
   end
 
-  @spec parse_response(graphql_response()) ::
-          client_response()
+  @spec parse_response(client_response()) :: graphql_response()
   def parse_response({:error, error}) when is_binary(error), do: {:error, error}
 
   def parse_response({:ok, %{errors: errors}}) do
@@ -64,7 +51,7 @@ defmodule BridgeEx.Graphql.Utils do
     {:error, errors}
   end
 
-  def parse_response({:ok, %{data: data}}), do: {:ok, data}
+  def parse_response({:ok, %{"data" => data}}), do: {:ok, data}
 
   @spec normalize_inner_fields(%{atom() => any()} | String.t()) :: %{atom() => any()} | String.t()
   def normalize_inner_fields(binary) when is_binary(binary), do: binary
@@ -94,7 +81,7 @@ defmodule BridgeEx.Graphql.Utils do
     end
   end
 
-  @spec do_normalize_inner_fields({atom(), any()}, map()) :: %{atom() => any()}
+  @spec do_normalize_inner_fields({String.t(), any()}, map()) :: %{String.t() => any()}
   defp do_normalize_inner_fields({key, value}, acc) when is_map(value) do
     Map.merge(acc, %{to_snake_case(key) => normalize_inner_fields(value)})
   end
@@ -107,14 +94,7 @@ defmodule BridgeEx.Graphql.Utils do
     Map.merge(acc, %{to_snake_case(key) => value})
   end
 
-  @spec to_snake_case(atom() | String.t()) :: atom() | String.t()
+  @spec to_snake_case(String.t()) ::  String.t()
   defp to_snake_case(formattable) when is_binary(formattable),
     do: LanguageConventions.to_internal_name(formattable, :read)
-
-  defp to_snake_case(formattable) when is_atom(formattable) do
-    formattable
-    |> Atom.to_string()
-    |> LanguageConventions.to_internal_name(:read)
-    |> String.to_atom()
-  end
 end

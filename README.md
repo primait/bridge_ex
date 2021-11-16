@@ -83,7 +83,7 @@ defmodule MyApp.SomeServiceBridgeMock do
 
   def my_cool_query(%{} = variables) do
     File.read!("some_mock_file.json")
-    |> Json.decode!(keys: :atoms)
+    |> Json.decode!()
     |> Utils.parse_response() # required to parse data
     # |> BridgeEx.Graphql.Client.format_response() # optional, if you want to format response
   end

@@ -68,6 +68,12 @@ defmodule BridgeEx.Graphql.LanguageConventions do
 
   iex> to_internal_name("camelCase23Snake4344", :read)
   "camel_case_23_snake_4344"
+
+  iex> to_internal_name("camelCase23Snake4344", :operation)
+  "camelCase23Snake4344"
+
+  iex> to_internal_name("__camelCase23Snake4344", :read)
+  "__camel_case_23_snake_4344"
   """
   def to_internal_name(nil, _role) do
     nil

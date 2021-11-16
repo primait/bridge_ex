@@ -45,8 +45,8 @@ defmodule BridgeEx.Graphql.Client do
   @doc """
   formats a GraphQL query response to make it Absinthe compliant
   """
-  @spec format_response(%{atom() => any()} | [%{atom() => any()}]) ::
-          %{atom() => any()} | [%{atom() => any()}]
+  @spec format_response(%{String.t() => any()} | [%{String.t() => any()}]) ::
+          %{String.t() => any()} | [%{String.t() => any()}]
   def format_response(response) when is_list(response) do
     Enum.map(response, &format_response(&1))
   end

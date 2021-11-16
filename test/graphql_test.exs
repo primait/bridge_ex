@@ -19,7 +19,7 @@ defmodule BridgeEx.GraphqlTest do
       use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
     end
 
-    assert {:ok, %{key: "value"}} = TestSimpleBridge.call("myquery", %{})
+    assert {:ok, %{"key" => "value"}} = TestSimpleBridge.call("myquery", %{})
   end
 
   @tag capture_log: true
@@ -36,7 +36,7 @@ defmodule BridgeEx.GraphqlTest do
       use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql", max_attempts: 2
     end
 
-    assert {:ok, %{key: "value"}} = TestBridgeWithRetry.call("myquery", %{})
+    assert {:ok, %{"key" => "value"}} = TestBridgeWithRetry.call("myquery", %{})
   end
 
   test "authenticates via auth0 when auth0_audience is set", %{bypass: bypass} do
@@ -58,7 +58,7 @@ defmodule BridgeEx.GraphqlTest do
         audience: "my-audience"
     end
 
-    assert {:ok, %{key: "value"}} = TestBridgeWithAuth0.call("myquery", %{})
+    assert {:ok, %{"key" => "value"}} = TestBridgeWithAuth0.call("myquery", %{})
   end
 
   defp valid_auth0_response do
