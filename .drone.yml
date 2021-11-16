@@ -13,6 +13,8 @@ steps:
 - name: git-clone
   image: public.ecr.aws/prima/drone-git:1.3-3
   environment:
+    DRONE_SSH_KEY:
+      from_secret: drone_ssh_key
     PLUGIN_DEPTH: 5
 
 - name: cache-restore
@@ -201,6 +203,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 15c56314b32a34edfd028f10237bb13ccf709e279bd164a6c763350a036b110e
+hmac: 477493a75b9ddecfbe5183e52e70395e84a4cf41aadb14f8ba5ca48008837060
 
 ...
