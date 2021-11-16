@@ -94,7 +94,7 @@ defmodule BridgeEx.Graphql.Utils do
     Map.merge(acc, %{to_snake_case(key) => value})
   end
 
-  @spec to_snake_case(String.t()) ::  String.t()
+  @spec to_snake_case(String.t()) :: String.t()
   defp to_snake_case(formattable) when is_binary(formattable),
     do: LanguageConventions.to_internal_name(formattable, :read)
 end
