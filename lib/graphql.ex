@@ -3,6 +3,7 @@ defmodule BridgeEx.Graphql do
   Main module to be used to implement graphql bridges.
   """
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defmacro __using__(opts) when is_list(opts) do
     quote do
       alias BridgeEx.Auth0AuthorizationProvider

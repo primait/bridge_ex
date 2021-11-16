@@ -71,7 +71,7 @@ defmodule BridgeEx.GraphqlTest do
     on_exit(fn -> Application.put_env(app, key, previous_value) end)
   end
 
-  defp reload_auth0_ex() do
+  defp reload_auth0_ex do
     Application.stop(:auth0_ex)
     Application.start(:auth0_ex)
   end
