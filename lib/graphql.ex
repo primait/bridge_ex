@@ -30,7 +30,7 @@ defmodule BridgeEx.Graphql do
         %{options: http_options, headers: http_headers, max_attempts: max_attempts} =
           Enum.into(options, @defaults)
 
-        with {:ok, http_headers} <- with_authorization_headers(http_headers, @audience) do
+        with {:ok, http_headers} <- with_authorization_headers(http_headers) do
           @endpoint
           |> Client.call(
             query,
@@ -56,13 +56,15 @@ defmodule BridgeEx.Graphql do
         defp format_response({ret, response}), do: {ret, response}
       end
 
-      defp with_authorization_headers(headers, nil), do: {:ok, headers}
-
-      defp with_authorization_headers(headers, audience) do
-        with {:ok, authorization_headers} <-
-               Auth0AuthorizationProvider.authorization_headers(audience) do
-          {:ok, Enum.into(authorization_headers, headers)}
+      if @audience do
+        defp with_authorization_headers(headers) do
+          with {:ok, authorization_headers} <-
+                 Auth0AuthorizationProvider.authorization_headers(@audience) do
+            {:ok, Enum.into(authorization_headers, headers)}
+          end
         end
+      else
+        defp with_authorization_headers(headers), do: {:ok, headers}
       end
     end
   end
