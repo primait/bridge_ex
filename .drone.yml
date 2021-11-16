@@ -68,7 +68,11 @@ steps:
 - name: elixir-dependencies
   image: prima/bridge_ex-ci:${DRONE_COMMIT}
   commands:
+  - mkdir ~/.ssh && echo $DRONE_SSH_KEY | base64 -d > ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa && echo "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
   - mix deps.get
+  environment:
+    DRONE_SSH_KEY:
+      from_secret: DRONE_SSH_KEY
   depends_on:
   - build-image
 
