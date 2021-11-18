@@ -55,7 +55,7 @@ defmodule BridgeEx.GraphqlTest do
     defmodule TestBridgeWithAuth0 do
       use BridgeEx.Graphql,
         endpoint: "http://localhost:#{bypass.port}/graphql",
-        audience: "my-audience"
+        auth0: [audience: "my-audience", enabled: true]
     end
 
     assert {:ok, %{key: "value"}} = TestBridgeWithAuth0.call("myquery", %{})

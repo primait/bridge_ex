@@ -26,7 +26,7 @@ defmodule BridgeEx.MixProject do
   defp deps do
     [
       {:absinthe, "~> 1.6"},
-      {:auth0_ex, git: "git@github.com:primait/auth0_ex.git", tag: "0.2.4"},
+      {:auth0_ex, git: "git@github.com:primait/auth0_ex.git", tag: "0.2.5"},
       {:bypass, "~> 2.1", only: :test},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},

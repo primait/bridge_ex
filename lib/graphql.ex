@@ -13,7 +13,8 @@ defmodule BridgeEx.Graphql do
       @endpoint Keyword.fetch!(unquote(opts), :endpoint)
 
       # optional opts with defaults
-      @audience Keyword.get(unquote(opts), :audience)
+      @audience get_in(unquote(opts), [:auth0, :audience])
+      @auth0_enabled get_in(unquote(opts), [:auth0, :enabled])
       @http_options Keyword.get(unquote(opts), :http_options, timeout: 1_000, recv_timeout: 16_000)
       @http_headers Keyword.get(unquote(opts), :http_headers, %{
                       "Content-type" => "application/json"
@@ -56,7 +57,7 @@ defmodule BridgeEx.Graphql do
         defp format_response({ret, response}), do: {ret, response}
       end
 
-      if @audience do
+      if @audience && @auth0_enabled do
         defp with_authorization_headers(headers) do
           with {:ok, authorization_headers} <-
                  Auth0AuthorizationProvider.authorization_headers(@audience) do
