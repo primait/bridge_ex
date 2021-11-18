@@ -119,7 +119,7 @@ See [example](example) directory for an implementation, it also works in `dev` a
 To use this feature, simply configure your bridge with the audience of the target service:
 
 ```elixir
-  use BridgeEx.Graphql, [endpoint: "...", audience: "target_audience"]
+  use BridgeEx.Graphql, [endpoint: "...", auth0: [enabled: true, audience: "target_audience"]]
 ```
 
 For this feature to work, your `config.exs` must be updated with the configuration for the `auth0_ex` library.
