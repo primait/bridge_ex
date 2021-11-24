@@ -12,7 +12,8 @@ defmodule BridgeEx.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      docs: docs()
+      docs: docs(),
+      package: package()
     ]
   end
 
@@ -48,6 +49,17 @@ defmodule BridgeEx.MixProject do
       source_url: @source_url,
       source_ref: "v#{@version}",
       formatters: ["html"]
+    ]
+  end
+
+  def package do
+    [
+      description:
+        "BridgeEx is a library to build bridges to other services.",
+      name: "bridge_ex",
+      maintainers: ["Prima"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => @source_url}
     ]
   end
 end
