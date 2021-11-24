@@ -2,7 +2,7 @@ defmodule BridgeEx.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/primait/bridge_ex"
-  @version "0.2.0-rc.1"
+  @version "0.2.0-rc.1.1"
 
   def project do
     [
