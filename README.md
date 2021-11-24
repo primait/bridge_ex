@@ -118,17 +118,20 @@ See [example](example) directory for an implementation, it also works in `dev` a
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `bridge_ex` to your list of dependencies in `mix.exs`:
+The package can be installed by adding `bridge_ex` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:bridge_ex, "~> 0.1.0"}
+    {:bridge_ex, "~> 0.2.0-rc.1"}
   ]
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/bridge_ex](https://hexdocs.pm/bridge_ex).
+## Copyright and License
+
+Copyright (c) 2020 Prima.it
+
+This work is free. You can redistribute it and/or modify it under the
+terms of the MIT License. See the [LICENSE.md](./LICENSE.md) file for more details.
+
