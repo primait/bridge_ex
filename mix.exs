@@ -1,14 +1,18 @@
 defmodule BridgeEx.MixProject do
   use Mix.Project
 
+  @source_url "https://github.com/primait/bridge_ex"
+  @version "0.2.0-rc.1"
+
   def project do
     [
       app: :bridge_ex,
-      version: "0.2.0-rc.1",
+      version: @version,
       elixir: "~> 1.10",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      docs: docs()
     ]
   end
 
@@ -31,6 +35,19 @@ defmodule BridgeEx.MixProject do
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       {:absinthe, "~> 1.6"},
       {:ex_doc, ">= 0.25.3", only: :dev, runtime: false}
+    ]
+  end
+  
+  defp docs do
+    [
+      extras: [
+        "LICENSE.md": [title: "License"],
+        "README.md": [title: "Overview"]
+      ],
+      main: "readme",
+      source_url: @source_url,
+      source_ref: "v#{@version}",
+      formatters: ["html"]
     ]
   end
 end
