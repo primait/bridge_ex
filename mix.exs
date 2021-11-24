@@ -38,7 +38,7 @@ defmodule BridgeEx.MixProject do
       {:ex_doc, ">= 0.25.3", only: :dev, runtime: false}
     ]
   end
-  
+
   defp docs do
     [
       extras: [
@@ -54,8 +54,7 @@ defmodule BridgeEx.MixProject do
 
   def package do
     [
-      description:
-        "BridgeEx is a library to build bridges to other services.",
+      description: "BridgeEx is a library to build bridges to other services.",
       name: "bridge_ex",
       maintainers: ["Prima"],
       licenses: ["MIT"],
