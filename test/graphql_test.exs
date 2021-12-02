@@ -72,12 +72,12 @@ defmodule BridgeEx.GraphqlTest do
   end
 
   defp reload_auth0_ex do
-    Application.stop(:auth0_ex)
-    Application.start(:auth0_ex)
+    Application.stop(:prima_auth0_ex)
+    Application.start(:prima_auth0_ex)
   end
 
   defp set_auth0_ex_configuration(port) do
-    set_test_env(:auth0_ex, :auth0_base_url, "http://localhost:#{port}")
-    set_test_env(:auth0_ex, :client, client_id: "", client_secret: "", cache_enabled: false)
+    set_test_env(:prima_auth0_ex, :auth0_base_url, "http://localhost:#{port}")
+    set_test_env(:prima_auth0_ex, :client, client_id: "", client_secret: "", cache_enabled: false)
   end
 end
