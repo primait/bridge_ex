@@ -2,7 +2,7 @@ defmodule BridgeEx.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/primait/bridge_ex"
-  @version "0.2.0-rc.1.1"
+  @version "0.3.0-rc.1"
 
   def project do
     [
@@ -30,12 +30,14 @@ defmodule BridgeEx.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:jason, "~> 1.2"},
-      {:telepoison, "~> 1.0.0-rc.4"},
+      {:absinthe, "~> 1.6"},
+      {:bypass, "~> 2.1", only: :test},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
-      {:absinthe, "~> 1.6"},
-      {:ex_doc, ">= 0.25.3", only: :dev, runtime: false}
+      {:ex_doc, ">= 0.25.3", only: :dev, runtime: false},
+      {:jason, "~> 1.2"},
+      {:prima_auth0_ex, "~> 0.3.0-rc.1.2"},
+      {:telepoison, "~> 1.0.0-rc.4"}
     ]
   end
 
