@@ -136,7 +136,7 @@ The package can be installed by adding `bridge_ex` to your list of dependencies 
 ```elixir
 def deps do
   [
-    {:bridge_ex, "~> 0.2.0-rc.1"}
+    {:bridge_ex, "~> 0.3.0-rc.1"}
   ]
 end
 ```
