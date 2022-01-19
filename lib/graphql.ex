@@ -28,8 +28,9 @@ defmodule BridgeEx.Graphql do
               options :: Keyword.t()
             ) :: Client.bridge_response()
       def call(query, variables, options \\ []) do
-        %{options: http_options, headers: http_headers, max_attempts: max_attempts} =
-          Enum.into(options, @defaults)
+        http_options = Keyword.merge(@http_options, Keyword.get(options, :options, []))
+        http_headers = Map.merge(@http_headers, Keyword.get(options, :http_headers, %{}))
+        max_attempts = Keyword.get(options, :max_attempts, @max_attempts)
 
         with {:ok, http_headers} <- with_authorization_headers(http_headers) do
           @endpoint
