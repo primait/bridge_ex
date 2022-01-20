@@ -61,6 +61,22 @@ defmodule BridgeEx.GraphqlTest do
     assert {:ok, %{key: "value"}} = TestBridgeWithAuth0.call("myquery", %{})
   end
 
+  test "supports custom headers", %{bypass: bypass} do
+    Bypass.expect(bypass, "POST", "/graphql", fn conn ->
+      assert {"content-type", "application/json"} in conn.req_headers
+      assert {"custom-header-key", "custom-header-value"} in conn.req_headers
+      Plug.Conn.resp(conn, 200, ~s[{"data": {"key": "value"}}])
+    end)
+
+    defmodule TestSimpleBridge do
+      use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+    end
+
+    TestSimpleBridge.call("myquery", %{},
+      http_headers: %{"custom-header-key" => "custom-header-value"}
+    )
+  end
+
   defp valid_auth0_response do
     ~s<{"access_token":"#{@fake_jwt}","expires_in":86400,"token_type":"Bearer"}>
   end
