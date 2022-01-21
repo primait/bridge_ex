@@ -73,7 +73,7 @@ defmodule BridgeEx.GraphqlTest do
     end
 
     TestSimpleBridge.call("myquery", %{},
-      http_headers: %{"custom-header-key" => "custom-header-value"}
+      headers: %{"custom-header-key" => "custom-header-value"}
     )
   end
 
