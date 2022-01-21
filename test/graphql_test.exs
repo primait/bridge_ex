@@ -72,9 +72,7 @@ defmodule BridgeEx.GraphqlTest do
       use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
     end
 
-    TestSimpleBridge.call("myquery", %{},
-      http_headers: %{"custom-header-key" => "custom-header-value"}
-    )
+    TestSimpleBridge.call("myquery", %{}, headers: %{"custom-header-key" => "custom-header-value"})
   end
 
   defp valid_auth0_response do
