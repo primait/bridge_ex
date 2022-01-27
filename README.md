@@ -114,7 +114,7 @@ See [example](example) directory for an implementation, it also works in `dev` a
 
 ### Authenticating calls via Auth0
 
-`bridge_ex` supports authentication of machine-to-machine calls via Auth0, through the (prima_auth0_ex)[https://github.com/primait/auth0_ex] library.
+`bridge_ex` supports authentication of machine-to-machine calls via Auth0, through the [prima_auth0_ex](https://github.com/primait/auth0_ex) library.
 
 To use this feature, simply configure your bridge with the audience of the target service:
 
