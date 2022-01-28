@@ -20,6 +20,7 @@ defmodule BridgeEx.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
+      mod: {BridgeEx.Application, []},
       extra_applications: [:logger]
     ]
   end
@@ -36,7 +37,7 @@ defmodule BridgeEx.MixProject do
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.25.3", only: :dev, runtime: false},
       {:jason, "~> 1.2"},
-      {:prima_auth0_ex, "~> 0.3.0"},
+      {:prima_auth0_ex, "~> 0.3.0", runtime: false},
       {:telepoison, "~> 1.0.0"}
     ]
   end
