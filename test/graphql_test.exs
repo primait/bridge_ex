@@ -69,11 +69,13 @@ defmodule BridgeEx.GraphqlTest do
       Plug.Conn.resp(conn, 200, ~s[{"data": {"key": "value"}}])
     end)
 
-    defmodule TestSimpleBridge do
+    defmodule TestBridgeWithCustomHeaders do
       use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
     end
 
-    TestSimpleBridge.call("myquery", %{}, headers: %{"custom-header-key" => "custom-header-value"})
+    TestBridgeWithCustomHeaders.call("myquery", %{},
+      headers: %{"custom-header-key" => "custom-header-value"}
+    )
   end
 
   test "reports back graphql errors", %{bypass: bypass} do
@@ -81,11 +83,11 @@ defmodule BridgeEx.GraphqlTest do
       Plug.Conn.resp(conn, 200, ~s<{"errors": [{"message": "error1"}, {"message": "error2"}]}>)
     end)
 
-    defmodule TestSimpleBridge do
+    defmodule TestBridgeForErrors do
       use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
     end
 
-    assert {:error, "error1, error2"} = TestSimpleBridge.call("myquery", %{})
+    assert {:error, "error1, error2"} = TestBridgeForErrors.call("myquery", %{})
   end
 
   defp valid_auth0_response do
