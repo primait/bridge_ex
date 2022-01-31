@@ -136,7 +136,7 @@ The package can be installed by adding `bridge_ex` to your list of dependencies 
 ```elixir
 def deps do
   [
-    {:bridge_ex, "~> 0.3.0-rc.1"}
+    {:bridge_ex, "~> 0.4.0"}
   ]
 end
 ```
@@ -147,4 +147,3 @@ Copyright (c) 2020 Prima.it
 
 This work is free. You can redistribute it and/or modify it under the
 terms of the MIT License. See the [LICENSE.md](./LICENSE.md) file for more details.
-
