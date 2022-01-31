@@ -17,7 +17,7 @@ defmodule BridgeEx.Auth0AuthorizationProvider do
 
   defp report_auth0_disabled_error do
     Logger.error("Auth0 is not enabled for this application!
-        Set it with `config :bridge_ex, auth0_enabled: true`")
+        To enable it set `config :bridge_ex, auth0_enabled: true` in your config.")
 
     {:error, "Auth0 not enabled in application"}
   end
