@@ -76,6 +76,18 @@ defmodule BridgeEx.GraphqlTest do
     TestSimpleBridge.call("myquery", %{}, headers: %{"custom-header-key" => "custom-header-value"})
   end
 
+  test "reports back graphql errors", %{bypass: bypass} do
+    Bypass.expect(bypass, "POST", "/graphql", fn conn ->
+      Plug.Conn.resp(conn, 200, ~s<{"errors": [{"message": "error1"}, {"message": "error2"}]}>)
+    end)
+
+    defmodule TestSimpleBridge do
+      use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+    end
+
+    assert {:error, "error1, error2"} = TestSimpleBridge.call("myquery", %{})
+  end
+
   defp valid_auth0_response do
     ~s<{"access_token":"#{@fake_jwt}","expires_in":86400,"token_type":"Bearer"}>
   end

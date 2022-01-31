@@ -51,15 +51,11 @@ defmodule BridgeEx.Graphql.Utils do
     {:error, "HTTP_ERROR"}
   end
 
-  @spec parse_response(graphql_response()) ::
-          client_response()
+  @spec parse_response(graphql_response()) :: client_response()
   def parse_response({:error, error}) when is_binary(error), do: {:error, error}
 
-  def parse_response({:ok, %{errors: errors}}) do
-    errors =
-      errors
-      |> Enum.map(& &1.message)
-      |> Enum.join(", ")
+  def parse_response({:ok, %{errors: errors} = _error_body}) do
+    errors = Enum.map_join(errors, ", ", & &1.message)
 
     {:error, errors}
   end

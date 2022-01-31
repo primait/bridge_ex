@@ -33,7 +33,7 @@ defmodule BridgeEx.MixProject do
     [
       {:absinthe, "~> 1.6"},
       {:bypass, "~> 2.1", only: :test},
-      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.25.3", only: :dev, runtime: false},
       {:jason, "~> 1.2"},
