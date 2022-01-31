@@ -24,29 +24,32 @@ defmodule BridgeEx.Graphql.Utils do
   @spec decode_http_response(
           {:ok, HTTPoison.Response.t() | HTTPoison.AsyncResponse.t()}
           | {:error, HTTPoison.Error.t()},
-          String.t()
+          String.t(),
+          boolean(),
+          boolean()
         ) :: client_response()
-  def decode_http_response({:ok, %HTTPoison.Response{status_code: 200, body: body_string}}, _) do
+  def decode_http_response({:ok, %HTTPoison.Response{status_code: 200, body: body_string}}, _, _, _) do
     Jason.decode(body_string, keys: :atoms)
   end
 
   def decode_http_response(
         {:ok,
          %HTTPoison.Response{status_code: code, body: body_string, request_url: request_url}},
-        query
+        query,
+        log_query_on_error,
+        log_response_on_error,
       ) do
-    Logger.error("GraphQL: Bad Response error",
-      status_code: code,
-      body_string: body_string,
-      request_url: request_url,
-      request_body: query
-    )
+    metadata = [status_code: code, request_url: request_url]
+      |> append_if(log_response_on_error, body_string: body_string)
+      |> append_if(log_query_on_error, request_body: query)
+    Logger.error("GraphQL: Bad Response error", metadata)
 
     {:error, "BAD_RESPONSE"}
   end
 
-  def decode_http_response({:error, %HTTPoison.Error{reason: reason}}, query) do
-    Logger.error("GraphQL: HTTP error", reason: inspect(reason), request_body: query)
+  def decode_http_response({:error, %HTTPoison.Error{reason: reason}}, query, log_query_on_error, _) do
+    metadata = [reason: inspect(reason)] |> append_if(log_query_on_error, request_body: query)
+    Logger.error("GraphQL: HTTP error", metadata)
 
     {:error, "HTTP_ERROR"}
   end
@@ -113,4 +116,9 @@ defmodule BridgeEx.Graphql.Utils do
     |> LanguageConventions.to_internal_name(:read)
     |> String.to_atom()
   end
+
+  # There is nothing like this in the std lib
+  # https://elixirforum.com/t/creating-list-adding-elements-on-specific-conditions/6295/4?u=learts
+  defp append_if(list, false, _), do: list
+  defp append_if(list, true, value), do: list ++ [value]
 end

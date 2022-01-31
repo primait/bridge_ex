@@ -3,7 +3,6 @@ defmodule BridgeEx.Graphql.Client do
   Documentation for `BridgeEx`.
   """
 
-  require Logger
   alias BridgeEx.Graphql.Utils
 
   @type bridge_response :: {:ok, term()} | {:error, String.t()}
@@ -26,16 +25,27 @@ defmodule BridgeEx.Graphql.Client do
           variables :: map(),
           http_options :: Keyword.t(),
           http_headers :: map(),
-          max_attempts :: integer()
+          max_attempts :: integer(),
+          log_query_on_error :: boolean(),
+          log_response_on_error :: boolean()
         ) :: bridge_response()
-  def call(url, query, variables, http_options, http_headers, max_attempts) do
+  def call(
+        url,
+        query,
+        variables,
+        http_options,
+        http_headers,
+        max_attempts,
+        log_query_on_error,
+        log_response_on_error
+      ) do
     %{query: String.trim(query), variables: variables}
     |> Jason.encode()
     |> Utils.retry(
       fn query ->
         url
         |> Telepoison.post(query, http_headers, http_options)
-        |> Utils.decode_http_response(query)
+        |> Utils.decode_http_response(query, log_query_on_error, log_response_on_error)
         |> Utils.parse_response()
       end,
       max_attempts
