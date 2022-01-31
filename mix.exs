@@ -13,7 +13,8 @@ defmodule BridgeEx.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       docs: docs(),
-      package: package()
+      package: package(),
+      dialyzer: [plt_add_apps: [:prima_auth0_ex]]
     ]
   end
 
