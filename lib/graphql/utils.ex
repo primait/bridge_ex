@@ -56,7 +56,7 @@ defmodule BridgeEx.Graphql.Utils do
         log_options
       ) do
     log_query_on_error = Keyword.get(log_options, :log_query_on_error, false)
-    metadata = [reason: inspect(reason)] |> append_if(log_query_on_error, request_body: query)
+    metadata = append_if([reason: inspect(reason)], log_query_on_error, request_body: query)
     Logger.error("GraphQL: HTTP error", metadata)
 
     {:error, "HTTP_ERROR"}
