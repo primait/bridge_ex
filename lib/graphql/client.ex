@@ -26,8 +26,7 @@ defmodule BridgeEx.Graphql.Client do
           http_options :: Keyword.t(),
           http_headers :: map(),
           max_attempts :: integer(),
-          log_query_on_error :: boolean(),
-          log_response_on_error :: boolean()
+          log_options :: Keyword.t()
         ) :: bridge_response()
   def call(
         url,
@@ -36,8 +35,7 @@ defmodule BridgeEx.Graphql.Client do
         http_options,
         http_headers,
         max_attempts,
-        log_query_on_error,
-        log_response_on_error
+        log_options
       ) do
     %{query: String.trim(query), variables: variables}
     |> Jason.encode()
@@ -45,7 +43,7 @@ defmodule BridgeEx.Graphql.Client do
       fn query ->
         url
         |> Telepoison.post(query, http_headers, http_options)
-        |> Utils.decode_http_response(query, log_query_on_error, log_response_on_error)
+        |> Utils.decode_http_response(query, log_options)
         |> Utils.parse_response()
       end,
       max_attempts

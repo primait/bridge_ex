@@ -21,8 +21,10 @@ defmodule BridgeEx.Graphql do
                     })
       @max_attempts Keyword.get(unquote(opts), :max_attempts, 1)
       # Should
-      @log_query_on_error Keyword.get(unquote(opts), :log_query_on_error, false)
-      @log_response_on_error Keyword.get(unquote(opts), :log_response_on_error, false)
+      @log_options Keyword.get(unquote(opts), :log_options,
+                     log_query_on_error: false,
+                     log_response_on_error: false
+                   )
 
       @spec call(
               query :: String.t(),
@@ -33,10 +35,7 @@ defmodule BridgeEx.Graphql do
         http_options = Keyword.merge(@http_options, Keyword.get(options, :options, []))
         http_headers = Map.merge(@http_headers, Keyword.get(options, :headers, %{}))
         max_attempts = Keyword.get(options, :max_attempts, @max_attempts)
-        log_query_on_error = Keyword.get(options, :log_query_on_error, @log_query_on_error)
-
-        log_response_on_error =
-          Keyword.get(options, :log_response_on_error, @log_response_on_error)
+        log_options = Keyword.merge(@log_options, Keyword.get(options, :log_options, []))
 
         with {:ok, http_headers} <- with_authorization_headers(http_headers) do
           @endpoint
@@ -46,8 +45,7 @@ defmodule BridgeEx.Graphql do
             http_options,
             http_headers,
             max_attempts,
-            log_query_on_error,
-            log_response_on_error
+            log_options
           )
           |> format_response()
         end
