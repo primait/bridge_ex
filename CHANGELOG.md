@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- new `log_options` keyword list with options `:log_query_on_error` and `log_response_on_error` for better control of what the lib logs on HTTP errors/request errors
+- new `log_options` keyword list with options `:log_query_on_error` and `:log_response_on_error` for better control of what the lib logs on HTTP errors/request errors
 
 ## [0.4.0]
 

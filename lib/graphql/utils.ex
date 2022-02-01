@@ -25,8 +25,7 @@ defmodule BridgeEx.Graphql.Utils do
           {:ok, HTTPoison.Response.t() | HTTPoison.AsyncResponse.t()}
           | {:error, HTTPoison.Error.t()},
           String.t(),
-          boolean(),
-          boolean()
+          Keyword.t()
         ) :: client_response()
   def decode_http_response({:ok, %HTTPoison.Response{status_code: 200, body: body_string}}, _, _) do
     Jason.decode(body_string, keys: :atoms)
