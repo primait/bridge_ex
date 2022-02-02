@@ -40,8 +40,9 @@ defmodule BridgeEx.GraphqlTest do
   end
 
   test "authenticates via auth0 when auth0_audience is set", %{bypass: bypass} do
-    set_auth0_ex_configuration(bypass.port)
-    reload_auth0_ex()
+    set_auth0_configuration(bypass.port)
+    reload_app()
+    on_exit(&reload_app/0)
 
     Bypass.expect_once(bypass, "POST", "/oauth/token", fn conn ->
       Plug.Conn.resp(conn, 200, valid_auth0_response())
@@ -68,11 +69,25 @@ defmodule BridgeEx.GraphqlTest do
       Plug.Conn.resp(conn, 200, ~s[{"data": {"key": "value"}}])
     end)
 
-    defmodule TestSimpleBridge do
+    defmodule TestBridgeWithCustomHeaders do
       use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
     end
 
-    TestSimpleBridge.call("myquery", %{}, headers: %{"custom-header-key" => "custom-header-value"})
+    TestBridgeWithCustomHeaders.call("myquery", %{},
+      headers: %{"custom-header-key" => "custom-header-value"}
+    )
+  end
+
+  test "reports back graphql errors", %{bypass: bypass} do
+    Bypass.expect(bypass, "POST", "/graphql", fn conn ->
+      Plug.Conn.resp(conn, 200, ~s<{"errors": [{"message": "error1"}, {"message": "error2"}]}>)
+    end)
+
+    defmodule TestBridgeForErrors do
+      use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+    end
+
+    assert {:error, "error1, error2"} = TestBridgeForErrors.call("myquery", %{})
   end
 
   defp valid_auth0_response do
@@ -85,12 +100,13 @@ defmodule BridgeEx.GraphqlTest do
     on_exit(fn -> Application.put_env(app, key, previous_value) end)
   end
 
-  defp reload_auth0_ex do
-    Application.stop(:prima_auth0_ex)
-    Application.start(:prima_auth0_ex)
+  defp reload_app do
+    Application.stop(:bridge_ex)
+    Application.start(:bridge_ex)
   end
 
-  defp set_auth0_ex_configuration(port) do
+  defp set_auth0_configuration(port) do
+    set_test_env(:bridge_ex, :auth0_enabled, true)
     set_test_env(:prima_auth0_ex, :auth0_base_url, "http://localhost:#{port}")
     set_test_env(:prima_auth0_ex, :client, client_id: "", client_secret: "", cache_enabled: false)
   end

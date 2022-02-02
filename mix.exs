@@ -2,24 +2,26 @@ defmodule BridgeEx.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/primait/bridge_ex"
-  @version "0.3.0-rc.3"
+  @version "0.4.0"
 
   def project do
     [
       app: :bridge_ex,
       version: @version,
-      elixir: "~> 1.10",
+      elixir: "~> 1.11",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       docs: docs(),
-      package: package()
+      package: package(),
+      dialyzer: [plt_add_apps: [:prima_auth0_ex]]
     ]
   end
 
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
+      mod: {BridgeEx.Application, []},
       extra_applications: [:logger]
     ]
   end
@@ -32,12 +34,12 @@ defmodule BridgeEx.MixProject do
     [
       {:absinthe, "~> 1.6"},
       {:bypass, "~> 2.1", only: :test},
-      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.25.3", only: :dev, runtime: false},
       {:jason, "~> 1.2"},
-      {:prima_auth0_ex, "~> 0.3.0-rc.1.2"},
-      {:telepoison, "~> 1.0.0-rc.4"}
+      {:prima_auth0_ex, "~> 0.3.0", runtime: false},
+      {:telepoison, "~> 1.0.0"}
     ]
   end
 
