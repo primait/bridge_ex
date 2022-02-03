@@ -144,13 +144,13 @@ defmodule BridgeEx.GraphqlTest do
        } do
     Bypass.down(bypass)
 
-    defmodule TestForHTTPErrorWithLogs do
+    defmodule TestForHTTPErrorNoLogs do
       use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
     end
 
     err_log =
       capture_log([metadata: [:request_body, :body_string]], fn ->
-        TestForHTTPErrorWithLogs.call("myquery", %{})
+        TestForHTTPErrorNoLogs.call("myquery", %{})
       end)
 
     assert err_log =~ "GraphQL: HTTP error"
