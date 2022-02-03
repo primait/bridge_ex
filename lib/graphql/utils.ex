@@ -42,8 +42,8 @@ defmodule BridgeEx.Graphql.Utils do
 
     metadata =
       [status_code: code, request_url: request_url]
-      |> append_if(log_response_on_error, body_string: body_string)
-      |> append_if(log_query_on_error, request_body: query)
+      |> prepend_if(log_response_on_error, body_string: body_string)
+      |> prepend_if(log_query_on_error, request_body: query)
 
     Logger.error("GraphQL: Bad Response error", metadata)
 
@@ -56,7 +56,7 @@ defmodule BridgeEx.Graphql.Utils do
         log_options
       ) do
     log_query_on_error = Keyword.get(log_options, :log_query_on_error, false)
-    metadata = append_if([reason: inspect(reason)], log_query_on_error, request_body: query)
+    metadata = prepend_if([reason: inspect(reason)], log_query_on_error, request_body: query)
     Logger.error("GraphQL: HTTP error", metadata)
 
     {:error, "HTTP_ERROR"}
@@ -125,7 +125,6 @@ defmodule BridgeEx.Graphql.Utils do
     |> String.to_atom()
   end
 
-  # https://elixirforum.com/t/creating-list-adding-elements-on-specific-conditions/6295/4?u=learts
-  defp append_if(list, false, _), do: list
-  defp append_if(list, true, value), do: list ++ [value]
+  defp prepend_if(list, false, _), do: list
+  defp prepend_if(list, true, value), do: [value | list]
 end

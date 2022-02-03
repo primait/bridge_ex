@@ -20,7 +20,6 @@ defmodule BridgeEx.Graphql do
                       "Content-type" => "application/json"
                     })
       @max_attempts Keyword.get(unquote(opts), :max_attempts, 1)
-      # Should
       @log_options Keyword.get(unquote(opts), :log_options,
                      log_query_on_error: false,
                      log_response_on_error: false
