@@ -138,6 +138,50 @@ defmodule BridgeEx.GraphqlTest do
     assert err_log =~ "body_string="
   end
 
+  test "on HTTP error, by default, does not log request_body",
+       %{
+         bypass: bypass
+       } do
+    Bypass.down(bypass)
+
+    defmodule TestForHTTPErrorWithLogs do
+      use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+    end
+
+    err_log =
+      capture_log([metadata: [:request_body, :body_string]], fn ->
+        TestForHTTPErrorWithLogs.call("myquery", %{})
+      end)
+
+    assert err_log =~ "GraphQL: HTTP error"
+    assert not (err_log =~ "request_body=")
+
+    Bypass.up(bypass)
+  end
+
+  test "on HTTP error logs request_body if option is enabled",
+       %{
+         bypass: bypass
+       } do
+    Bypass.down(bypass)
+
+    defmodule TestForHTTPErrorWithLogs do
+      use BridgeEx.Graphql,
+        endpoint: "http://localhost:#{bypass.port}/graphql",
+        log_options: [log_query_on_error: true]
+    end
+
+    err_log =
+      capture_log([metadata: [:request_body, :body_string]], fn ->
+        TestForHTTPErrorWithLogs.call("myquery", %{})
+      end)
+
+    assert err_log =~ "GraphQL: HTTP error"
+    assert err_log =~ "request_body="
+
+    Bypass.up(bypass)
+  end
+
   defp valid_auth0_response do
     ~s<{"access_token":"#{@fake_jwt}","expires_in":86400,"token_type":"Bearer"}>
   end
