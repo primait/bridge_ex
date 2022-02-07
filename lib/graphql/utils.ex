@@ -24,29 +24,40 @@ defmodule BridgeEx.Graphql.Utils do
   @spec decode_http_response(
           {:ok, HTTPoison.Response.t() | HTTPoison.AsyncResponse.t()}
           | {:error, HTTPoison.Error.t()},
-          String.t()
+          String.t(),
+          Keyword.t()
         ) :: client_response()
-  def decode_http_response({:ok, %HTTPoison.Response{status_code: 200, body: body_string}}, _) do
+  def decode_http_response({:ok, %HTTPoison.Response{status_code: 200, body: body_string}}, _, _) do
     Jason.decode(body_string, keys: :atoms)
   end
 
   def decode_http_response(
         {:ok,
          %HTTPoison.Response{status_code: code, body: body_string, request_url: request_url}},
-        query
+        query,
+        log_options
       ) do
-    Logger.error("GraphQL: Bad Response error",
-      status_code: code,
-      body_string: body_string,
-      request_url: request_url,
-      request_body: query
-    )
+    log_response_on_error = Keyword.get(log_options, :log_response_on_error, false)
+    log_query_on_error = Keyword.get(log_options, :log_query_on_error, false)
+
+    metadata =
+      [status_code: code, request_url: request_url]
+      |> prepend_if(log_response_on_error, {:body_string, body_string})
+      |> prepend_if(log_query_on_error, {:request_body, query})
+
+    Logger.error("GraphQL: Bad Response error", metadata)
 
     {:error, "BAD_RESPONSE"}
   end
 
-  def decode_http_response({:error, %HTTPoison.Error{reason: reason}}, query) do
-    Logger.error("GraphQL: HTTP error", reason: inspect(reason), request_body: query)
+  def decode_http_response(
+        {:error, %HTTPoison.Error{reason: reason}},
+        query,
+        log_options
+      ) do
+    log_query_on_error = Keyword.get(log_options, :log_query_on_error, false)
+    metadata = prepend_if([reason: inspect(reason)], log_query_on_error, {:request_body, query})
+    Logger.error("GraphQL: HTTP error", metadata)
 
     {:error, "HTTP_ERROR"}
   end
@@ -113,4 +124,7 @@ defmodule BridgeEx.Graphql.Utils do
     |> LanguageConventions.to_internal_name(:read)
     |> String.to_atom()
   end
+
+  defp prepend_if(list, false, _), do: list
+  defp prepend_if(list, true, value), do: [value | list]
 end

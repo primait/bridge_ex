@@ -1,6 +1,8 @@
 defmodule BridgeEx.GraphqlTest do
   use ExUnit.Case, async: false
 
+  import ExUnit.CaptureLog
+
   doctest BridgeEx.Graphql
 
   @fake_jwt "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Im15X2tpZCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxMjMsImV4cCI6MTIzMTIzMTIzfQ.qq5yV_Lr6BHOgq5-oWk91Y6F26awQ-82Nn9__7-w9Xg"
@@ -88,6 +90,143 @@ defmodule BridgeEx.GraphqlTest do
     end
 
     assert {:error, "error1, error2"} = TestBridgeForErrors.call("myquery", %{})
+  end
+
+  test "on non-200 status code, by default, does not log request_body and body_string as metadata",
+       %{
+         bypass: bypass
+       } do
+    Bypass.expect_once(bypass, "POST", "/graphql", fn conn ->
+      Plug.Conn.resp(conn, 500, "some 500 error")
+    end)
+
+    defmodule TestBridgeForErrorsNoLogs do
+      use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+    end
+
+    err_log =
+      capture_log([metadata: [:request_body, :body_string]], fn ->
+        TestBridgeForErrorsNoLogs.call("myquery", %{})
+      end)
+
+    assert err_log =~ "GraphQL: Bad Response error"
+    assert not (err_log =~ "request_body=")
+    assert not (err_log =~ "body_string=")
+  end
+
+  test "on non-200 status code logs request_body and body_string if respective options are enabled",
+       %{
+         bypass: bypass
+       } do
+    Bypass.expect_once(bypass, "POST", "/graphql", fn conn ->
+      Plug.Conn.resp(conn, 500, "some 500 error")
+    end)
+
+    defmodule TestForErrorsAllLogs do
+      use BridgeEx.Graphql,
+        endpoint: "http://localhost:#{bypass.port}/graphql",
+        log_options: [log_query_on_error: true, log_response_on_error: true]
+    end
+
+    err_log =
+      capture_log([metadata: [:request_body, :body_string]], fn ->
+        TestForErrorsAllLogs.call("myquery", %{})
+      end)
+
+    assert err_log =~ "GraphQL: Bad Response error"
+    assert err_log =~ "request_body="
+    assert err_log =~ "body_string="
+  end
+
+  test "on non-200 status code does not log request_body and body_string if respective options are explicitly disabled",
+       %{
+         bypass: bypass
+       } do
+    Bypass.expect_once(bypass, "POST", "/graphql", fn conn ->
+      Plug.Conn.resp(conn, 500, "some 500 error")
+    end)
+
+    defmodule TestForErrorsDisabledLogs do
+      use BridgeEx.Graphql,
+        endpoint: "http://localhost:#{bypass.port}/graphql",
+        log_options: [log_query_on_error: false, log_response_on_error: false]
+    end
+
+    err_log =
+      capture_log([metadata: [:request_body, :body_string]], fn ->
+        TestForErrorsDisabledLogs.call("myquery", %{})
+      end)
+
+    assert err_log =~ "GraphQL: Bad Response error"
+    assert not (err_log =~ "request_body=")
+    assert not (err_log =~ "body_string=")
+  end
+
+  test "on HTTP error, by default, does not log request_body",
+       %{
+         bypass: bypass
+       } do
+    Bypass.down(bypass)
+
+    defmodule TestForHTTPErrorNoLogs do
+      use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+    end
+
+    err_log =
+      capture_log([metadata: [:request_body, :body_string]], fn ->
+        TestForHTTPErrorNoLogs.call("myquery", %{})
+      end)
+
+    assert err_log =~ "GraphQL: HTTP error"
+    assert not (err_log =~ "request_body=")
+
+    Bypass.up(bypass)
+  end
+
+  test "on HTTP error logs request_body if option is enabled",
+       %{
+         bypass: bypass
+       } do
+    Bypass.down(bypass)
+
+    defmodule TestForHTTPErrorWithLogs do
+      use BridgeEx.Graphql,
+        endpoint: "http://localhost:#{bypass.port}/graphql",
+        log_options: [log_query_on_error: true]
+    end
+
+    err_log =
+      capture_log([metadata: [:request_body, :body_string]], fn ->
+        TestForHTTPErrorWithLogs.call("myquery", %{})
+      end)
+
+    assert err_log =~ "GraphQL: HTTP error"
+    assert err_log =~ "request_body="
+
+    Bypass.up(bypass)
+  end
+
+  test "on HTTP error logs request_body if option is explicitly disabled",
+       %{
+         bypass: bypass
+       } do
+    Bypass.down(bypass)
+
+    defmodule TestForHTTPErrorDisabledLogs do
+      use BridgeEx.Graphql,
+        endpoint: "http://localhost:#{bypass.port}/graphql",
+        log_options: [log_query_on_error: false]
+    end
+
+    err_log =
+      capture_log([metadata: [:request_body, :body_string]], fn ->
+        TestForHTTPErrorDisabledLogs.call("myquery", %{})
+      end)
+
+    assert err_log =~ "GraphQL: HTTP error"
+    assert not (err_log =~ "request_body=")
+
+    Bypass.up(bypass)
   end
 
   defp valid_auth0_response do
