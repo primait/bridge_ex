@@ -1,6 +1,13 @@
 defmodule BridgeEx.Graphql do
   @moduledoc """
   Main module to be used to implement graphql bridges.
+
+  You need to provide an `endpoint` on `use`, e.g.
+
+  ```
+  use BridgeEx.Graphql,
+    endpoint: "https://your.auth0.endpoint"
+  ```
   """
 
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
@@ -9,21 +16,31 @@ defmodule BridgeEx.Graphql do
       alias BridgeEx.Auth0AuthorizationProvider
       alias BridgeEx.Graphql.Client
 
+      # global config
+      @global_auth0_enabled Application.get_env(:bridge_ex, :auth0_enabled, false)
+      @global_log_options Application.get_env(:bridge_ex, :log_options,
+                            log_query_on_error: false,
+                            log_response_on_error: false
+                          )
+
+      # local config
       # mandatory opts
       @endpoint Keyword.fetch!(unquote(opts), :endpoint)
 
       # optional opts with defaults
+      # TODO(Cri): define default for audience
       @audience get_in(unquote(opts), [:auth0, :audience])
-      @auth0_enabled get_in(unquote(opts), [:auth0, :enabled])
+      @auth0_enabled get_in_or_default(
+                       unquote(opts),
+                       [:auth0, :enabled],
+                       @global_auth0_enabled
+                     )
       @http_options Keyword.get(unquote(opts), :http_options, timeout: 1_000, recv_timeout: 16_000)
       @http_headers Keyword.get(unquote(opts), :http_headers, %{
                       "Content-type" => "application/json"
                     })
       @max_attempts Keyword.get(unquote(opts), :max_attempts, 1)
-      @log_options Keyword.get(unquote(opts), :log_options,
-                     log_query_on_error: false,
-                     log_response_on_error: false
-                   )
+      @log_options Keyword.get(unquote(opts), :log_options, @global_log_options)
 
       @spec call(
               query :: String.t(),
@@ -34,7 +51,6 @@ defmodule BridgeEx.Graphql do
         http_options = Keyword.merge(@http_options, Keyword.get(options, :options, []))
         http_headers = Map.merge(@http_headers, Keyword.get(options, :headers, %{}))
         max_attempts = Keyword.get(options, :max_attempts, @max_attempts)
-        log_options = Keyword.merge(@log_options, Keyword.get(options, :log_options, []))
 
         with {:ok, http_headers} <- with_authorization_headers(http_headers) do
           @endpoint
@@ -44,9 +60,16 @@ defmodule BridgeEx.Graphql do
             http_options,
             http_headers,
             max_attempts,
-            log_options
+            @log_options
           )
           |> format_response()
+        end
+      end
+
+      defp get_in_or_default(data, keys, default \\ nil) do
+        case get_in(data, keys) do
+          nil -> default
+          result -> result
         end
       end
 
