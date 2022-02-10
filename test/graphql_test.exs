@@ -79,6 +79,20 @@ defmodule BridgeEx.GraphqlTest do
     assert {:error, _} = TestBridgeWithAuth0EnabledOnlyInBridge.call("myquery", %{})
   end
 
+  test "macro won't expand if auth0 is enabled but no audience is set", %{bypass: bypass} do
+    set_auth0_configuration(bypass.port)
+    reload_app()
+    on_exit(&reload_app/0)
+
+    assert_raise CompileError, fn ->
+      defmodule TestBridgeWithAuth0EnabledButNoAudience do
+        use BridgeEx.Graphql,
+          endpoint: "http://localhost:#{bypass.port}/graphql",
+          auth0: [enabled: true]
+      end
+    end
+  end
+
   test "supports custom headers", %{bypass: bypass} do
     Bypass.expect(bypass, "POST", "/graphql", fn conn ->
       assert {"content-type", "application/json"} in conn.req_headers
