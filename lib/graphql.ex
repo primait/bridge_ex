@@ -17,8 +17,8 @@ defmodule BridgeEx.Graphql do
       alias BridgeEx.Graphql.Client
 
       # global config
-      @global_auth0_enabled Application.get_env(:bridge_ex, :auth0_enabled, false)
-      @global_log_options Application.get_env(:bridge_ex, :log_options,
+      @global_auth0_enabled Application.compile_env(:bridge_ex, :auth0_enabled, false)
+      @global_log_options Application.compile_env(:bridge_ex, :log_options,
                             log_query_on_error: false,
                             log_response_on_error: false
                           )
@@ -28,13 +28,10 @@ defmodule BridgeEx.Graphql do
       @endpoint Keyword.fetch!(unquote(opts), :endpoint)
 
       # optional opts with defaults
-      # TODO(Cri): define default for audience
       @audience get_in(unquote(opts), [:auth0, :audience])
-      @auth0_enabled get_in_or_default(
-                       unquote(opts),
-                       [:auth0, :enabled],
-                       @global_auth0_enabled
-                     )
+      @auth0_enabled if (result = get_in(unquote(opts), [:auth0, :enabled])) == nil,
+                       do: @global_auth0_enabled,
+                       else: result
       @http_options Keyword.get(unquote(opts), :http_options, timeout: 1_000, recv_timeout: 16_000)
       @http_headers Keyword.get(unquote(opts), :http_headers, %{
                       "Content-type" => "application/json"
@@ -66,13 +63,6 @@ defmodule BridgeEx.Graphql do
         end
       end
 
-      defp get_in_or_default(data, keys, default \\ nil) do
-        case get_in(data, keys) do
-          nil -> default
-          result -> result
-        end
-      end
-
       # define helpers at compile-time, to avoid dialyzer errors about pattern matching constants
       if Keyword.get(unquote(opts), :encode_variables, false) do
         defp encode_variables(variables), do: Jason.encode!(variables)
@@ -84,6 +74,20 @@ defmodule BridgeEx.Graphql do
         defp format_response({ret, response}), do: {ret, Client.format_response(response)}
       else
         defp format_response({ret, response}), do: {ret, response}
+      end
+
+      if @audience == nil && @auth0_enabled do
+        raise CompileError,
+          description: """
+          Auth0 is enabled but audience is not set for bridge in module #{__MODULE__}.
+          Please either set an audience for this bridge or disable auth0 locally:
+
+            # Either this
+            use BridgeEx.Graphql, auth0: [audience: "my-audience"]
+
+            # or this
+            use BridgeEx.Graphql, auth0: [enabled: false]
+          """
       end
 
       if @audience && @auth0_enabled do
