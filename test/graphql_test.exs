@@ -365,9 +365,14 @@ defmodule BridgeEx.GraphqlTest do
   end
 
   defp set_test_env(app, key, new_value) do
-    previous_value = Application.get_env(app, key)
+    previous_value = Application.get_env(app, key, :unset)
     Application.put_env(app, key, new_value)
-    on_exit(fn -> Application.put_env(app, key, previous_value) end)
+
+    on_exit(fn ->
+      if previous_value == :unset,
+        do: Application.delete_env(app, key),
+        else: Application.put_env(app, key, previous_value)
+    end)
   end
 
   defp reload_app do
