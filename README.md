@@ -4,83 +4,82 @@ A library to build bridges to other services (actually only graphql ones are sup
 
 ## Usage
 
-### A GraphQL bridge
+### Graphql
 
-Define a behaviour with the queries/mutations you're going to need for the bridge:
-
-```elixir
-defmodule MyApp.SomeService do
-  @moduledoc """
-  Bridge definition for SomeService
-  """
-
-  @callback my_cool_query(any()) :: {:ok, map()} | {:error, any()}
-end
-```
-
-Implement the behaviour:
+Bridges to Graphql services are defined by `use`ing the `BridgeEx.Graphql` macro as follows:
 
 ```elixir
 defmodule MyApp.SomeServiceBridge do
-  @moduledoc """
-  Bridge implementation for SomeService behaviour.
-  """
+  use BridgeEx.Graphql, endpoint: "http://some_service.example.com"
 
-  @behaviour MyApp.SomeService
-
-  use BridgeEx.Graphql, [
-    # mandatory settings
-    endpoint: "http://some_service.example.com",
-
-    # optional settings (with defaults)
-    http_headers: %{
-      "User-Agent" => "microservice-myapp/myapp-version",
-      "Content-type" => "application/json",
-      "X-Client-Id" => "myapp",
-      "X-Client-Secret" => "myapp_secret"
-    },
-    http_options: [timeout: 1_000, recv_timeout: 16_000],
-    max_attempts: 1,
-    encode_variables: false,
-    format_response: true, # formats keys from CamelCase to snake_case
-    log_options: [log_query_on_error: true, log_response_on_error: false]
-  ]
-
-  def my_cool_query(%{} = variables) do
+  def my_query(%{} = variables) do
     call("a graphql query or mutation", variables)
-
-    # or, if you need more granularity (ex: different endpoint or options):
-
-    # BridgeEx.Graphql.Client.call(
-    #   "https://another-url.com/graphql",
-    #   "graphql query or mutation",
-    #   variables,
-    #   encode_variables: false,
-    #   [timeout: 1_000, recv_timeout: 16_000],
-    #   %{
-    #     "Some-Header" => "some-value",
-    #   },
-    #   1
-    # )
-
   end
 end
 ```
 
-You can now use your bridge module:
+Besides `endpoint`, the following parameters can be optionally set when `use`ing `BridgeEx.Graphql`:
+
+- `auth0`
+- `encode_variables`
+- `format_response`
+- `http_headers`
+- `http_options`
+- `log_options`
+- `max_attempts`
+
+Refer to [the documentation](https://hexdocs.pm/bridge_ex/BridgeEx.Graphql.html) for more details.
+
+If you need more control on your requests you can use [`BridgeEx.Graphql.Client.call`](https://hexdocs.pm/bridge_ex/BridgeEx.Graphql.Client.html#call/7) directly.
+
+#### Global configuration
+
+The following configuration parameters can be set globally for all bridges in the app, by setting them inside your `config.exs`:
+
+- `config :bridge_ex, auth0_enabled: true` to enable authentication via Auth0 for your bridges
+- `config :bridge_ex, log_options: [log_query_on_error: true, log_response_on_error: false]` to customize logging in your bridges
+
+#### Authenticating calls via Auth0
+
+`bridge_ex` supports authentication of machine-to-machine calls via Auth0, through the [prima_auth0_ex](https://github.com/primait/auth0_ex) library.
+
+To use this feature it is necessary to set the following configuration in your `config.exs`:
+
+- configuration necessary to create API consumers with `prima_auth0_ex`, see [the documentation](https://github.com/primait/auth0_ex#api-consumer).
+- auth0 support for the environment must be enabled via `config :bridge_ex, auth0_enabled: true`.
+
+Then configure your bridge with the audience of the target service:
 
 ```elixir
-MyApp.SomeServiceBridge.my_cool_query(%{var: 1})
+use BridgeEx.Graphql, [endpoint: "...", auth0: [enabled: true, audience: "target_audience"]]
 ```
 
-As a good practice, if you want to mock your bridge for testing, you _should_ implement another module:
+## Testing your bridge
+
+As a good practice, if you want to mock your bridge for testing, you _should_ define a behaviour:
+
+```elixir
+defmodule MyApp.SomeService do
+  @callback my_cool_query(any()) :: {:ok, map()} | {:error, any()}
+end
+```
+
+Then implement it for your bridge:
+
+```elixir
+defmodule MyApp.SomeServiceBridge do
+  @behaviour MyApp.SomeService
+
+  use BridgeEx.Graphql, endpoint: "..."
+```
+
+And finally implement it again for the mock:
 
 ```elixir
 defmodule MyApp.SomeServiceBridgeMock do
   @behaviour MyApp.SomeService
 
   alias BridgeEx.Graphql.Utils
-
 
   def my_cool_query(%{} = variables) do
     File.read!("some_mock_file.json")
@@ -112,19 +111,6 @@ And use it in your app from configuration:
 ```
 
 See [example](example) directory for an implementation, it also works in `dev` and `test` environments.
-
-### Authenticating calls via Auth0
-
-`bridge_ex` supports authentication of machine-to-machine calls via Auth0, through the [prima_auth0_ex](https://github.com/primait/auth0_ex) library.
-
-To use this feature, simply configure your bridge with the audience of the target service:
-
-```elixir
-  use BridgeEx.Graphql, [endpoint: "...", auth0: [enabled: true, audience: "target_audience"]]
-```
-
-For this feature to work, your `config.exs` must be updated with the configuration for the `prima_auth0_ex` library.
-You can refer to [the library's README](https://github.com/primait/auth0_ex/blob/master/README.md#configuration) for more information on the supported configuration.
 
 ## Development
 
