@@ -13,9 +13,7 @@ defmodule BridgeEx.Graphql.Client do
   ## Options
 
     * `:options` - HTTPoison options
-
     * `:headers` - HTTPoison headers
-
     * `:max_attempts` - Defines number of retries before returning error
   """
 

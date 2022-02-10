@@ -5,11 +5,40 @@ defmodule BridgeEx.Graphql do
   You need to provide an `endpoint` on `use`, e.g.
 
   ```
-  use BridgeEx.Graphql,
-    endpoint: "https://your.auth0.endpoint"
+  use BridgeEx.Graphql, endpoint: "https://your.auth0.endpoint"
   ```
   """
 
+  @doc """
+  Create a Graphql bridge in the given module.
+
+  Once created, a graphql request can be made via `MyBridge.call("my-query", %{"variable": "var"})`
+
+  ## Options
+
+    * `endpoint` (required): URL of the remote Graphql endpoint.
+    * `auth0`: enable and configure Auth0 for authentication of requests. Takes the form of `[enabled: false, audience: "target-audience"]`.
+    * `encode_variables`: if true, encode the Graphql variables to JSON. Defaults to `false`.
+    * `format_response`: transforms camelCase keys in response to snake_case. Defaults to `false`.
+    * `http_headers`: HTTP headers for the request. Defaults to `%{"Content-type": "application/json"}`
+    * `http_options`: HTTP options to be passed to Telepoison. Defaults to `[timeout: 1_000, recv_timeout: 16_000]`.
+    * `log_options`: override global configuration for logging errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`
+    * `max_attempts`: number of times the request will be retried upon failure. Defaults to `1`.
+
+  ## Examples
+
+  ```elixir
+  defmodule MyBridge do
+    use BridgeEx.Graphql, endpoint: "http://my-api.com/graphql"
+  end
+  ```
+
+  ```elixir
+  defmodule MyBridge do
+    use BridgeEx.Graphql, endpoint: "http://my-api.com/graphql", auth0: [enabled: true, audience: "target-audience"]
+  end
+  ```
+  """
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defmacro __using__(opts) when is_list(opts) do
     quote do
@@ -39,6 +68,20 @@ defmodule BridgeEx.Graphql do
       @max_attempts Keyword.get(unquote(opts), :max_attempts, 1)
       @log_options Keyword.get(unquote(opts), :log_options, @global_log_options)
 
+      @doc """
+      Run a graphql query or mutation over the configured bridge.
+
+      ## Options
+
+        * `options`: extra HTTP options to be passed to Telepoison.
+        * `headers`: extra HTTP headers.
+        * `max_attempts`: override the configured `max_attempts` parameter.
+
+      ## Examples
+
+        iex> MyBridge.call("some_query", %{var_key: "var_value"})
+        iex> MyBridge.call("some_query", %{var_key: "var_value"}, max_attempts: 3)
+      """
       @spec call(
               query :: String.t(),
               variables :: map(),
