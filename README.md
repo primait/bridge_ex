@@ -36,7 +36,7 @@ If you need more control on your requests you can use [`BridgeEx.Graphql.Client.
 
 The following configuration parameters can be set globally for all bridges in the app, by setting them inside your `config.exs`:
 
-- `config :bridge_ex, auth0_enabled: true` to enable authentication via Auth0 for your bridges
+- `config :bridge_ex, auth0_enabled: true` to allow bridges to enable integration with Auth0
 - `config :bridge_ex, log_options: [log_query_on_error: true, log_response_on_error: false]` to customize logging in your bridges
 
 #### Authenticating calls via Auth0
@@ -45,14 +45,16 @@ The following configuration parameters can be set globally for all bridges in th
 
 To use this feature it is necessary to set the following configuration in your `config.exs`:
 
+- auth0 support for the application in the environment must be enabled via `config :bridge_ex, auth0_enabled: true`.
 - configuration necessary to create API consumers with `prima_auth0_ex`, see [the documentation](https://github.com/primait/auth0_ex#api-consumer).
-- auth0 support for the environment must be enabled via `config :bridge_ex, auth0_enabled: true`.
 
 Then configure your bridge with the audience of the target service:
 
 ```elixir
 use BridgeEx.Graphql, [endpoint: "...", auth0: [enabled: true, audience: "target_audience"]]
 ```
+
+Note that Auth0 integration must be explicitly enabled for each bridge by setting `auth0: [enable: true]`, as per the example above.
 
 ## Testing your bridge
 

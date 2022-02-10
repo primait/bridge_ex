@@ -64,6 +64,21 @@ defmodule BridgeEx.GraphqlTest do
     assert {:ok, %{key: "value"}} = TestBridgeWithAuth0.call("myquery", %{})
   end
 
+  @tag capture_log: true
+  test "returns error when auth0 is enabled for bridge but not for app", %{bypass: bypass} do
+    set_auth0_configuration(bypass.port, _auth0_enabled_for_app = false)
+    reload_app()
+    on_exit(&reload_app/0)
+
+    defmodule TestBridgeWithAuth0EnabledOnlyInBridge do
+      use BridgeEx.Graphql,
+        endpoint: "http://localhost:#{bypass.port}/graphql",
+        auth0: [audience: "my-audience", enabled: true]
+    end
+
+    assert {:error, _} = TestBridgeWithAuth0EnabledOnlyInBridge.call("myquery", %{})
+  end
+
   test "supports custom headers", %{bypass: bypass} do
     Bypass.expect(bypass, "POST", "/graphql", fn conn ->
       assert {"content-type", "application/json"} in conn.req_headers
@@ -244,8 +259,8 @@ defmodule BridgeEx.GraphqlTest do
     Application.start(:bridge_ex)
   end
 
-  defp set_auth0_configuration(port) do
-    set_test_env(:bridge_ex, :auth0_enabled, true)
+  defp set_auth0_configuration(port, auth0_enabled? \\ true) do
+    set_test_env(:bridge_ex, :auth0_enabled, auth0_enabled?)
     set_test_env(:prima_auth0_ex, :auth0_base_url, "http://localhost:#{port}")
     set_test_env(:prima_auth0_ex, :client, client_id: "", client_secret: "", cache_enabled: false)
   end
