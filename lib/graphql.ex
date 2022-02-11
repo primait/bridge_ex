@@ -121,6 +121,8 @@ defmodule BridgeEx.Graphql do
 
       if @audience == nil && @auth0_enabled do
         raise CompileError,
+          file: __ENV__.file,
+          line: __ENV__.line,
           description: """
           Auth0 is enabled but audience is not set for bridge in module #{__MODULE__}.
           Please either set an audience for this bridge or disable auth0 locally:
