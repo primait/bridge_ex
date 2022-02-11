@@ -51,7 +51,7 @@ To use this feature it is necessary to set the following configuration in your `
 Then configure your bridge with the audience of the target service:
 
 ```elixir
-use BridgeEx.Graphql, [endpoint: "...", auth0: [enabled: true, audience: "target_audience"]]
+use BridgeEx.Graphql, endpoint: "...", auth0: [enabled: true, audience: "target_audience"]
 ```
 
 Note that Auth0 integration must be explicitly enabled for each bridge by setting `auth0: [enable: true]`, as per the example above.
