@@ -5,11 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2]
+
+### Added
+
+- Support for global log options i.e. `config :bridge_ex, log_options: [...]`
+- Compile time detection of incorrect auth0 config: if audience is not set but auth0 is enabled a `CompileError` is raised
+
+### Changed
+
+- Better exdocs
+
+### Removed
+
+- Local `log_options` flag are no longer supported
+
 ## [0.4.1]
 
 ### Added
 
-- new `log_options` keyword list with options `:log_query_on_error` and `:log_response_on_error` for better control of what the lib logs on HTTP errors/request errors
+- New `log_options` keyword list with options `:log_query_on_error` and `:log_response_on_error` for better control of what the lib logs on HTTP errors/request errors
 
 ## [0.4.0]
 

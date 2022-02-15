@@ -48,7 +48,6 @@ defmodule BridgeEx.Graphql do
       alias BridgeEx.Graphql.Client
 
       # global config
-      @global_auth0_enabled Application.compile_env(:bridge_ex, :auth0_enabled, false)
       @global_log_options Application.compile_env(:bridge_ex, :log_options,
                             log_query_on_error: false,
                             log_response_on_error: false
