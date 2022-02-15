@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- Local `log_options` flag are no longer supported
+- Local `log_options` opt is no longer supported
 
 ## [0.4.1]
 
