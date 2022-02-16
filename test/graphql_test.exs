@@ -80,7 +80,7 @@ defmodule BridgeEx.GraphqlTest do
     )
   end
 
-  test "reports back graphql errors", %{bypass: bypass} do
+  test "reports back graphql structured errors", %{bypass: bypass} do
     Bypass.expect(bypass, "POST", "/graphql", fn conn ->
       Plug.Conn.resp(conn, 200, ~s<{"errors": [{"message": "error1"}, {"message": "error2"}]}>)
     end)
@@ -89,7 +89,8 @@ defmodule BridgeEx.GraphqlTest do
       use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
     end
 
-    assert {:error, "error1, error2"} = TestBridgeForErrors.call("myquery", %{})
+    assert {:error, [%{message: "error1"}, %{message: "error2"}]} =
+             TestBridgeForErrors.call("myquery", %{})
   end
 
   test "on non-200 status code, by default, does not log request_body and body_string as metadata",
