@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Return full graphql error objects instead of just a concatenated error message
+- [**Breaking**] Return full graphql error objects instead of just a concatenated error message
 
 ## [0.4.1]
 
