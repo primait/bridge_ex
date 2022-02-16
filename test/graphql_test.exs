@@ -82,14 +82,19 @@ defmodule BridgeEx.GraphqlTest do
 
   test "reports back graphql structured errors", %{bypass: bypass} do
     Bypass.expect(bypass, "POST", "/graphql", fn conn ->
-      Plug.Conn.resp(conn, 200, ~s<{"errors": [{"message": "error1"}, {"message": "error2"}]}>)
+      Plug.Conn.resp(
+        conn,
+        200,
+        ~s<{"errors": [{"message": "error1", "extensions": { "code": "BAD_REQUEST" }}, {"message": "error2"}]}>
+      )
     end)
 
     defmodule TestBridgeForErrors do
       use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
     end
 
-    assert {:error, [%{message: "error1"}, %{message: "error2"}]} =
+    assert {:error,
+            [%{message: "error1", extensions: %{code: "BAD_REQUEST"}}, %{message: "error2"}]} =
              TestBridgeForErrors.call("myquery", %{})
   end
 

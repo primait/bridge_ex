@@ -65,9 +65,7 @@ defmodule BridgeEx.Graphql.Utils do
   @spec parse_response(graphql_response()) :: client_response()
   def parse_response({:error, error}) when is_binary(error), do: {:error, error}
 
-  def parse_response({:ok, %{errors: errors} = _error_body}) do
-    {:error, errors}
-  end
+  def parse_response({:ok, %{errors: errors}}), do: {:error, errors}
 
   def parse_response({:ok, %{data: data}}), do: {:ok, data}
 
