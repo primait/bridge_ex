@@ -7,14 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Next]
 
+### Changed
+
+- [**Breaking**] Return full graphql error objects instead of just a concatenated error message
+- Better exdocs
+
 ### Added
 
 - Support for global log options i.e. `config :bridge_ex, log_options: [...]`
 - Compile time detection of incorrect auth0 config: if audience is not set but auth0 is enabled a `CompileError` is raised
-
-### Changed
-
-- Better exdocs
 
 ### Removed
 
