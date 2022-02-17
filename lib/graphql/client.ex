@@ -1,6 +1,6 @@
 defmodule BridgeEx.Graphql.Client do
   @moduledoc """
-  Documentation for `BridgeEx`.
+  Graphql client for BridgeEx.
   """
 
   alias BridgeEx.Graphql.Utils
@@ -10,13 +10,15 @@ defmodule BridgeEx.Graphql.Client do
   @doc """
   Calls a GraphQL endpoint
 
-  ## Options
+  ## Parameters
 
-    * `:options` - HTTPoison options
-
-    * `:headers` - HTTPoison headers
-
-    * `:max_attempts` - Defines number of retries before returning error
+    * `url`: URL of the endpoint.
+    * `query`: Graphql query or mutation.
+    * `variables`: dariables for Graphql query or mutation.
+    * `http_options`: HTTPoison options.
+    * `http_headers`: HTTPoison headers.
+    * `max_attempts`: defines number of retries before returning error.
+    * `log_options`: configures logging on errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`.
   """
 
   @spec call(
@@ -51,7 +53,7 @@ defmodule BridgeEx.Graphql.Client do
   end
 
   @doc """
-  formats a GraphQL query response to make it Absinthe compliant
+  Formats a GraphQL query response to make it Absinthe compliant
   """
   @spec format_response(%{atom() => any()} | [%{atom() => any()}]) ::
           %{atom() => any()} | [%{atom() => any()}]
