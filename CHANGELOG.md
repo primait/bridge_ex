@@ -17,10 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for global log options i.e. `config :bridge_ex, log_options: [...]`
 - Compile time detection of incorrect auth0 config: if audience is not set but auth0 is enabled a `CompileError` is raised
 
-### Removed
-
-- Local `log_options` opt is no longer supported
-
 ## [0.4.1]
 
 ### Added
