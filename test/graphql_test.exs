@@ -21,13 +21,33 @@ defmodule BridgeEx.GraphqlTest do
   end
 
   @tag capture_log: true
-  test "retries request on failure", %{bypass: bypass} do
+  test "retries request on status code != 2XX", %{bypass: bypass} do
     Bypass.expect_once(bypass, "POST", "/graphql", fn conn ->
       Bypass.expect_once(bypass, "POST", "/graphql", fn conn ->
         Plug.Conn.resp(conn, 200, ~s[{"data": {"key": "value"}}])
       end)
 
       Plug.Conn.resp(conn, 500, "")
+    end)
+
+    defmodule TestBridgeWithRetry do
+      use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql", max_attempts: 2
+    end
+
+    assert {:ok, %{key: "value"}} = TestBridgeWithRetry.call("myquery", %{})
+  end
+
+  test "retries request on response with errors", %{bypass: bypass} do
+    Bypass.expect_once(bypass, "POST", "/graphql", fn conn ->
+      Bypass.expect_once(bypass, "POST", "/graphql", fn conn ->
+        Plug.Conn.resp(conn, 200, ~s[{"data": {"key": "value"}}])
+      end)
+
+      Plug.Conn.resp(
+        conn,
+        200,
+        ~s<{"data": {"key": "value"}, "errors": [{"message": "error1", "extensions": { "code": "BAD_REQUEST" }}, {"message": "error2"}]}>
+      )
     end)
 
     defmodule TestBridgeWithRetry do
