@@ -1,4 +1,4 @@
-FROM public.ecr.aws/prima/elixir:1.11.2-2
+FROM public.ecr.aws/prima/elixir:1.13.0-1
 
 # Serve per avere l'owner dei file scritti dal container uguale all'utente Linux sull'host
 USER app
