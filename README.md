@@ -97,7 +97,7 @@ defmodule MyApp.SomeServiceBridgeMock do
     # required to parse data
     |> Utils.parse_response()
     # optional, if you want to format response
-    # |> BridgeEx.Graphql.Client.format_response()\
+    # |> BridgeEx.Graphql.Client.format_response()
   end
 end
 ```
