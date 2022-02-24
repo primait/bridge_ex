@@ -121,22 +121,25 @@ defmodule BridgeEx.Graphql do
       end
 
       if @audience == nil && @auth0_enabled do
-        raise CompileError,
-          file: __ENV__.file,
-          line: __ENV__.line,
-          description: """
-          Auth0 is enabled but audience is not set for bridge in module #{__MODULE__}.
-          Please either set an audience for this bridge or disable auth0 locally:
+        raise """
+        Auth0 is enabled but audience is not set for bridge in module #{__MODULE__}.
+        Please either set an audience for this bridge or disable auth0 locally:
 
-            # Either this
-            use BridgeEx.Graphql, auth0: [audience: "my-audience"]
+          # Either this
+          use BridgeEx.Graphql, auth0: [audience: "my-audience"]
 
-            # or this
-            use BridgeEx.Graphql, auth0: [enabled: false]
-          """
+          # or this
+          use BridgeEx.Graphql, auth0: [enabled: false]
+        """
       end
 
       if @audience && @auth0_enabled do
+        unless Code.ensure_loaded?(PrimaAuth0Ex) do
+          raise """
+          Auth0 is enabled but :prima_auth0_ex is not loaded. Did you add it to your dependencies?
+          """
+        end
+
         defp with_authorization_headers(headers) do
           with {:ok, authorization_headers} <-
                  Auth0AuthorizationProvider.authorization_headers(@audience) do
