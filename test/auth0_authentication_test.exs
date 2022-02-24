@@ -36,7 +36,9 @@ defmodule BridgeEx.Auth0AuthenticationTest do
   end
 
   @tag capture_log: true
-  test "exits when auth0 is enabled for bridge but not for app", %{bypass: bypass} do
+  test "exits when auth0 is enabled for bridge but prima_auth0_ex is not started", %{
+    bypass: bypass
+  } do
     set_auth0_configuration(bypass.port)
     reload_app()
     on_exit(&reload_app/0)
