@@ -35,7 +35,9 @@ defmodule BridgeEx.Graphql do
 
   ```elixir
   defmodule MyBridge do
-    use BridgeEx.Graphql, endpoint: "http://my-api.com/graphql", auth0: [enabled: true, audience: "target-audience"]
+    use BridgeEx.Graphql,
+      endpoint: "http://my-api.com/graphql",
+      auth0: [enabled: true, audience: "target-audience"]
   end
   ```
   """
