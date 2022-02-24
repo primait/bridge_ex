@@ -20,7 +20,7 @@ defmodule BridgeEx.TestHelper do
 
     if start_prima_auth0_ex? do
       {:ok, _} = Application.ensure_all_started(:prima_auth0_ex)
-      on_exit(fn -> Application.stop(:prima_auth0_ex) |> IO.inspect() end)
+      on_exit(fn -> Application.stop(:prima_auth0_ex) end)
     end
   end
 
