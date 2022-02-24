@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Bump minimum Elixir version to 1.13
+- set `prima_auth0_ex` as `optional: true`
+- Remove global `:auth0_enabled` flag support, `prima_auth0_ex` is not "ensured" on start anymore and must be included by the lib user
 
 ## [1.0.0] - 2022-02-18
 
