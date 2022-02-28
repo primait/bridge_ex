@@ -9,16 +9,11 @@ metadata:
   name: bridge_ex 
   description: a library to build bridges to other services (actually only graphql ones are supported).
   tags:
-  - elixir
+    - elixir
   links:
-  - url: https://hex.pm/packages/bridge_ex
-    icon: link
-    title: Hex.pm
-
-  - url: https://hexdocs.pm/bridge_ex
-    icon: link
-    title: official documentation
-
-  - url: https://github.com/primait/bridge_ex
-    icon: github
-    title: github repository
+    - url: https://hex.pm/packages/bridge_ex
+      icon: link
+      title: Hex.pm
+    - url: https://hexdocs.pm/bridge_ex
+      icon: link
+      title: official documentation
