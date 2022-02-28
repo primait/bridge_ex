@@ -7,7 +7,7 @@ spec:
   system: prima.it
 metadata:
   name: bridge_ex 
-  description: a library to build bridges to other services (actually only graphql ones are supported).
+  description: A library to build bridges to other services (currently only GraphQL ones are supported)
   tags:
     - elixir
   links:
