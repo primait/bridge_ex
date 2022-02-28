@@ -1,0 +1,24 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+spec:
+  type: library
+  lifecycle: production
+  owner: team-shared-services
+  system: prima.it
+metadata:
+  name: bridge_ex 
+  description: a library to build bridges to other services (actually only graphql ones are supported).
+  tags:
+  - elixir
+  links:
+  - url: https://hex.pm/packages/bridge_ex
+    icon: link
+    title: Hex.pm
+
+  - url: https://hexdocs.pm/bridge_ex
+    icon: link
+    title: official documentation
+
+  - url: https://github.com/primait/bridge_ex
+    icon: github
+    title: github repository
