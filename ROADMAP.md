@@ -51,7 +51,7 @@ Improve the library by adding the ability to customize the retry policy.
 
 On error, a retry function is called (if max attempts > 1), but right now the retry happens regardless of the error. This is a bit limiting since not all errors are transient and enabling the retry could lead to many needless requests.
 
-A better approach would be to provide the user with a default retry mechanism and then a way to provide a custom function to match errors and decide which to recover from, something like
+A better approach would be to provide the user with a default retry mechanism and then a way to define a custom function to match errors and decide which to recover from, something like
 
 ```elixir
 use BridgeEx.Graphql,
@@ -65,21 +65,25 @@ use BridgeEx.Graphql,
   ]
 ```
 
-Moreover, the library retries linearly every 500ms. We could provide the user with the ability to configure how much time to wait between each retry, like so
+or even at the call level
 
 ```elixir
 use BridgeEx.Graphql,
-  endpoint: "http://my-endpoint",
+  endpoint: "http://my-endpoint"
+
+...
+
+call("{ some { query } }", %{},
   retry_options: [
     handler: fn
       {:error, "SOME_ERROR"} -> :retry
       {:error, "ANOTHER_ERROR"} -> :retry
       _ -> :stop
-    end,
-    wait_for: 1000
+    end
   ]
+)
 ```
 
 ## Add exponential retry policy
 
-As of now there is only a linear retry policy. It could be useful to add support for an exponential retry strategy and let the user decide which kind of strategy to employ.
+As of now the retry policy is linear. It could be useful to implement an exponential retry strategy instead.
