@@ -14,7 +14,7 @@ defmodule BridgeEx.TestHelper do
     end)
   end
 
-  def reload_app(start_prima_auth0_ex? \\ false) do
+  def reload_app(start_prima_auth0_ex?) do
     Application.stop(:bridge_ex)
     Application.start(:bridge_ex)
 

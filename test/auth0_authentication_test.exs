@@ -15,7 +15,7 @@ defmodule BridgeEx.Auth0AuthenticationTest do
   test "authenticates via auth0 when auth0_audience is set", %{bypass: bypass} do
     set_auth0_configuration(bypass.port)
     reload_app(_start_prima_auth0_ex? = true)
-    on_exit(&reload_app/0)
+    on_exit(fn -> reload_app(_start_prima_auth0_ex? = false) end)
 
     Bypass.expect_once(bypass, "POST", "/oauth/token", fn conn ->
       Plug.Conn.resp(conn, 200, valid_auth0_response())
@@ -40,8 +40,8 @@ defmodule BridgeEx.Auth0AuthenticationTest do
     bypass: bypass
   } do
     set_auth0_configuration(bypass.port)
-    reload_app()
-    on_exit(&reload_app/0)
+    reload_app(_start_prima_auth0_ex? = false)
+    on_exit(fn -> reload_app(_start_prima_auth0_ex? = false) end)
 
     defmodule TestBridgeWithAuth0EnabledOnlyInBridge do
       use BridgeEx.Graphql,

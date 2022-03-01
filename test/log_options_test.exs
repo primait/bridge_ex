@@ -67,8 +67,8 @@ defmodule BridgeEx.LogOptionsTest do
       end)
 
       set_log_options_configuration(log_query?: true, log_response?: true)
-      reload_app()
-      on_exit(&reload_app/0)
+      reload_app(_start_prima_auth0_ex? = false)
+      on_exit(fn -> reload_app(_start_prima_auth0_ex? = false) end)
 
       defmodule TestForErrorsAllLogsGlobal do
         use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
@@ -117,8 +117,8 @@ defmodule BridgeEx.LogOptionsTest do
       end)
 
       set_log_options_configuration(log_query?: false, log_response?: false)
-      reload_app()
-      on_exit(&reload_app/0)
+      reload_app(_start_prima_auth0_ex? = false)
+      on_exit(fn -> reload_app(_start_prima_auth0_ex? = false) end)
 
       defmodule TestForErrorsDisabledLogsGlobal do
         use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
@@ -187,8 +187,8 @@ defmodule BridgeEx.LogOptionsTest do
       Bypass.down(bypass)
 
       set_log_options_configuration(log_query?: true)
-      reload_app()
-      on_exit(&reload_app/0)
+      reload_app(_start_prima_auth0_ex? = false)
+      on_exit(fn -> reload_app(_start_prima_auth0_ex? = false) end)
 
       defmodule TestForHTTPErrorWithLogsGlobal do
         use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
@@ -235,8 +235,8 @@ defmodule BridgeEx.LogOptionsTest do
       Bypass.down(bypass)
 
       set_log_options_configuration(log_query?: false)
-      reload_app()
-      on_exit(&reload_app/0)
+      reload_app(_start_prima_auth0_ex? = false)
+      on_exit(fn -> reload_app(_start_prima_auth0_ex? = false) end)
 
       defmodule TestForHTTPErrorDisabledLogsGlobal do
         use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
