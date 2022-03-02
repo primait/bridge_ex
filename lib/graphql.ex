@@ -35,7 +35,9 @@ defmodule BridgeEx.Graphql do
 
   ```elixir
   defmodule MyBridge do
-    use BridgeEx.Graphql, endpoint: "http://my-api.com/graphql", auth0: [enabled: true, audience: "target-audience"]
+    use BridgeEx.Graphql,
+      endpoint: "http://my-api.com/graphql",
+      auth0: [enabled: true, audience: "target-audience"]
   end
   ```
   """
@@ -119,45 +121,34 @@ defmodule BridgeEx.Graphql do
       end
 
       if @audience == nil && @auth0_enabled do
-        raise CompileError,
-          file: __ENV__.file,
-          line: __ENV__.line,
-          description: """
-          Auth0 is enabled but audience is not set for bridge in module #{__MODULE__}.
-          Please either set an audience for this bridge or disable auth0 locally:
+        raise """
+        Auth0 is enabled but audience is not set for bridge in module #{__MODULE__}.
+        Please either set an audience for this bridge or disable auth0 locally:
 
-            # Either this
-            use BridgeEx.Graphql, auth0: [audience: "my-audience"]
+          # Either this
+          use BridgeEx.Graphql, auth0: [audience: "my-audience"]
 
-            # or this
-            use BridgeEx.Graphql, auth0: [enabled: false]
-          """
+          # or this
+          use BridgeEx.Graphql, auth0: [enabled: false]
+        """
       end
 
       if @audience && @auth0_enabled do
+        unless Code.ensure_loaded?(PrimaAuth0Ex) do
+          raise """
+          Auth0 is enabled but :prima_auth0_ex is not loaded. Did you add it to your dependencies?
+          """
+        end
+
         defp with_authorization_headers(headers) do
-          with {:ok, authorization_headers} <- get_authorization_headers_for(@audience) do
+          with {:ok, authorization_headers} <-
+                 Auth0AuthorizationProvider.authorization_headers(@audience) do
             {:ok, Enum.into(authorization_headers, headers)}
           end
         end
       else
         defp with_authorization_headers(headers), do: {:ok, headers}
       end
-
-      defp get_authorization_headers_for(audience) do
-        if auth0_enabled_for_app(),
-          do: Auth0AuthorizationProvider.authorization_headers(@audience),
-          else: report_auth0_disabled_error()
-      end
-
-      defp report_auth0_disabled_error do
-        Logger.error("Auth0 is not enabled for this application!
-        To enable it set `config :bridge_ex, auth0_enabled: true` in your config.")
-
-        {:error, "Auth0 not enabled in application"}
-      end
-
-      defp auth0_enabled_for_app, do: Application.get_env(:bridge_ex, :auth0_enabled, false)
     end
   end
 end

@@ -14,13 +14,17 @@ defmodule BridgeEx.TestHelper do
     end)
   end
 
-  def reload_app do
+  def reload_app(start_prima_auth0_ex?) do
     Application.stop(:bridge_ex)
     Application.start(:bridge_ex)
+
+    if start_prima_auth0_ex? do
+      {:ok, _} = Application.ensure_all_started(:prima_auth0_ex)
+      on_exit(fn -> Application.stop(:prima_auth0_ex) end)
+    end
   end
 
-  def set_auth0_configuration(port, auth0_enabled? \\ true) do
-    set_test_env(:bridge_ex, :auth0_enabled, auth0_enabled?)
+  def set_auth0_configuration(port) do
     set_test_env(:prima_auth0_ex, :auth0_base_url, "http://localhost:#{port}")
     set_test_env(:prima_auth0_ex, :client, client_id: "", client_secret: "", cache_enabled: false)
   end
