@@ -49,12 +49,6 @@ defmodule BridgeEx.Graphql do
       alias BridgeEx.Auth0AuthorizationProvider
       alias BridgeEx.Graphql.Client
 
-      # global config
-      @global_log_options Application.compile_env(:bridge_ex, :log_options,
-                            log_query_on_error: false,
-                            log_response_on_error: false
-                          )
-
       # local config
       # mandatory opts
       @endpoint Keyword.fetch!(unquote(opts), :endpoint)
@@ -67,7 +61,7 @@ defmodule BridgeEx.Graphql do
                       "Content-type" => "application/json"
                     })
       @max_attempts Keyword.get(unquote(opts), :max_attempts, 1)
-      @log_options Keyword.get(unquote(opts), :log_options, @global_log_options)
+      @log_options Keyword.get(unquote(opts), :log_options)
 
       @doc """
       Run a graphql query or mutation over the configured bridge.
@@ -101,7 +95,7 @@ defmodule BridgeEx.Graphql do
             http_options,
             http_headers,
             max_attempts,
-            @log_options
+            log_options()
           )
           |> format_response()
         end
@@ -148,6 +142,18 @@ defmodule BridgeEx.Graphql do
         end
       else
         defp with_authorization_headers(headers), do: {:ok, headers}
+      end
+
+      # Local log options always have precedence over global log options
+      if @log_options do
+        defp log_options, do: @log_options
+      else
+        defp log_options do
+          Application.get_env(:bridge_ex, :log_options,
+            log_query_on_error: false,
+            log_response_on_error: false
+          )
+        end
       end
     end
   end

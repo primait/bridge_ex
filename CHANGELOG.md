@@ -7,11 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Next]
 
+### Added
+
+- If `PrimaAuth0Ex` is not loaded a `RuntimeError` is raised
+
 ### Changed
 
-- Set `prima_auth0_ex` as `optional: true` instead of `runtime: false`
-- Remove global `:auth0_enabled` flag support, `prima_auth0_ex` is not "ensured" on start anymore and must be included by the lib user
+- `prima_auth0_ex` dependency is now `optional: true` instead of `runtime: false`
+- Removed global `:auth0_enabled` flag support: `prima_auth0_ex` is not "ensured" on start anymore and must be included by the lib user
 - If audience is not set but auth0 is enabled a `RuntimeError` is now raised instead of a `CompileError`
+- Global log options are fetched with `get_env` instead of `compile_env`
 
 ## [1.0.0] - 2022-02-18
 
