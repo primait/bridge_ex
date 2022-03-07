@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Next]
 
+## [1.0.1] - 2022-03-07
+
 ### Added
 
 - If `PrimaAuth0Ex` is not loaded a `RuntimeError` is raised
