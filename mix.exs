@@ -13,8 +13,16 @@ defmodule BridgeEx.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       docs: docs(),
+      aliases: aliases(),
       package: package(),
       dialyzer: [plt_add_apps: [:prima_auth0_ex]]
+    ]
+  end
+
+  defp aliases do
+    [
+      "format.all":
+        "format mix.exs 'lib/**/*.{ex,exs}' 'test/**/*.{ex,exs}' 'config/*.{ex,exs}' 'priv/**/*.exs'"
     ]
   end
 

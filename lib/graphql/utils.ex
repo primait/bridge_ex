@@ -82,15 +82,20 @@ defmodule BridgeEx.Graphql.Utils do
     {:error, message}
   end
 
-  def retry({:ok, arg}, fun, 1) do
-    fun.(arg)
-  end
+  def retry({:ok, arg}, fun, _retry_condition_fun, 1), do: fun.(arg)
 
-  def retry({:ok, arg}, fun, n) do
+  def retry({:ok, _arg}, _fun, _retry_condition_fun, n) when n <= 0,
+    do: {:error, :invalid_retry_value}
+
+  def retry({:ok, arg}, fun, retry_condition_fun, n) do
     case fun.(arg) do
-      {:error, _reason} ->
-        Process.sleep(500)
-        retry({:ok, arg}, fun, n - 1)
+      {:error, reason} ->
+        if retry_condition_fun.(reason) do
+          Process.sleep(500)
+          retry({:ok, arg}, fun, retry_condition_fun, n - 1)
+        else
+          {:error, reason}
+        end
 
       val ->
         val

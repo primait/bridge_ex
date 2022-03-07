@@ -37,7 +37,8 @@ defmodule BridgeEx.Graphql.Client do
         http_options,
         http_headers,
         max_attempts,
-        log_options
+        log_options,
+        retry_fn \\ fn _ -> true end
       ) do
     %{query: String.trim(query), variables: variables}
     |> Jason.encode()
@@ -48,6 +49,7 @@ defmodule BridgeEx.Graphql.Client do
         |> Utils.decode_http_response(query, log_options)
         |> Utils.parse_response()
       end,
+      retry_fn,
       max_attempts
     )
   end
