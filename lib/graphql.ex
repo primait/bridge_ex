@@ -72,6 +72,13 @@ defmodule BridgeEx.Graphql do
         * `headers`: extra HTTP headers.
         * `max_attempts`: override the configured `max_attempts` parameter.
 
+      ## Return values
+
+        * `{:ok, graphql_response}` on success
+        * `{:error, graphql_error}` on graphql error (i.e. 200 status code but `errors` array is not `nil`)
+        * `{:error, {:bad_response, status_code}}` on non 200 status code
+        * `{:error, {:http_error, reason}}` on http error e.g. `:econnrefused`
+
       ## Examples
 
         iex> MyBridge.call("some_query", %{var_key: "var_value"})

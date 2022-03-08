@@ -5,7 +5,11 @@ defmodule BridgeEx.Graphql.Client do
 
   alias BridgeEx.Graphql.Utils
 
-  @type bridge_response :: {:ok, term()} | {:error, String.t()}
+  @type bridge_response ::
+          {:ok, term()}
+          | {:error, {:bad_response, integer()}}
+          | {:error, {:http_error, String.t()}}
+          | {:error, list()}
 
   @doc """
   Calls a GraphQL endpoint

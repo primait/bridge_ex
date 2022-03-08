@@ -47,7 +47,7 @@ defmodule BridgeEx.Graphql.Utils do
 
     Logger.error("GraphQL: Bad Response error", metadata)
 
-    {:error, "BAD_RESPONSE"}
+    {:error, {:bad_response, code}}
   end
 
   def decode_http_response(
@@ -59,11 +59,11 @@ defmodule BridgeEx.Graphql.Utils do
     metadata = prepend_if([reason: inspect(reason)], log_query_on_error, {:request_body, query})
     Logger.error("GraphQL: HTTP error", metadata)
 
-    {:error, "HTTP_ERROR"}
+    {:error, {:http_error, reason}}
   end
 
   @spec parse_response(graphql_response()) :: client_response()
-  def parse_response({:error, error}) when is_binary(error), do: {:error, error}
+  def parse_response({:error, error}), do: {:error, error}
 
   def parse_response({:ok, %{errors: errors}}), do: {:error, errors}
 
@@ -82,17 +82,17 @@ defmodule BridgeEx.Graphql.Utils do
     {:error, message}
   end
 
-  def retry({:ok, arg}, fun, _retry_condition_fun, 1), do: fun.(arg)
+  def retry({:ok, arg}, fun, _retry_policy, 1), do: fun.(arg)
 
-  def retry({:ok, _arg}, _fun, _retry_condition_fun, n) when n <= 0,
+  def retry({:ok, _arg}, _fun, _retry_policy, n) when n <= 0,
     do: {:error, :invalid_retry_value}
 
-  def retry({:ok, arg}, fun, retry_condition_fun, n) do
+  def retry({:ok, arg}, fun, retry_policy, n) do
     case fun.(arg) do
       {:error, reason} ->
-        if retry_condition_fun.(reason) do
+        if retry_policy.(reason) do
           Process.sleep(500)
-          retry({:ok, arg}, fun, retry_condition_fun, n - 1)
+          retry({:ok, arg}, fun, retry_policy, n - 1)
         else
           {:error, reason}
         end
