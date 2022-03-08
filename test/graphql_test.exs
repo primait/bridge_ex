@@ -90,4 +90,50 @@ defmodule BridgeEx.GraphqlTest do
             [%{message: "error1", extensions: %{code: "BAD_REQUEST"}}, %{message: "error2"}]} =
              TestBridgeForErrors.call("myquery", %{})
   end
+
+  test "retry_policy correctly prevents retry", %{bypass: bypass} do
+    Bypass.expect_once(bypass, "POST", "/graphql", fn conn ->
+      Bypass.expect_once(bypass, "POST", "/graphql", fn conn ->
+        Plug.Conn.resp(conn, 200, ~s<{"errors": [{"message": "error"}]}>)
+      end)
+
+      Plug.Conn.resp(
+        conn,
+        500,""
+      )
+    end)
+
+    retry_policy = fn errors  ->
+      case errors do
+      "BAD_RESPONSE" -> false
+      _ -> true
+      end
+    end
+
+    defmodule TestBridge do
+      use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+    end
+
+    assert {:error, "BAD_RESPONSE"} =
+             TestBridge.call("myquery", %{}, retry_policy: retry_policy, max_attempts: 2)
+  end
+
+  test "avoid retry by following the retry policy", %{bypass: bypass} do
+    Bypass.expect_once(bypass, "POST", "/graphql", fn conn ->
+      Plug.Conn.resp(
+        conn,
+        200,
+        ~s<{"errors": [{"message": "error1"}, {"message": "error2"}]}>
+      )
+    end)
+
+    retry_policy = fn _ -> false end
+
+    defmodule TestBridge do
+      use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+    end
+
+    assert {:error, _} =
+             TestBridge.call("myquery", %{}, retry_policy: retry_policy, max_attempts: 2)
+  end
 end
