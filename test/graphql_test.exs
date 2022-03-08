@@ -34,7 +34,8 @@ defmodule BridgeEx.GraphqlTest do
       use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql", max_attempts: 2
     end
 
-    assert {:ok, %{key: "value"}} = TestBridgeWithRetry.call("myquery", %{})
+    assert {:ok, %{key: "value"}} =
+             TestBridgeWithRetry.call("myquery", %{})
   end
 
   test "retries request on response with errors", %{bypass: bypass} do

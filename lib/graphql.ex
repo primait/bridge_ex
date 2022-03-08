@@ -86,6 +86,7 @@ defmodule BridgeEx.Graphql do
         http_options = Keyword.merge(@http_options, Keyword.get(options, :options, []))
         http_headers = Map.merge(@http_headers, Keyword.get(options, :headers, %{}))
         max_attempts = Keyword.get(options, :max_attempts, @max_attempts)
+        retry_policy = Keyword.get(options, :retry_policy, fn _ -> true end)
 
         with {:ok, http_headers} <- with_authorization_headers(http_headers) do
           @endpoint
@@ -95,7 +96,8 @@ defmodule BridgeEx.Graphql do
             http_options,
             http_headers,
             max_attempts,
-            log_options()
+            log_options(),
+            retry_policy
           )
           |> format_response()
         end

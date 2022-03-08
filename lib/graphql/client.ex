@@ -28,7 +28,8 @@ defmodule BridgeEx.Graphql.Client do
           http_options :: Keyword.t(),
           http_headers :: map(),
           max_attempts :: integer(),
-          log_options :: Keyword.t()
+          log_options :: Keyword.t(),
+          retry_policy :: fun()
         ) :: bridge_response()
   def call(
         url,
@@ -38,7 +39,7 @@ defmodule BridgeEx.Graphql.Client do
         http_headers,
         max_attempts,
         log_options,
-        retry_fn \\ fn _ -> true end
+        retry_policy
       ) do
     %{query: String.trim(query), variables: variables}
     |> Jason.encode()
@@ -49,7 +50,7 @@ defmodule BridgeEx.Graphql.Client do
         |> Utils.decode_http_response(query, log_options)
         |> Utils.parse_response()
       end,
-      retry_fn,
+      retry_policy,
       max_attempts
     )
   end
