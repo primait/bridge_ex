@@ -11,6 +11,7 @@ This document describes the current status and the upcoming milestones of the `b
 | ❌ | [Use strings instead of atoms when deserializing GraphQL response](#use-strings-instead-of-atoms-when-deserializing-graphql-response) | 💣 | - |
 | ❌ | [Flexible retry policy](#make-retry-policy-more-flexible) | - | [341](https://prima-assicurazioni-spa.myjetbrains.com/youtrack/issue/PLATFORM-341) |
 | ❌ | [Exponential retry policy](#add-exponential-retry-policy) | - | [367](https://prima-assicurazioni-spa.myjetbrains.com/youtrack/issue/PLATFORM-367) |
+| ❌ | [Better renaming of `max_attempts`](#better-naming-of-max-attempts) | - | - |
 
 ## Support all possible outcomes of a GraphQL query
 
@@ -71,3 +72,11 @@ call("{ some { query } }", %{},
 ## Add exponential retry policy
 
 As of now the retry policy is linear. It could be useful to implement an exponential retry strategy instead.
+
+## Better naming of max attempts
+
+`max_attempts` decides how many requests are made **in total** and the default parameter is `1`. This means that if someone wants the request to be retried `n` times they have to set a `max_attempts` value of `n + 1`.
+
+This is a bit counterintuitive since a request should always be made at least one time and eventually retried `n` times.
+
+It would probably be better to rename `max_attempts` to `max_retries` - or something along the line - and make it so that it controls only how many **additional** attempts are made.
