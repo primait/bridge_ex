@@ -2,13 +2,16 @@
 
 This document describes the current status and the upcoming milestones of the `bridge_ex` library.
 
-| Status | Goal | Breaking |
-| :---: | :--- | :---: |
-| ✔️ | Add a CHANGELOG | - |
-| ✔️ | Add a ROADMAP for future developments | - |
-| ❌ | [Support all possible outcomes of a GraphQL query](#support-all-possible-outcomes-of-a-graphql-query) | 💣 |
-| ❌ | [Log queries safely](#log-queries-safely) | - |
-| ❌ | [Use strings instead of atoms when deserializing GraphQL response](#use-strings-instead-of-atoms-when-deserializing-graphql-response) | 💣 |
+| Status | Goal | Breaking | Card |
+| :---: | :--- | :---: | :---: |
+| ✔️ | Add a CHANGELOG | - | - |
+| ✔️ | Add a ROADMAP for future developments | - | - |
+| ❌ | [Support all possible outcomes of a GraphQL query](#support-all-possible-outcomes-of-a-graphql-query) | 💣 | - |
+| ❌ | [Log queries safely](#log-queries-safely) | - | - |
+| ❌ | [Use strings instead of atoms when deserializing GraphQL response](#use-strings-instead-of-atoms-when-deserializing-graphql-response) | 💣 | - |
+| ❌ | [Flexible retry policy](#make-retry-policy-more-flexible) | - | [341](https://prima-assicurazioni-spa.myjetbrains.com/youtrack/issue/PLATFORM-341) |
+| ❌ | [Exponential retry policy](#add-exponential-retry-policy) | - | [367](https://prima-assicurazioni-spa.myjetbrains.com/youtrack/issue/PLATFORM-367) |
+| ❌ | [Better renaming of `max_attempts`](#better-naming-of-max-attempts) | - | - |
 
 ## Support all possible outcomes of a GraphQL query
 
@@ -42,3 +45,38 @@ end
 ```
 
 to convert keys to strings.
+
+## Make retry policy more flexible
+
+Improve the library by adding the ability to customize the retry policy.
+
+On error, a retry function is called (if `max attempts > 1`), but right now the retry happens regardless of the error. This is a bit limiting since not all errors are transient and enabling the retry could lead to many needless requests.
+
+A better approach would be to provide the user with a default retry mechanism and then a way to define a custom function to match errors and decide which to recover from, something like
+
+```elixir
+use BridgeEx.Graphql,
+  endpoint: "http://my-endpoint"
+
+...
+
+call("{ some { query } }", %{},
+  retry_policy: fn ->
+    "SOME_ERROR" -> :retry
+    "ANOTHER_ERROR" -> :retry
+    _ -> :stop
+  end
+)
+```
+
+## Add exponential retry policy
+
+As of now the retry policy is linear. It could be useful to implement an exponential retry strategy instead.
+
+## Better naming of max attempts
+
+`max_attempts` decides how many requests are made **in total** and the default parameter is `1`. This means that if someone wants the request to be retried `n` times they have to set a `max_attempts` value of `n + 1`.
+
+This is a bit counterintuitive since a request should always be made at least one time and eventually retried `n` times.
+
+It would probably be better to rename `max_attempts` to `max_retries` - or something along the line - and make it so that it controls only how many **additional** attempts are made.
