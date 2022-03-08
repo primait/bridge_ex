@@ -10,7 +10,7 @@ This document describes the current status and the upcoming milestones of the `b
 | ❌ | [Log queries safely](#log-queries-safely) | - | - |
 | ❌ | [Use strings instead of atoms when deserializing GraphQL response](#use-strings-instead-of-atoms-when-deserializing-graphql-response) | 💣 | - |
 | ❌ | [Flexible retry policy](#make-retry-policy-more-flexible) | - | [341](https://prima-assicurazioni-spa.myjetbrains.com/youtrack/issue/PLATFORM-341) |
-| ❌ | [Exponential retry policy](#add-exponential-retry-policy) | - | - |
+| ❌ | [Exponential retry policy](#add-exponential-retry-policy) | - | [367](https://prima-assicurazioni-spa.myjetbrains.com/youtrack/issue/PLATFORM-367) |
 
 ## Support all possible outcomes of a GraphQL query
 
@@ -49,23 +49,9 @@ to convert keys to strings.
 
 Improve the library by adding the ability to customize the retry policy.
 
-On error, a retry function is called (if max attempts > 1), but right now the retry happens regardless of the error. This is a bit limiting since not all errors are transient and enabling the retry could lead to many needless requests.
+On error, a retry function is called (if `max attempts > 1`), but right now the retry happens regardless of the error. This is a bit limiting since not all errors are transient and enabling the retry could lead to many needless requests.
 
 A better approach would be to provide the user with a default retry mechanism and then a way to define a custom function to match errors and decide which to recover from, something like
-
-```elixir
-use BridgeEx.Graphql,
-  endpoint: "http://my-endpoint",
-  retry_options: [
-    handler: fn
-      {:error, "SOME_ERROR"} -> :retry
-      {:error, "ANOTHER_ERROR"} -> :retry
-      _ -> :stop
-    end
-  ]
-```
-
-or even at the call level
 
 ```elixir
 use BridgeEx.Graphql,
@@ -74,13 +60,11 @@ use BridgeEx.Graphql,
 ...
 
 call("{ some { query } }", %{},
-  retry_options: [
-    handler: fn
-      {:error, "SOME_ERROR"} -> :retry
-      {:error, "ANOTHER_ERROR"} -> :retry
-      _ -> :stop
-    end
-  ]
+  retry_policy: fn ->
+    "SOME_ERROR" -> :retry
+    "ANOTHER_ERROR" -> :retry
+    _ -> :stop
+  end
 )
 ```
 
