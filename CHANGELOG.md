@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Next]
 
+### Added
+
+- New `retry_policy` option to `call`: clients can customize which errors are retried by providing a function
+
+### Changed
+
+- [**Breaking**] More detailed errors on bad response and http error: instead of returning a string, return an atom with some additional info
+
 ## [1.0.1] - 2022-03-07
 
 ### Added

@@ -72,6 +72,13 @@ defmodule BridgeEx.Graphql do
         * `headers`: extra HTTP headers.
         * `max_attempts`: override the configured `max_attempts` parameter.
 
+      ## Return values
+
+        * `{:ok, graphql_response}` on success
+        * `{:error, graphql_error}` on graphql error (i.e. 200 status code but `errors` array is not `nil`)
+        * `{:error, {:bad_response, status_code}}` on non 200 status code
+        * `{:error, {:http_error, reason}}` on http error e.g. `:econnrefused`
+
       ## Examples
 
         iex> MyBridge.call("some_query", %{var_key: "var_value"})
@@ -86,6 +93,7 @@ defmodule BridgeEx.Graphql do
         http_options = Keyword.merge(@http_options, Keyword.get(options, :options, []))
         http_headers = Map.merge(@http_headers, Keyword.get(options, :headers, %{}))
         max_attempts = Keyword.get(options, :max_attempts, @max_attempts)
+        retry_policy = Keyword.get(options, :retry_policy, fn _ -> true end)
 
         with {:ok, http_headers} <- with_authorization_headers(http_headers) do
           @endpoint
@@ -95,7 +103,8 @@ defmodule BridgeEx.Graphql do
             http_options,
             http_headers,
             max_attempts,
-            log_options()
+            log_options(),
+            retry_policy
           )
           |> format_response()
         end

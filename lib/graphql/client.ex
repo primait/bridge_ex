@@ -5,7 +5,11 @@ defmodule BridgeEx.Graphql.Client do
 
   alias BridgeEx.Graphql.Utils
 
-  @type bridge_response :: {:ok, term()} | {:error, String.t()}
+  @type bridge_response ::
+          {:ok, term()}
+          | {:error, {:bad_response, integer()}}
+          | {:error, {:http_error, String.t()}}
+          | {:error, list()}
 
   @doc """
   Calls a GraphQL endpoint
@@ -28,7 +32,8 @@ defmodule BridgeEx.Graphql.Client do
           http_options :: Keyword.t(),
           http_headers :: map(),
           max_attempts :: integer(),
-          log_options :: Keyword.t()
+          log_options :: Keyword.t(),
+          retry_policy :: fun()
         ) :: bridge_response()
   def call(
         url,
@@ -37,7 +42,8 @@ defmodule BridgeEx.Graphql.Client do
         http_options,
         http_headers,
         max_attempts,
-        log_options
+        log_options,
+        retry_policy
       ) do
     %{query: String.trim(query), variables: variables}
     |> Jason.encode()
@@ -48,6 +54,7 @@ defmodule BridgeEx.Graphql.Client do
         |> Utils.decode_http_response(query, log_options)
         |> Utils.parse_response()
       end,
+      retry_policy,
       max_attempts
     )
   end

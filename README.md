@@ -32,6 +32,51 @@ Refer to [the documentation](https://hexdocs.pm/bridge_ex/BridgeEx.Graphql.html)
 
 If you need more control on your requests you can use [`BridgeEx.Graphql.Client.call`](https://hexdocs.pm/bridge_ex/BridgeEx.Graphql.Client.html#call/7) directly.
 
+#### Call options
+
+When `call`ing you can provide the following options, some of which override the ones provided when `use`ing the bridge:
+
+- `http_headers`
+- `http_options`
+- `max_attempts`
+- `retry_policy`
+
+#### Return values
+
+`call` can return one of the following values:
+
+- `{:ok, graphql_response}` on success
+- `{:error, graphql_error}` on graphql error (i.e. 200 status code but `errors` array is not `nil`)
+- `{:error, {:bad_response, status_code}}` on non 200 status code
+- `{:error, {:http_error, reason}}` on http error e.g. `:econnrefused`
+
+#### Customizing the retry policy
+
+By default if `max_attempts` is greater than 1, the bridge retries every error regardless of its value. This behaviour can be customized by providing the `retry_policy` option to a `call`.
+
+The `retry_policy` must be a function, which will receive an error as input and will return a boolean as a result.
+
+```elixir
+retry_policy = fn errors ->
+  case errors do
+    {:bad_response, 400} -> true
+    {:http_error, _reason} -> true
+    [%{message: "some_error", extensions: %{code: "SOME_CODE"}}] -> true
+    _ -> false
+  end
+end
+
+defmodule BridgeWithCustomRetry do
+  use BridgeEx.Graphql,
+    endpoint: "http://some_service.example.com/graphql"
+end
+
+BridgeWithCustomRetry.call("myquery", %{},
+  retry_policy: retry_policy,
+  max_attempts: 2
+)
+```
+
 ### Global configuration
 
 The following configuration parameters can be set globally for all bridges in the app, by setting them inside your `config.exs`:
