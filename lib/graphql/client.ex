@@ -4,6 +4,7 @@ defmodule BridgeEx.Graphql.Client do
   """
 
   alias BridgeEx.Graphql.Utils
+  alias BridgeEx.Graphql.Retry
 
   @type bridge_response ::
           {:ok, term()}
@@ -47,7 +48,7 @@ defmodule BridgeEx.Graphql.Client do
       ) do
     %{query: String.trim(query), variables: variables}
     |> Jason.encode()
-    |> Utils.retry(
+    |> Retry.retry(
       fn query ->
         url
         |> Telepoison.post(query, http_headers, http_options)

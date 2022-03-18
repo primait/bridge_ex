@@ -12,14 +12,14 @@ defmodule BridgeEx.Graphql.Retry do
     {:error, message}
   end
 
-  def retry({:ok, arg}, fun, _retry_policy, 1), do: fun.(arg)
-
-  def retry({:ok, _arg}, _fun, _retry_policy, n) when n <= 0,
-    do: {:error, :invalid_retry_value}
-
   def retry({:ok, arg}, fun, retry_policy, n) do
     do_retry(arg, fun, retry_policy, 500, n)
   end
+
+  defp do_retry(arg, fun, _retry_policy, _delay, 1), do: fun.(arg)
+
+  defp do_retry(_arg, _fun, _retry_policy, _delay, n) when n <= 0,
+    do: {:error, :invalid_retry_value}
 
   defp do_retry(arg, fun, policy, delay, retries) do
     case fun.(arg) do
