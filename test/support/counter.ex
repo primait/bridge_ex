@@ -1,4 +1,6 @@
 defmodule BridgeEx.Utils.Counter do
+  @moduledoc false
+
   use Agent
 
   def start(initial_value) do

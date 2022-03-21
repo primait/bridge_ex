@@ -4,15 +4,12 @@ defmodule BridgeEx.Graphql.Retry do
   """
 
   @spec retry(
-          {:ok, String.t()} | {:error, Jason.EncodeError.t() | Exception.t()},
+          String.t(),
           (any() -> {:error, String.t()} | {:ok, any()}),
+          (any() -> boolean()),
           integer()
         ) :: {:ok, any()} | {:error, any()}
-  def retry({:error, %Jason.EncodeError{message: message}}, _fun, _attempt) do
-    {:error, message}
-  end
-
-  def retry({:ok, arg}, fun, retry_policy, n) do
+  def retry(arg, fun, retry_policy, n) do
     do_retry(arg, fun, retry_policy, 500, n)
   end
 

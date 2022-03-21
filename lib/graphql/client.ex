@@ -48,15 +48,18 @@ defmodule BridgeEx.Graphql.Client do
       ) do
     %{query: String.trim(query), variables: variables}
     |> Jason.encode()
-    |> Retry.retry(
-      fn query ->
-        url
-        |> Telepoison.post(query, http_headers, http_options)
-        |> Utils.decode_http_response(query, log_options)
-        |> Utils.parse_response()
-      end,
-      retry_policy,
-      max_attempts
+    |> Noether.Either.bind(
+      &Retry.retry(
+        &1,
+        fn query ->
+          url
+          |> Telepoison.post(query, http_headers, http_options)
+          |> Utils.decode_http_response(query, log_options)
+          |> Utils.parse_response()
+        end,
+        retry_policy,
+        max_attempts
+      )
     )
   end
 
