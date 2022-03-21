@@ -2,16 +2,17 @@ defmodule BridgeEx.Graphql.RetryTest do
   use ExUnit.Case, async: true
 
   alias BridgeEx.Graphql.Retry
+  alias BridgeEx.Utils.Counter
 
   setup do
-    {:ok, agent} = Agent.start(fn -> 0 end)
-    on_exit(fn -> Agent.stop(agent) end)
-    {:ok, agent: agent}
+    {:ok, counter} = Counter.start(0)
+    on_exit(fn -> Counter.stop(counter) end)
+    {:ok, counter: counter}
   end
 
-  test "retry a function on error until max retries", %{agent: agent} do
+  test "retry a function on error until max retries", %{counter: counter} do
     mock_function = fn _ ->
-      Agent.update(agent, fn counter -> counter + 1 end)
+      Counter.increment(counter)
       {:error, "Error"}
     end
 
@@ -24,7 +25,7 @@ defmodule BridgeEx.Graphql.RetryTest do
       expected_retries
     )
 
-    assert Agent.get(agent, fn counter -> counter end) == expected_retries
+    assert Counter.count(counter) == expected_retries
   end
 
   def retry_always(_), do: true
