@@ -52,7 +52,7 @@ When `call`ing you can provide the following options, some of which override the
 
 #### Customizing the retry policy
 
-By default if `max_attempts` is greater than 1, the bridge retries every error regardless of its value. This behaviour can be customized by providing the `retry_policy` option to a `call`.
+By default if `max_attempts` is greater than `1`, the bridge retries every error regardless of its value. This behaviour can be customized by providing the `retry_policy` option to a `call`. The retries follow an exponential backoff strategy.
 
 The `retry_policy` must be a function, which will receive an error as input and will return a boolean as a result.
 

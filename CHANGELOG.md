@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - [**Breaking**] More detailed errors on bad response and http error: instead of returning a string, return an atom with some additional info
+- Retries follow an exponential backoff timing instead of a constant one
 
 ## [1.0.1] - 2022-03-07
 

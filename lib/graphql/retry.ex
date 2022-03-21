@@ -1,6 +1,6 @@
 defmodule BridgeEx.Graphql.Retry do
   @moduledoc """
-  Misc utils for handling Graphql requests/responses.
+  Utils for handling retrying of functions.
   """
 
   @spec retry(
