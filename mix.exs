@@ -44,10 +44,10 @@ defmodule BridgeEx.MixProject do
       {:bypass, "~> 2.1", only: :test},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", only: [:dev, :test], runtime: false},
-      {:ex_doc, ">= 0.28.2", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.28", only: :dev, runtime: false},
       {:jason, "~> 1.2"},
-      {:prima_auth0_ex, "~> 0.3.0", optional: true},
-      {:telepoison, "~> 1.0.0"}
+      {:prima_auth0_ex, "~> 0.3", optional: true},
+      {:telepoison, "~> 1.0"}
     ]
   end
 
