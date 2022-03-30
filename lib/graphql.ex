@@ -100,19 +100,32 @@ defmodule BridgeEx.Graphql do
 
         if max_attempts != nil and Keyword.get(user_retry_options, :max_retries) == nil do
           retry_options = Keyword.put(retry_options, :max_retries, max_attempts - 1)
-        end
 
-        with {:ok, http_headers} <- with_authorization_headers(http_headers) do
-          @endpoint
-          |> Client.call(
-            query,
-            encode_variables(variables),
-            http_options,
-            http_headers,
-            retry_options,
-            log_options()
-          )
-          |> format_response()
+          with {:ok, http_headers} <- with_authorization_headers(http_headers) do
+            @endpoint
+            |> Client.call(
+              query,
+              encode_variables(variables),
+              http_options,
+              http_headers,
+              retry_options,
+              log_options()
+            )
+            |> format_response()
+          end
+        else
+          with {:ok, http_headers} <- with_authorization_headers(http_headers) do
+            @endpoint
+            |> Client.call(
+              query,
+              encode_variables(variables),
+              http_options,
+              http_headers,
+              retry_options,
+              log_options()
+            )
+            |> format_response()
+          end
         end
       end
 
