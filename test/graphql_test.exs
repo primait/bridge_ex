@@ -31,10 +31,12 @@ defmodule BridgeEx.GraphqlTest do
     end)
 
     defmodule TestBridgeRetriesOnBadResponse do
-      use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql", max_attempts: 2
+      use BridgeEx.Graphql,
+        endpoint: "http://localhost:#{bypass.port}/graphql"
     end
 
-    assert {:ok, %{key: "value"}} = TestBridgeRetriesOnBadResponse.call("myquery", %{})
+    assert {:ok, %{key: "value"}} =
+             TestBridgeRetriesOnBadResponse.call("myquery", %{}, retry_options: [max_retries: 1])
   end
 
   test "retries request on response with errors", %{bypass: bypass} do
@@ -51,10 +53,12 @@ defmodule BridgeEx.GraphqlTest do
     end)
 
     defmodule TestBridgeRetriesOnError do
-      use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql", max_attempts: 2
+      use BridgeEx.Graphql,
+        endpoint: "http://localhost:#{bypass.port}/graphql"
     end
 
-    assert {:ok, %{key: "value"}} = TestBridgeRetriesOnError.call("myquery", %{})
+    assert {:ok, %{key: "value"}} =
+             TestBridgeRetriesOnError.call("myquery", %{}, retry_options: [max_retries: 1])
   end
 
   test "supports custom headers", %{bypass: bypass} do
@@ -118,8 +122,7 @@ defmodule BridgeEx.GraphqlTest do
 
     assert {:error, {:bad_response, _}} =
              TestBridgePreventsRetryWithCustomPolicy.call("myquery", %{},
-               retry_policy: retry_policy,
-               max_attempts: 2
+               retry_options: [policy: retry_policy, max_retries: 1]
              )
   end
 
@@ -149,8 +152,7 @@ defmodule BridgeEx.GraphqlTest do
 
     assert {:ok, %{key: "value"}} =
              TestBridgePreventsRetryWithCustomPolicy.call("myquery", %{},
-               retry_policy: retry_policy,
-               max_attempts: 2
+               retry_options: [policy: retry_policy, max_retries: 1]
              )
   end
 end
