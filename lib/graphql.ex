@@ -78,7 +78,7 @@ defmodule BridgeEx.Graphql do
       ## Examples
 
         iex> MyBridge.call("some_query", %{var_key: "var_value"})
-        iex> MyBridge.call("some_query", %{var_key: "var_value"}, max_attempts: 3)
+        iex> MyBridge.call("some_query", %{var_key: "var_value"}, retry_options: [max_retries: 3])
       """
       @spec call(
               query :: String.t(),

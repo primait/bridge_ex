@@ -22,7 +22,7 @@ defmodule BridgeEx.Graphql.Client do
     * `variables`: dariables for Graphql query or mutation.
     * `http_options`: HTTPoison options.
     * `http_headers`: HTTPoison headers.
-    * `max_attempts`: defines number of retries before returning error.
+    * `retry_options`: configures retry attempts. Takes the form of `[max_retries: 1, timing: :exponential]`
     * `log_options`: configures logging on errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`.
   """
 

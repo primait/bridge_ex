@@ -15,7 +15,6 @@ defmodule BridgeEx.Example.SomeServiceBridge do
 
     # optional settings (with defaults)
     http_options: [timeout: 1_000, recv_timeout: 16_000],
-    max_attempts: 1,
     encode_variables: false,
     format_response: true
   ]
@@ -23,6 +22,6 @@ defmodule BridgeEx.Example.SomeServiceBridge do
   def my_cool_query(%{id: "12345"} = variables) do
     "#{__DIR__}/some_service/my_cool_query.graphql"
     |> File.read!()
-    |> call(variables)
+    |> call(variables, retry_options: [max_retries: 1])
   end
 end

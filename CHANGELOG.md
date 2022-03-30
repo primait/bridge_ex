@@ -9,12 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- New `retry_policy` option to `call`: clients can customize which errors are retried by providing a function
+- New `retry_options` to `call`: clients can customize how handle a call retry (more details [here](./README.md#customizing-the-retry-options)))
 
 ### Changed
 
 - [**Breaking**] More detailed errors on bad response and http error: instead of returning a string, return an atom with some additional info
-- Retries follow an exponential backoff timing instead of a constant one
+- Retries, by default, follow an exponential backoff timing instead of a constant one
+- Retry delay starts with 100ms by default,
+- `max_attempts` option is now deprecated in favour of `retry_options`
 
 ## [1.0.1] - 2022-03-07
 

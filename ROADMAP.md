@@ -2,16 +2,16 @@
 
 This document describes the current status and the upcoming milestones of the `bridge_ex` library.
 
-| Status | Goal | Breaking | Card |
-| :---: | :--- | :---: | :---: |
-| ✔️ | Add a CHANGELOG | - | - |
-| ✔️ | Add a ROADMAP for future developments | - | - |
-| ❌ | [Support all possible outcomes of a GraphQL query](#support-all-possible-outcomes-of-a-graphql-query) | 💣 | - |
-| ❌ | [Log queries safely](#log-queries-safely) | - | - |
-| ❌ | [Use strings instead of atoms when deserializing GraphQL response](#use-strings-instead-of-atoms-when-deserializing-graphql-response) | 💣 | - |
-| ✔ | [Flexible retry policy](#make-retry-policy-more-flexible) | 💣 | [341](https://prima-assicurazioni-spa.myjetbrains.com/youtrack/issue/PLATFORM-341) |
-| ✔️ | [Exponential retry policy](#add-exponential-retry-policy) | - | [367](https://prima-assicurazioni-spa.myjetbrains.com/youtrack/issue/PLATFORM-367) |
-| ❌ | [Better renaming of `max_attempts`](#better-naming-of-max-attempts) | - | - |
+| Status | Goal                                                                                                                                  | Breaking |                                        Card                                        |
+| :----: | :------------------------------------------------------------------------------------------------------------------------------------ | :------: | :--------------------------------------------------------------------------------: |
+|   ✔️   | Add a CHANGELOG                                                                                                                       |    -     |                                         -                                          |
+|   ✔️   | Add a ROADMAP for future developments                                                                                                 |    -     |                                         -                                          |
+|   ❌   | [Support all possible outcomes of a GraphQL query](#support-all-possible-outcomes-of-a-graphql-query)                                 |    💣    |                                         -                                          |
+|   ❌   | [Log queries safely](#log-queries-safely)                                                                                             |    -     |                                         -                                          |
+|   ❌   | [Use strings instead of atoms when deserializing GraphQL response](#use-strings-instead-of-atoms-when-deserializing-graphql-response) |    💣    |                                         -                                          |
+|   ✔    | [Flexible retry policy](#make-retry-policy-more-flexible)                                                                             |    💣    | [341](https://prima-assicurazioni-spa.myjetbrains.com/youtrack/issue/PLATFORM-341) |
+|   ✔️   | [Exponential retry policy](#add-exponential-retry-policy)                                                                             |    -     | [367](https://prima-assicurazioni-spa.myjetbrains.com/youtrack/issue/PLATFORM-367) |
+|   ✔️   | [Better renaming of `max_attempts`](#better-naming-of-max-attempts)                                                                   |    -     |                                         -                                          |
 
 ## Support all possible outcomes of a GraphQL query
 
