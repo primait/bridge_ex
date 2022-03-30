@@ -9,10 +9,11 @@ defmodule BridgeEx.Graphql.Retry do
           Keyword.t()
         ) :: {:ok, any()} | {:error, any()}
   def retry(arg, fun, retry_options) do
-    delay = Keyword.fetch!(retry_options, :delay)
-    policy = Keyword.fetch!(retry_options, :policy)
-    timing = Keyword.fetch!(retry_options, :timing)
-    max_retries = Keyword.fetch!(retry_options, :max_retries)
+    # These values should always be present
+    delay = Keyword.get(retry_options, :delay)
+    policy = Keyword.get(retry_options, :policy)
+    timing = Keyword.get(retry_options, :timing)
+    max_retries = Keyword.get(retry_options, :max_retries)
 
     do_retry(arg, fun, policy, delay, timing, max_retries + 1)
   end
