@@ -14,26 +14,21 @@ defmodule BridgeEx.Graphql.Retry do
     timing = Keyword.fetch!(retry_options, :timing)
     max_retries = Keyword.fetch!(retry_options, :max_retries)
 
-    delay_stream = Stream.iterate(delay, &calculate_new_delay(&1, timing))
-
-    do_retry(arg, fun, policy, delay_stream, max_retries)
+    do_retry(arg, fun, policy, delay, timing, max_retries + 1)
   end
 
-  defp do_retry(arg, fun, _retry_policy, _delay_stream, 1), do: fun.(arg)
+  defp do_retry(arg, fun, _retry_policy, _delay, _timing, 1), do: fun.(arg)
 
-  defp do_retry(_arg, _fun, _retry_policy, _delay_stream, n) when n <= 0,
+  defp do_retry(_arg, _fun, _retry_policy, _delay, _timing, n) when n <= 0,
     do: {:error, :invalid_retry_value}
 
-  defp do_retry(arg, fun, policy, delay_stream, retries) do
+  defp do_retry(arg, fun, policy, delay, timing, retries) do
     case fun.(arg) do
       {:error, reason} ->
         if policy.(reason) do
-          delay_stream
-          |> Enum.take(1)
-          |> Enum.at(0)
-          |> Process.sleep()
+          Process.sleep(calculate_new_delay(delay, timing))
 
-          do_retry(arg, fun, policy, delay_stream, retries - 1)
+          do_retry(arg, fun, policy, delay, timing, retries - 1)
         else
           {:error, reason}
         end

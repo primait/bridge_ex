@@ -24,8 +24,10 @@ defmodule BridgeEx.Graphql.RetryTest do
       Retry.retry(
         "Some argument",
         mock_function,
-        &retry_always/1,
-        max_retries
+        delay: 500,
+        max_retries: max_retries,
+        timing: :exponential,
+        policy: &retry_always/1
       )
 
     assert Counter.count(counter) == 1
@@ -43,8 +45,10 @@ defmodule BridgeEx.Graphql.RetryTest do
     Retry.retry(
       "Some argument",
       mock_function,
-      &retry_always/1,
-      expected_retries
+      delay: 500,
+      max_retries: expected_retries - 1,
+      timing: :exponential,
+      policy: &retry_always/1
     )
 
     assert Counter.count(counter) == expected_retries
@@ -61,11 +65,13 @@ defmodule BridgeEx.Graphql.RetryTest do
     Retry.retry(
       "Some argument",
       mock_function,
-      fn
+      delay: 500,
+      max_retries: max_retries,
+      timing: :exponential,
+      policy: fn
         "Error" -> false
         _ -> true
-      end,
-      max_retries
+      end
     )
 
     assert Counter.count(counter) == 1
