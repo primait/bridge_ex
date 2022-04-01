@@ -58,6 +58,13 @@ defmodule BridgeEx.Graphql do
       @max_attempts Keyword.get(unquote(opts), :max_attempts, 1)
       @log_options Keyword.get(unquote(opts), :log_options)
 
+      if Keyword.has_key?(unquote(opts), :max_attempts) do
+        IO.warn(
+          "max_attemps is deprecated, please use retry_options[:max_retries] instead",
+          Macro.Env.stacktrace(__ENV__)
+        )
+      end
+
       @doc """
       Run a graphql query or mutation over the configured bridge.
 

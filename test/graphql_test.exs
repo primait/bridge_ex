@@ -18,13 +18,13 @@ defmodule BridgeEx.GraphqlTest do
       Plug.Conn.resp(conn, 500, "")
     end)
 
-    defmodule TestBridgeRetriesOnBadResponse do
+    defmodule TestBridgeDeprecatedOption do
       use BridgeEx.Graphql,
         endpoint: "http://localhost:#{bypass.port}/graphql",
         max_attempts: 2
     end
 
-    assert {:ok, %{key: "value"}} = TestBridgeRetriesOnBadResponse.call("myquery", %{})
+    assert {:ok, %{key: "value"}} = TestBridgeDeprecatedOption.call("myquery", %{})
   end
 
   test "runs graphql queries over the provided endpoint", %{bypass: bypass} do
@@ -165,12 +165,12 @@ defmodule BridgeEx.GraphqlTest do
       end
     end
 
-    defmodule TestBridgePreventsRetryWithCustomPolicy do
+    defmodule TestBridgeRetriesWithGivenPolicy do
       use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
     end
 
     assert {:ok, %{key: "value"}} =
-             TestBridgePreventsRetryWithCustomPolicy.call("myquery", %{},
+             TestBridgeRetriesWithGivenPolicy.call("myquery", %{},
                retry_options: [policy: retry_policy, max_retries: 1]
              )
   end
