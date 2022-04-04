@@ -70,7 +70,9 @@ defmodule BridgeEx.Graphql.Utils do
   def parse_response({:ok, %{data: data}}), do: {:ok, data}
 
   @spec normalize_inner_fields(any()) :: any()
-  def normalize_inner_fields(map) when is_map(map),do: Enum.reduce(map, %{}, &do_normalize_inner_fields/2)
+  def normalize_inner_fields(map) when is_map(map),
+      do: Enum.reduce(map, %{}, &do_normalize_inner_fields/2)
+
   def normalize_inner_fields(value), do: value
 
   @spec do_normalize_inner_fields({atom() | String.t(), any()}, map()) :: %{atom() => any()}
