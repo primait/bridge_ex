@@ -4,6 +4,7 @@ defmodule BridgeEx.Graphql.Client do
   """
 
   alias BridgeEx.Graphql.Utils
+  alias BridgeEx.Graphql.Retry
 
   @type bridge_response ::
           {:ok, term()}
@@ -21,7 +22,7 @@ defmodule BridgeEx.Graphql.Client do
     * `variables`: dariables for Graphql query or mutation.
     * `http_options`: HTTPoison options.
     * `http_headers`: HTTPoison headers.
-    * `max_attempts`: defines number of retries before returning error.
+    * `retry_options`: configures retry attempts. Takes the form of `[max_retries: 1, timing: :exponential]`
     * `log_options`: configures logging on errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`.
   """
 
@@ -31,9 +32,8 @@ defmodule BridgeEx.Graphql.Client do
           variables :: map(),
           http_options :: Keyword.t(),
           http_headers :: map(),
-          max_attempts :: integer(),
-          log_options :: Keyword.t(),
-          retry_policy :: fun()
+          retry_options :: Keyword.t(),
+          log_options :: Keyword.t()
         ) :: bridge_response()
   def call(
         url,
@@ -41,21 +41,22 @@ defmodule BridgeEx.Graphql.Client do
         variables,
         http_options,
         http_headers,
-        max_attempts,
-        log_options,
-        retry_policy
+        retry_options,
+        log_options
       ) do
     %{query: String.trim(query), variables: variables}
     |> Jason.encode()
-    |> Utils.retry(
-      fn query ->
-        url
-        |> Telepoison.post(query, http_headers, http_options)
-        |> Utils.decode_http_response(query, log_options)
-        |> Utils.parse_response()
-      end,
-      retry_policy,
-      max_attempts
+    |> Noether.Either.bind(
+      &Retry.retry(
+        &1,
+        fn query ->
+          url
+          |> Telepoison.post(query, http_headers, http_options)
+          |> Utils.decode_http_response(query, log_options)
+          |> Utils.parse_response()
+        end,
+        retry_options
+      )
     )
   end
 

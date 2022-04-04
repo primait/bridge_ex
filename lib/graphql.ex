@@ -1,15 +1,5 @@
 defmodule BridgeEx.Graphql do
   @moduledoc """
-  Main module to be used to implement graphql bridges.
-
-  You need to provide an `endpoint` on `use`, e.g.
-
-  ```
-  use BridgeEx.Graphql, endpoint: "https://your.auth0.endpoint"
-  ```
-  """
-
-  @doc """
   Create a Graphql bridge in the given module.
 
   Once created, a graphql request can be made via `MyBridge.call("my-query", %{"variable": "var"})`
@@ -23,7 +13,14 @@ defmodule BridgeEx.Graphql do
     * `http_headers`: HTTP headers for the request. Defaults to `%{"Content-type": "application/json"}`
     * `http_options`: HTTP options to be passed to Telepoison. Defaults to `[timeout: 1_000, recv_timeout: 16_000]`.
     * `log_options`: override global configuration for logging errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`
-    * `max_attempts`: number of times the request will be retried upon failure. Defaults to `1`.
+    * `max_attempts`: number of times the request will be retried upon failure. Defaults to `1`. ⚠️ Deprecated: use retry_options instead.
+    * `retry_options`: override configuration regarding retries, namely
+      * `delay`: meaning depends on `timing`
+        * `:constant`: retry ever `delay` ms
+        * `:exponential`: start retrying with `delay` ms
+      * `max_retries`. Defaults to `0`
+      * `policy`: a function that takes an error as input and returns `true`/`false` to indicate whether to retry the error or not. Defaults to "always retry" (`fn _ -> true end`).
+      * `timing`: either `:exponential` or `:constant`, indicates how frequently retries are made (e.g. every 1s, in an exponential manner and so on). Defaults to `:exponential`
 
   ## Examples
 
@@ -31,9 +28,7 @@ defmodule BridgeEx.Graphql do
   defmodule MyBridge do
     use BridgeEx.Graphql, endpoint: "http://my-api.com/graphql"
   end
-  ```
 
-  ```elixir
   defmodule MyBridge do
     use BridgeEx.Graphql,
       endpoint: "http://my-api.com/graphql",
@@ -63,6 +58,13 @@ defmodule BridgeEx.Graphql do
       @max_attempts Keyword.get(unquote(opts), :max_attempts, 1)
       @log_options Keyword.get(unquote(opts), :log_options)
 
+      if Keyword.has_key?(unquote(opts), :max_attempts) do
+        IO.warn(
+          "max_attemps is deprecated, please use retry_options[:max_retries] instead",
+          Macro.Env.stacktrace(__ENV__)
+        )
+      end
+
       @doc """
       Run a graphql query or mutation over the configured bridge.
 
@@ -70,7 +72,8 @@ defmodule BridgeEx.Graphql do
 
         * `options`: extra HTTP options to be passed to Telepoison.
         * `headers`: extra HTTP headers.
-        * `max_attempts`: override the configured `max_attempts` parameter.
+        * `max_attempts`: override the configured `max_attempts` parameter. ⚠️ Deprecated: use retry_options instead.
+        * `retry_options`: override the default retry options.
 
       ## Return values
 
@@ -82,7 +85,7 @@ defmodule BridgeEx.Graphql do
       ## Examples
 
         iex> MyBridge.call("some_query", %{var_key: "var_value"})
-        iex> MyBridge.call("some_query", %{var_key: "var_value"}, max_attempts: 3)
+        iex> MyBridge.call("some_query", %{var_key: "var_value"}, retry_options: [max_retries: 3])
       """
       @spec call(
               query :: String.t(),
@@ -93,7 +96,19 @@ defmodule BridgeEx.Graphql do
         http_options = Keyword.merge(@http_options, Keyword.get(options, :options, []))
         http_headers = Map.merge(@http_headers, Keyword.get(options, :headers, %{}))
         max_attempts = Keyword.get(options, :max_attempts, @max_attempts)
-        retry_policy = Keyword.get(options, :retry_policy, fn _ -> true end)
+
+        user_retry_options = Keyword.get(options, :retry_options, [])
+
+        retry_options =
+          Keyword.merge(
+            [
+              delay: 100,
+              max_retries: max_attempts - 1,
+              policy: fn _ -> true end,
+              timing: :exponential
+            ],
+            user_retry_options
+          )
 
         with {:ok, http_headers} <- with_authorization_headers(http_headers) do
           @endpoint
@@ -102,9 +117,8 @@ defmodule BridgeEx.Graphql do
             encode_variables(variables),
             http_options,
             http_headers,
-            max_attempts,
-            log_options(),
-            retry_policy
+            retry_options,
+            log_options()
           )
           |> format_response()
         end

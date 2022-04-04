@@ -72,36 +72,6 @@ defmodule BridgeEx.Graphql.Utils do
   @spec normalize_inner_fields(%{atom() => any()} | String.t()) :: %{atom() => any()} | String.t()
   def normalize_inner_fields(binary) when is_binary(binary), do: binary
   def normalize_inner_fields(map = %{}), do: Enum.reduce(map, %{}, &do_normalize_inner_fields/2)
-
-  @spec retry(
-          {:ok, String.t()} | {:error, Jason.EncodeError.t() | Exception.t()},
-          (any() -> {:error, String.t()} | {:ok, any()}),
-          integer()
-        ) :: client_response()
-  def retry({:error, %Jason.EncodeError{message: message}}, _fun, _attempt) do
-    {:error, message}
-  end
-
-  def retry({:ok, arg}, fun, _retry_policy, 1), do: fun.(arg)
-
-  def retry({:ok, _arg}, _fun, _retry_policy, n) when n <= 0,
-    do: {:error, :invalid_retry_value}
-
-  def retry({:ok, arg}, fun, retry_policy, n) do
-    case fun.(arg) do
-      {:error, reason} ->
-        if retry_policy.(reason) do
-          Process.sleep(500)
-          retry({:ok, arg}, fun, retry_policy, n - 1)
-        else
-          {:error, reason}
-        end
-
-      val ->
-        val
-    end
-  end
-
   @spec do_normalize_inner_fields({atom(), any()}, map()) :: %{atom() => any()}
   defp do_normalize_inner_fields({key, value}, acc) when is_map(value) do
     Map.merge(acc, %{to_snake_case(key) => normalize_inner_fields(value)})

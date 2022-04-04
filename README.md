@@ -13,7 +13,7 @@ defmodule MyApp.SomeServiceBridge do
   use BridgeEx.Graphql, endpoint: "http://some_service.example.com"
 
   def my_query(%{} = variables) do
-    call("a graphql query or mutation", variables)
+    call("a graphql query or mutation", variables, retry_policy: [max_retries: 1])
   end
 end
 ```
@@ -26,7 +26,7 @@ Besides `endpoint`, the following parameters can be optionally set when `use`ing
 - `http_headers`
 - `http_options`
 - `log_options`
-- `max_attempts`
+- `max_attempts` `⚠ Deprecated in favour of retry_options in call method`
 
 Refer to [the documentation](https://hexdocs.pm/bridge_ex/BridgeEx.Graphql.html) for more details.
 
@@ -38,8 +38,7 @@ When `call`ing you can provide the following options, some of which override the
 
 - `http_headers`
 - `http_options`
-- `max_attempts`
-- `retry_policy`
+- `retry_options`
 
 #### Return values
 
@@ -50,11 +49,19 @@ When `call`ing you can provide the following options, some of which override the
 - `{:error, {:bad_response, status_code}}` on non 200 status code
 - `{:error, {:http_error, reason}}` on http error e.g. `:econnrefused`
 
-#### Customizing the retry policy
+#### Customizing the retry options
 
-By default if `max_attempts` is greater than 1, the bridge retries every error regardless of its value. This behaviour can be customized by providing the `retry_policy` option to a `call`.
+By default if `max_attempts` is greater than `1`, the bridge retries every error regardless of its value (⚠ This way is deprecated). This behaviour can be customized by providing the `retry_options` to a `call`.
+`retry_options`: override configuration regarding retries, namely
 
-The `retry_policy` must be a function, which will receive an error as input and will return a boolean as a result.
+- `delay`: meaning depends on `timing`
+- `:constant`: retry ever `delay` ms
+- `:exponential`: start retrying with `delay` ms
+- `max_retries`. Defaults to `0`
+- `policy`: a function that takes an error as input and returns `true`/`false` to indicate whether to retry the error or not. Defaults to "always retry" (`fn _ -> true end`).
+- `timing`: either `:exponential`or`:constant`, indicates how frequently retries are made (e.g. every 1s, in an exponential manner and so on). Defaults to `:exponential`
+
+A policy example:
 
 ```elixir
 retry_policy = fn errors ->
@@ -71,10 +78,7 @@ defmodule BridgeWithCustomRetry do
     endpoint: "http://some_service.example.com/graphql"
 end
 
-BridgeWithCustomRetry.call("myquery", %{},
-  retry_policy: retry_policy,
-  max_attempts: 2
-)
+BridgeWithCustomRetry.call("myquery", %{}, retry_options: [policy: retry_policy, max_retries: 2])
 ```
 
 ### Global configuration
