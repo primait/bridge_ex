@@ -71,7 +71,7 @@ defmodule BridgeEx.Graphql.Utils do
 
   @spec normalize_inner_fields(any()) :: any()
   def normalize_inner_fields(map) when is_map(map),
-      do: Enum.reduce(map, %{}, &do_normalize_inner_fields/2)
+    do: Enum.reduce(map, %{}, &do_normalize_inner_fields/2)
 
   def normalize_inner_fields(value), do: value
 
