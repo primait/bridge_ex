@@ -71,6 +71,8 @@ defmodule BridgeEx.Graphql.Utils do
 
   @spec normalize_inner_fields(%{atom() => any()} | String.t()) :: %{atom() => any()} | String.t()
   def normalize_inner_fields(binary) when is_binary(binary), do: binary
+  def normalize_inner_fields(number) when is_number(number), do: number
+  def normalize_inner_fields(boolean) when is_boolean(boolean), do: boolean
   def normalize_inner_fields(map = %{}), do: Enum.reduce(map, %{}, &do_normalize_inner_fields/2)
   @spec do_normalize_inner_fields({atom(), any()}, map()) :: %{atom() => any()}
   defp do_normalize_inner_fields({key, value}, acc) when is_map(value) do
