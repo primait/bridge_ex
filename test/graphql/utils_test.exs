@@ -8,6 +8,14 @@ defmodule BridgeEx.Graphql.UtilsTest do
       assert "some-string" == Utils.normalize_inner_fields("some-string")
     end
 
+    test "does not change integers" do
+      assert 5 == Utils.normalize_inner_fields(5)
+    end
+
+    test "does not change booleans" do
+      assert true == Utils.normalize_inner_fields(true)
+    end
+
     test "does not change empty maps" do
       assert %{} == Utils.normalize_inner_fields(%{})
     end
