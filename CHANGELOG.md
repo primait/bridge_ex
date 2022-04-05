@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Next]
 
+## [1.1.0] - 2022-03-07
+
 ### Added
 
 - New `retry_options` to `call`: clients can customize how handle a call retry (more details [here](./README.md#customizing-the-retry-options))
