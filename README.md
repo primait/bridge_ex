@@ -179,7 +179,7 @@ The package can be installed by adding `bridge_ex` to your list of dependencies 
 ```elixir
 def deps do
   [
-    {:bridge_ex, "~> 1.0.0"}
+    {:bridge_ex, "~> 1.1.0"}
     # only if you want auth0 too
     # {:prima_auth0_ex, "~> 0.3.0"}
   ]
