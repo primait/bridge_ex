@@ -3,7 +3,7 @@ defmodule BridgeEx.Graphql.LanguageConventions do
   This defines an adapter that supports GraphQL query documents in their
   conventional (in JS) camelCase notation, while allowing the schema to be
   defined using conventional (in Elixir) snake_case notation, and
-  tranforming the names as needed for lookups, results, and error messages.
+  transforming the names as needed for lookups, results, and error messages.
 
   For example, this document:
 
