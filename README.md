@@ -1,6 +1,13 @@
 # BridgeEx
 
-A library to build bridges to other services (actually only graphql ones are supported).
+[![Build Status](https://drone-1.prima.it/api/badges/primait/bridge_ex/status.svg)](https://drone-1.prima.it/primait/bridge_ex)
+[![Module Version](https://img.shields.io/hexpm/v/bridge_ex.svg)](https://hex.pm/packages/bridge_ex)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/bridge_ex/)
+[![Total Downloads](https://img.shields.io/hexpm/dt/bridge_ex.svg)](https://hex.pm/packages/bridge_ex)
+[![License](https://img.shields.io/hexpm/l/bridge_ex.svg)](https://github.com/primait/auth0_ex/blob/master/LICENSE.md)
+[![Last Updated](https://img.shields.io/github/last-commit/primait/auth0_ex.svg)](https://github.com/primait/auth0_ex/commits/master)
+
+A library to build bridges to GraphQL services.
 
 ## Usage
 
