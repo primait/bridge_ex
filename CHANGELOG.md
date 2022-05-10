@@ -57,13 +57,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Require `config :bridge_ex, :auth0_enabled` to be set in order to use auth0 authentication
 
-## [0.3.0-rc.3]
+## [0.3.1]
 
 ### Changed
 
 - Removed `http_` prefix from header option
-
-## [0.3.0-rc.2]
 
 ### Fixed
 
@@ -90,3 +88,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Initial implementation of `bridge_ex`
+
+[Next]: https://github.com/primait/bridge_ex/compare/1.1.0...HEAD
+[1.1.0]: https://github.com/primait/bridge_ex/compare/1.0.1...1.1.0
+[1.0.1]: https://github.com/primait/bridge_ex/compare/1.0.0...1.0.1
+[1.0.0]: https://github.com/primait/bridge_ex/compare/0.4.1...1.0.0
+[0.4.1]: https://github.com/primait/bridge_ex/compare/0.4.0...0.4.1
+[0.4.0]: https://github.com/primait/bridge_ex/compare/0.3.1...0.4.0
+[0.3.1]: https://github.com/primait/bridge_ex/compare/0.3.0-rc.1...0.3.1
+[0.3.0-rc.1]: https://github.com/primait/bridge_ex/compare/0.2.0-rc.1.1...0.3.0-rc.1
+[0.2.0-rc.1.1]: https://github.com/primait/bridge_ex/compare/0.2.0-rc.1...0.2.0-rc.1.1
+[0.2.0-rc.1]: https://github.com/primait/bridge_ex/compare/0.1.1...0.2.0-rc.1
+[0.1.1]: https://github.com/primait/bridge_ex/compare/0.1.0...0.1.1
+[0.1.0]: https://github.com/primait/bridge_ex/releases/tag/0.1.0
