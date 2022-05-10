@@ -29,7 +29,7 @@ defmodule BridgeEx.Graphql.Client do
   @spec call(
           url :: String.t(),
           query :: String.t(),
-          variables :: map(),
+          variables :: map() | String.t(),
           http_options :: Keyword.t(),
           http_headers :: map(),
           retry_options :: Keyword.t(),
