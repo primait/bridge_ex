@@ -42,6 +42,7 @@ defmodule BridgeEx.Graphql do
       require Logger
 
       alias BridgeEx.Auth0AuthorizationProvider
+      alias BridgeEx.Graphql
       alias BridgeEx.Graphql.Client
 
       # local config
@@ -57,6 +58,9 @@ defmodule BridgeEx.Graphql do
                     })
       @max_attempts Keyword.get(unquote(opts), :max_attempts, 1)
       @log_options Keyword.get(unquote(opts), :log_options)
+      @queries %{}
+
+      @before_compile BridgeEx.Graphql
 
       if Keyword.has_key?(unquote(opts), :max_attempts) do
         IO.warn(
@@ -178,6 +182,25 @@ defmodule BridgeEx.Graphql do
           )
         end
       end
+    end
+  end
+
+  defmacro preload_query_from_file(name, opts \\ []) when is_atom(name) do
+    path = Keyword.get(opts, :path, "#{name}.graphql")
+
+    quote generated: true do
+      path = Path.join(__DIR__, unquote(path))
+      @external_resource path
+      @queries Map.put(@queries, unquote(name), File.read!(path))
+
+      @spec unquote(name)() :: String.t()
+      def unquote(name)(), do: Map.fetch!(queries(), unquote(name))
+    end
+  end
+
+  defmacro __before_compile__(_env) do
+    quote do
+      defp queries, do: @queries
     end
   end
 end
