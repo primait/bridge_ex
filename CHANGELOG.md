@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Next]
 
+### Added
+
+- New `BridgeEx.Extensions.ExternalResources` module useful to embed external resources with less boilerplate
+
+### Fixed
+
+- Typespec of `BridgeEx.Graphql.Client.call` function is now compatible with `encode_variables: true` option
+
 ## [1.1.0] - 2022-03-07
 
 ### Added
