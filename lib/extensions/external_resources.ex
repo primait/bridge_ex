@@ -24,6 +24,7 @@ defmodule BridgeEx.Extensions.ExternalResources do
 
     @spec my_query() :: String.t()
     def my_query, do: Map.fetch!(external_resources(), :my_query)
+    @spec my_mutation() :: String.t()
     def my_mutation, do: Map.fetch!(external_resources(), :my_mutation)
 
     defp external_resources do
