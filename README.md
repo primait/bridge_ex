@@ -44,7 +44,7 @@ The library supports preloading queries from external files via the `BridgeEx.Ex
 ```elixir
 defmodule MyApp.SomeServiceBridge do
   use BridgeEx.Graphql, endpoint: "http://some_service.example.com"
-  use BridgeEx.Extensions.ExternalResources, resources: [ my_query: "my_query.graphql" ]
+  use BridgeEx.Extensions.ExternalResources, resources: [my_query: "my_query.graphql"]
 
   def my_query(%{} = variables), do: call(my_query(), variables)
 end
@@ -185,10 +185,6 @@ And use it in your app from configuration:
 ```
 
 See [example](example) directory for an implementation, it also works in `dev` and `test` environments.
-
-
-## Extensions
-
 
 ## Development
 
