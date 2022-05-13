@@ -22,6 +22,7 @@ defmodule BridgeEx.Extensions.ExternalResources do
     @external_resource "\#{__DIR__}/queries/query.graphql"
     @external_resource "\#{__DIR__}/mutations/mutation.graphql"
 
+    @spec my_query() :: String.t()
     def my_query, do: Map.fetch!(external_resources(), :my_query)
     def my_mutation, do: Map.fetch!(external_resources(), :my_mutation)
 
