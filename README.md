@@ -39,6 +39,17 @@ Refer to [the documentation](https://hexdocs.pm/bridge_ex/BridgeEx.Graphql.html)
 
 If you need more control on your requests you can use [`BridgeEx.Graphql.Client.call`](https://hexdocs.pm/bridge_ex/BridgeEx.Graphql.Client.html#call/7) directly.
 
+The library supports preloading queries from external files via the `BridgeEx.Extensions.ExternalResources` optional macro:
+
+```elixir
+defmodule MyApp.SomeServiceBridge do
+  use BridgeEx.Graphql, endpoint: "http://some_service.example.com"
+  use BridgeEx.Extensions.ExternalResources, resources: [my_query: "my_query.graphql"]
+
+  def my_query(%{} = variables), do: call(my_query(), variables)
+end
+```
+
 #### Call options
 
 When `call`ing you can provide the following options, some of which override the ones provided when `use`ing the bridge:
@@ -186,7 +197,7 @@ The package can be installed by adding `bridge_ex` to your list of dependencies 
 ```elixir
 def deps do
   [
-    {:bridge_ex, "~> 1.1.0"}
+    {:bridge_ex, "~> 1.2.0"}
     # only if you want auth0 too
     # {:prima_auth0_ex, "~> 0.3.0"}
   ]
