@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Next]
 
+## [1.2.0] - 2022-05-16
+
 ### Added
 
 - New `BridgeEx.Extensions.ExternalResources` module useful to embed external resources with less boilerplate
