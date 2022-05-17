@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Next]
 
+### Fixed
+
+- `BridgeEx.Graphql.Client.call` accepts only `variables :: map()` once again
+- `BridgeEx.Graphql.Client.call` now performs `variables` encoding internally
+
 ## [1.2.0] - 2022-05-16
 
 ### Added
