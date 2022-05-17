@@ -19,7 +19,8 @@ defmodule BridgeEx.Graphql.Client do
 
     * `url`: URL of the endpoint.
     * `query`: Graphql query or mutation.
-    * `variables`: dariables for Graphql query or mutation.
+    * `variables`: variables for Graphql query or mutation.
+    * `encode_variables`: whether to encode variables or not.
     * `http_options`: HTTPoison options.
     * `http_headers`: HTTPoison headers.
     * `retry_options`: configures retry attempts. Takes the form of `[max_retries: 1, timing: :exponential]`
@@ -29,7 +30,8 @@ defmodule BridgeEx.Graphql.Client do
   @spec call(
           url :: String.t(),
           query :: String.t(),
-          variables :: map() | String.t(),
+          variables :: map(),
+          encode_variables :: boolean(),
           http_options :: Keyword.t(),
           http_headers :: map(),
           retry_options :: Keyword.t(),
@@ -39,11 +41,18 @@ defmodule BridgeEx.Graphql.Client do
         url,
         query,
         variables,
+        encode_variables,
         http_options,
         http_headers,
         retry_options,
         log_options
       ) do
+    # define helpers at compile-time, to avoid dialyzer errors about pattern matching constants
+    variables =
+      if encode_variables,
+        do: Jason.encode!(variables),
+        else: variables
+
     %{query: String.trim(query), variables: variables}
     |> Jason.encode()
     |> Noether.Either.bind(

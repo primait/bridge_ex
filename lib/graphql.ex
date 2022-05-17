@@ -51,6 +51,7 @@ defmodule BridgeEx.Graphql do
       # optional opts with defaults
       @auth0_enabled get_in(unquote(opts), [:auth0, :enabled]) || false
       @audience get_in(unquote(opts), [:auth0, :audience])
+      @encode_variables Keyword.get(unquote(opts), :encode_variables, false)
       @http_options Keyword.get(unquote(opts), :http_options, timeout: 1_000, recv_timeout: 16_000)
       @http_headers Keyword.get(unquote(opts), :http_headers, %{
                       "Content-type" => "application/json"
@@ -114,7 +115,8 @@ defmodule BridgeEx.Graphql do
           @endpoint
           |> Client.call(
             query,
-            encode_variables(variables),
+            variables,
+            @encode_variables,
             http_options,
             http_headers,
             retry_options,
@@ -122,13 +124,6 @@ defmodule BridgeEx.Graphql do
           )
           |> format_response()
         end
-      end
-
-      # define helpers at compile-time, to avoid dialyzer errors about pattern matching constants
-      if Keyword.get(unquote(opts), :encode_variables, false) do
-        defp encode_variables(variables), do: Jason.encode!(variables)
-      else
-        defp encode_variables(variables), do: variables
       end
 
       if Keyword.get(unquote(opts), :format_response, false) do
