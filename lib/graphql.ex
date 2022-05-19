@@ -91,14 +91,13 @@ defmodule BridgeEx.Graphql do
       @spec call(
               query :: String.t(),
               variables :: map(),
-              options :: Keyword.t()
+              opts :: Keyword.t()
             ) :: Client.bridge_response()
-      def call(query, variables, options \\ []) do
-        http_options = Keyword.merge(@http_options, Keyword.get(options, :options, []))
-        http_headers = Map.merge(@http_headers, Keyword.get(options, :headers, %{}))
-        max_attempts = Keyword.get(options, :max_attempts, @max_attempts)
-
-        user_retry_options = Keyword.get(options, :retry_options, [])
+      def call(query, variables, opts \\ []) do
+        http_options = Keyword.merge(@http_options, Keyword.get(opts, :options, []))
+        http_headers = Map.merge(@http_headers, Keyword.get(opts, :headers, %{}))
+        max_attempts = Keyword.get(opts, :max_attempts, @max_attempts)
+        user_retry_options = Keyword.get(opts, :retry_options, [])
 
         retry_options =
           Keyword.merge(
@@ -116,11 +115,11 @@ defmodule BridgeEx.Graphql do
           |> Client.call(
             query,
             variables,
-            @encode_variables,
-            http_options,
-            http_headers,
-            retry_options,
-            log_options()
+            encode_variables: @encode_variables,
+            http_options: http_options,
+            http_headers: http_headers,
+            log_options: log_options(),
+            retry_options: retry_options
           )
           |> format_response()
         end

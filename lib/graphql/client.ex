@@ -20,6 +20,10 @@ defmodule BridgeEx.Graphql.Client do
     * `url`: URL of the endpoint.
     * `query`: Graphql query or mutation.
     * `variables`: variables for Graphql query or mutation.
+    * `opts`: various options.
+
+  ## Options
+
     * `encode_variables`: whether to encode variables or not.
     * `http_options`: HTTPoison options.
     * `http_headers`: HTTPoison headers.
@@ -31,23 +35,20 @@ defmodule BridgeEx.Graphql.Client do
           url :: String.t(),
           query :: String.t(),
           variables :: map(),
-          encode_variables :: boolean(),
-          http_options :: Keyword.t(),
-          http_headers :: map(),
-          retry_options :: Keyword.t(),
-          log_options :: Keyword.t()
+          opts :: Keyword.t()
         ) :: bridge_response()
   def call(
         url,
         query,
         variables,
-        encode_variables,
-        http_options,
-        http_headers,
-        retry_options,
-        log_options
+        opts
       ) do
-    # define helpers at compile-time, to avoid dialyzer errors about pattern matching constants
+    encode_variables = Keyword.get(opts, :encode_variables)
+    http_options = Keyword.get(opts, :http_options)
+    http_headers = Keyword.get(opts, :http_headers)
+    log_options = Keyword.get(opts, :log_options)
+    retry_options = Keyword.get(opts, :retry_options)
+
     variables =
       if encode_variables,
         do: Jason.encode!(variables),
