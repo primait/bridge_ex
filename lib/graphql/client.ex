@@ -12,6 +12,11 @@ defmodule BridgeEx.Graphql.Client do
           | {:error, {:http_error, String.t()}}
           | {:error, list()}
 
+  @http_options timeout: 1_000, recv_timeout: 16_000
+  @http_headers %{
+    "Content-type" => "application/json"
+  }
+
   @doc """
   Calls a GraphQL endpoint
 
@@ -24,9 +29,9 @@ defmodule BridgeEx.Graphql.Client do
 
   ## Options
 
-    * `encode_variables`: whether to encode variables or not.
-    * `http_options`: HTTPoison options.
-    * `http_headers`: HTTPoison headers.
+    * `options`: extra HTTP options to be passed to Telepoison.
+    * `headers`: extra HTTP headers.
+    * `encode_variables`: whether to JSON encode variables or not.
     * `retry_options`: configures retry attempts. Takes the form of `[max_retries: 1, timing: :exponential]`
     * `log_options`: configures logging on errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`.
   """
@@ -43,11 +48,25 @@ defmodule BridgeEx.Graphql.Client do
         variables,
         opts
       ) do
-    encode_variables = Keyword.get(opts, :encode_variables)
-    http_options = Keyword.get(opts, :http_options)
-    http_headers = Keyword.get(opts, :http_headers)
-    log_options = Keyword.get(opts, :log_options)
-    retry_options = Keyword.get(opts, :retry_options)
+    encode_variables = Keyword.get(opts, :encode_variables, false)
+    http_options = Keyword.merge(@http_options, Keyword.get(opts, :options, []))
+    http_headers = Map.merge(@http_headers, Keyword.get(opts, :headers, %{}))
+    log_options = Keyword.merge(log_options(), Keyword.get(opts, :log_options))
+
+    retry_options =
+      opts
+      |> Keyword.get(:retry_options, [])
+      |> then(
+        &Keyword.merge(
+          [
+            delay: 100,
+            max_retries: 0,
+            policy: fn _ -> true end,
+            timing: :exponential
+          ],
+          &1
+        )
+      )
 
     variables =
       if encode_variables,
@@ -81,4 +100,11 @@ defmodule BridgeEx.Graphql.Client do
 
   def format_response(response) when is_map(response), do: Utils.normalize_inner_fields(response)
   def format_response(response), do: response
+
+  defp log_options do
+    Application.get_env(:bridge_ex, :log_options,
+      log_query_on_error: false,
+      log_response_on_error: false
+    )
+  end
 end

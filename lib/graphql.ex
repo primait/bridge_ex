@@ -52,12 +52,10 @@ defmodule BridgeEx.Graphql do
       @auth0_enabled get_in(unquote(opts), [:auth0, :enabled]) || false
       @audience get_in(unquote(opts), [:auth0, :audience])
       @encode_variables Keyword.get(unquote(opts), :encode_variables, false)
-      @http_options Keyword.get(unquote(opts), :http_options, timeout: 1_000, recv_timeout: 16_000)
-      @http_headers Keyword.get(unquote(opts), :http_headers, %{
-                      "Content-type" => "application/json"
-                    })
+      @http_options Keyword.get(unquote(opts), :http_options, [])
+      @http_headers Keyword.get(unquote(opts), :http_headers, %{})
       @max_attempts Keyword.get(unquote(opts), :max_attempts, 1)
-      @log_options Keyword.get(unquote(opts), :log_options)
+      @log_options Keyword.get(unquote(opts), :log_options, [])
 
       if Keyword.has_key?(unquote(opts), :max_attempts) do
         IO.warn(
@@ -97,28 +95,21 @@ defmodule BridgeEx.Graphql do
         http_options = Keyword.merge(@http_options, Keyword.get(opts, :options, []))
         http_headers = Map.merge(@http_headers, Keyword.get(opts, :headers, %{}))
         max_attempts = Keyword.get(opts, :max_attempts, @max_attempts)
-        user_retry_options = Keyword.get(opts, :retry_options, [])
 
         retry_options =
-          Keyword.merge(
-            [
-              delay: 100,
-              max_retries: max_attempts - 1,
-              policy: fn _ -> true end,
-              timing: :exponential
-            ],
-            user_retry_options
-          )
+          opts
+          |> Keyword.get(:retry_options, [])
+          |> then(&Keyword.merge([max_retries: max_attempts - 1], &1))
 
         with {:ok, http_headers} <- with_authorization_headers(http_headers) do
           @endpoint
           |> Client.call(
             query,
             variables,
+            options: http_options,
+            headers: http_headers,
             encode_variables: @encode_variables,
-            http_options: http_options,
-            http_headers: http_headers,
-            log_options: log_options(),
+            log_options: @log_options,
             retry_options: retry_options
           )
           |> format_response()
@@ -159,18 +150,6 @@ defmodule BridgeEx.Graphql do
         end
       else
         defp with_authorization_headers(headers), do: {:ok, headers}
-      end
-
-      # Local log options always have precedence over global log options
-      if @log_options do
-        defp log_options, do: @log_options
-      else
-        defp log_options do
-          Application.get_env(:bridge_ex, :log_options,
-            log_query_on_error: false,
-            log_response_on_error: false
-          )
-        end
       end
     end
   end
