@@ -51,12 +51,11 @@ defmodule BridgeEx.Graphql do
       # optional opts with defaults
       @auth0_enabled get_in(unquote(opts), [:auth0, :enabled]) || false
       @audience get_in(unquote(opts), [:auth0, :audience])
-      @http_options Keyword.get(unquote(opts), :http_options, timeout: 1_000, recv_timeout: 16_000)
-      @http_headers Keyword.get(unquote(opts), :http_headers, %{
-                      "Content-type" => "application/json"
-                    })
+      @encode_variables Keyword.get(unquote(opts), :encode_variables, false)
+      @http_options Keyword.get(unquote(opts), :http_options, [])
+      @http_headers Keyword.get(unquote(opts), :http_headers, %{})
       @max_attempts Keyword.get(unquote(opts), :max_attempts, 1)
-      @log_options Keyword.get(unquote(opts), :log_options)
+      @log_options Keyword.get(unquote(opts), :log_options, [])
 
       if Keyword.has_key?(unquote(opts), :max_attempts) do
         IO.warn(
@@ -90,45 +89,31 @@ defmodule BridgeEx.Graphql do
       @spec call(
               query :: String.t(),
               variables :: map(),
-              options :: Keyword.t()
+              opts :: Keyword.t()
             ) :: Client.bridge_response()
-      def call(query, variables, options \\ []) do
-        http_options = Keyword.merge(@http_options, Keyword.get(options, :options, []))
-        http_headers = Map.merge(@http_headers, Keyword.get(options, :headers, %{}))
-        max_attempts = Keyword.get(options, :max_attempts, @max_attempts)
-
-        user_retry_options = Keyword.get(options, :retry_options, [])
+      def call(query, variables, opts \\ []) do
+        http_options = Keyword.merge(@http_options, Keyword.get(opts, :options, []))
+        http_headers = Map.merge(@http_headers, Keyword.get(opts, :headers, %{}))
+        max_attempts = Keyword.get(opts, :max_attempts, @max_attempts)
 
         retry_options =
-          Keyword.merge(
-            [
-              delay: 100,
-              max_retries: max_attempts - 1,
-              policy: fn _ -> true end,
-              timing: :exponential
-            ],
-            user_retry_options
-          )
+          opts
+          |> Keyword.get(:retry_options, [])
+          |> then(&Keyword.merge([max_retries: max_attempts - 1], &1))
 
         with {:ok, http_headers} <- with_authorization_headers(http_headers) do
           @endpoint
           |> Client.call(
             query,
-            encode_variables(variables),
-            http_options,
-            http_headers,
-            retry_options,
-            log_options()
+            variables,
+            options: http_options,
+            headers: http_headers,
+            encode_variables: @encode_variables,
+            log_options: @log_options,
+            retry_options: retry_options
           )
           |> format_response()
         end
-      end
-
-      # define helpers at compile-time, to avoid dialyzer errors about pattern matching constants
-      if Keyword.get(unquote(opts), :encode_variables, false) do
-        defp encode_variables(variables), do: Jason.encode!(variables)
-      else
-        defp encode_variables(variables), do: variables
       end
 
       if Keyword.get(unquote(opts), :format_response, false) do
@@ -165,18 +150,6 @@ defmodule BridgeEx.Graphql do
         end
       else
         defp with_authorization_headers(headers), do: {:ok, headers}
-      end
-
-      # Local log options always have precedence over global log options
-      if @log_options do
-        defp log_options, do: @log_options
-      else
-        defp log_options do
-          Application.get_env(:bridge_ex, :log_options,
-            log_query_on_error: false,
-            log_response_on_error: false
-          )
-        end
       end
     end
   end
