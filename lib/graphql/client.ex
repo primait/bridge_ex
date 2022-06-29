@@ -111,8 +111,8 @@ defmodule BridgeEx.Graphql.Client do
   @doc """
   Formats Graphql query variables to make it compliant with the Schema
   """
-  def format_variables(nil), do: nil
   @spec format_variables(any) :: any
+  def format_variables(nil), do: nil
   def format_variables(variable = %Date{}), do: Date.to_string(variable)
   def format_variables(variable = %DateTime{}), do: DateTime.to_string(variable)
   def format_variables(variable = %NaiveDateTime{}), do: NaiveDateTime.to_string(variable)
