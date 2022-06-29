@@ -107,4 +107,34 @@ defmodule BridgeEx.Graphql.Client do
       log_response_on_error: false
     )
   end
+
+  @doc """
+  Formats Graphql query variables to make it compliant with the Schema
+  """
+  def format_variables(nil), do: nil
+  @spec format_variables(any) :: any
+  def format_variables(variable = %Date{}), do: Date.to_string(variable)
+  def format_variables(variable = %DateTime{}), do: DateTime.to_string(variable)
+  def format_variables(variable = %NaiveDateTime{}), do: NaiveDateTime.to_string(variable)
+  def format_variables(variable) when is_boolean(variable), do: variable
+
+  def format_variables(variable) when is_map(variable) do
+    variable
+    |> Enum.map(fn
+      {key, value} when is_atom(key) ->
+        {key |> Atom.to_string() |> Absinthe.Utils.camelize(lower: true), format_variables(value)}
+
+      {key, value} when is_binary(key) ->
+        {Absinthe.Utils.camelize(key, lower: true), format_variables(value)}
+    end)
+    |> Map.new()
+  end
+
+  def format_variables(variable) when is_atom(variable),
+    do: variable |> Atom.to_string() |> String.upcase()
+
+  def format_variables(variable) when is_list(variable),
+    do: Enum.map(variable, &format_variables(&1))
+
+  def format_variables(variables), do: variables
 end
