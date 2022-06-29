@@ -10,6 +10,7 @@ defmodule BridgeEx.Graphql do
     * `auth0`: enable and configure Auth0 for authentication of requests. Takes the form of `[enabled: false, audience: "target-audience"]`.
     * `encode_variables`: if true, encode the Graphql variables to JSON. Defaults to `false`.
     * `format_response`: transforms camelCase keys in response to snake_case. Defaults to `false`.
+    * `format_variables`: transforms snake_case variable names in compliant camelCase`.
     * `http_headers`: HTTP headers for the request. Defaults to `%{"Content-type": "application/json"}`
     * `http_options`: HTTP options to be passed to Telepoison. Defaults to `[timeout: 1_000, recv_timeout: 16_000]`.
     * `log_options`: override global configuration for logging errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`
@@ -105,7 +106,7 @@ defmodule BridgeEx.Graphql do
           @endpoint
           |> Client.call(
             query,
-            variables,
+            format_variables(variables),
             options: http_options,
             headers: http_headers,
             encode_variables: @encode_variables,
@@ -120,6 +121,12 @@ defmodule BridgeEx.Graphql do
         defp format_response({ret, response}), do: {ret, Client.format_response(response)}
       else
         defp format_response({ret, response}), do: {ret, response}
+      end
+
+      if Keyword.get(unquote(opts), :format_variables, false) do
+        defp format_variables(variables), do: Client.format_variables(variables)
+      else
+        defp format_variables(variables), do: variables
       end
 
       if @audience == nil && @auth0_enabled do
