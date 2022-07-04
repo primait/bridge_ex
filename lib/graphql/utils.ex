@@ -3,7 +3,6 @@ defmodule BridgeEx.Graphql.Utils do
   Misc utils for handling Graphql requests/responses.
   """
 
-  alias BridgeEx.Graphql.LanguageConventions
   require Logger
 
   @type client_response :: {:ok, any()} | {:error, any()}
@@ -68,36 +67,6 @@ defmodule BridgeEx.Graphql.Utils do
   def parse_response({:ok, %{errors: errors}}), do: {:error, errors}
 
   def parse_response({:ok, %{data: data}}), do: {:ok, data}
-
-  @spec normalize_inner_fields(any()) :: any()
-  def normalize_inner_fields(map) when is_map(map),
-    do: Enum.reduce(map, %{}, &do_normalize_inner_fields/2)
-
-  def normalize_inner_fields(value), do: value
-
-  @spec do_normalize_inner_fields({atom() | String.t(), any()}, map()) :: %{atom() => any()}
-  defp do_normalize_inner_fields({key, value}, acc) when is_map(value) do
-    Map.merge(acc, %{to_snake_case(key) => normalize_inner_fields(value)})
-  end
-
-  defp do_normalize_inner_fields({key, value}, acc) when is_list(value) do
-    Map.merge(acc, %{to_snake_case(key) => Enum.map(value, &normalize_inner_fields/1)})
-  end
-
-  defp do_normalize_inner_fields({key, value}, acc) do
-    Map.merge(acc, %{to_snake_case(key) => value})
-  end
-
-  @spec to_snake_case(atom() | String.t()) :: atom() | String.t()
-  defp to_snake_case(formattable) when is_binary(formattable),
-    do: LanguageConventions.to_internal_name(formattable, :read)
-
-  defp to_snake_case(formattable) when is_atom(formattable) do
-    formattable
-    |> Atom.to_string()
-    |> LanguageConventions.to_internal_name(:read)
-    |> String.to_atom()
-  end
 
   defp prepend_if(list, false, _), do: list
   defp prepend_if(list, true, value), do: [value | list]
