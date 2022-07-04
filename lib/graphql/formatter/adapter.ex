@@ -26,5 +26,12 @@ defmodule BridgeEx.Graphql.Formatter.Adapter do
   ```
   """
 
+  @type t() :: %__MODULE__{}
+
+  defstruct do [
+      name: __MODULE__
+    ]
+  end
+
   @callback format(any()) :: any()
 end
