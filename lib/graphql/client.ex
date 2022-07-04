@@ -3,8 +3,12 @@ defmodule BridgeEx.Graphql.Client do
   Graphql client for BridgeEx.
   """
 
+  require Logger
+
   alias BridgeEx.Graphql.Utils
   alias BridgeEx.Graphql.Retry
+    alias BridgeEx.Graphql.Formatter.Adapter
+  alias BridgeEx.Graphql.Formatter.CamelCase
 
   @type bridge_response ::
           {:ok, term()}
@@ -52,6 +56,8 @@ defmodule BridgeEx.Graphql.Client do
     http_options = Keyword.merge(@http_options, Keyword.get(opts, :options, []))
     http_headers = Map.merge(@http_headers, Keyword.get(opts, :headers, %{}))
     log_options = Keyword.merge(log_options(), Keyword.get(opts, :log_options))
+    format_variables = Keyword.get(opts, :variables_to_camel_case, false)
+    variable_types_formatter = Keyword.get(opts, :variable_types_formatter, nil)
 
     retry_options =
       opts
@@ -69,9 +75,10 @@ defmodule BridgeEx.Graphql.Client do
       )
 
     variables =
-      if encode_variables,
-        do: Jason.encode!(variables),
-        else: variables
+      variables
+      |> do_format_variables(format_variables)
+      |> do_format_variable_types(variable_types_formatter)
+      |> do_encode_variables(encode_variables)
 
     %{query: String.trim(query), variables: variables}
     |> Jason.encode()
@@ -89,18 +96,6 @@ defmodule BridgeEx.Graphql.Client do
     )
   end
 
-  @doc """
-  Formats a GraphQL query response to make it Absinthe compliant
-  """
-  @spec format_response(%{atom() => any()} | [%{atom() => any()}]) ::
-          %{atom() => any()} | [%{atom() => any()}]
-  def format_response(response) when is_list(response) do
-    Enum.map(response, &format_response(&1))
-  end
-
-  def format_response(response) when is_map(response), do: Utils.normalize_inner_fields(response)
-  def format_response(response), do: response
-
   defp log_options do
     Application.get_env(:bridge_ex, :log_options,
       log_query_on_error: false,
@@ -108,33 +103,24 @@ defmodule BridgeEx.Graphql.Client do
     )
   end
 
-  @doc """
-  Formats Graphql query variables to make it compliant with the Schema
-  """
-  @spec format_variables(any) :: any
-  def format_variables(nil), do: nil
-  def format_variables(variable = %Date{}), do: Date.to_string(variable)
-  def format_variables(variable = %DateTime{}), do: DateTime.to_string(variable)
-  def format_variables(variable = %NaiveDateTime{}), do: NaiveDateTime.to_string(variable)
-  def format_variables(variable) when is_boolean(variable), do: variable
+  @spec do_format_variables(any(), bool()) :: any
+  def do_format_variables(variables, true), do: CamelCase.format(variables)
+  def do_format_variables(variables, _), do: variables
 
-  def format_variables(variable) when is_map(variable) do
-    variable
-    |> Enum.map(fn
-      {key, value} when is_atom(key) ->
-        {key |> Atom.to_string() |> Absinthe.Utils.camelize(lower: true), format_variables(value)}
-
-      {key, value} when is_binary(key) ->
-        {Absinthe.Utils.camelize(key, lower: true), format_variables(value)}
-    end)
-    |> Map.new()
+  @spec do_format_variable_types(map() | nil, Adapter.t() | nil) :: any()
+  def do_format_variable_types(variables, formatter) when not is_nil(formatter) do
+    try do
+      formatter.format(variables)
+    rescue
+      e ->
+        Logger.error("Type formatter error: ", e)
+        variables
+    end
   end
 
-  def format_variables(variable) when is_atom(variable),
-    do: variable |> Atom.to_string() |> String.upcase()
+  def do_format_variable_types(variables, nil), do: variables
 
-  def format_variables(variable) when is_list(variable),
-    do: Enum.map(variable, &format_variables(&1))
-
-  def format_variables(variables), do: variables
+  @spec do_encode_variables(any(), bool()) :: any()
+  def do_encode_variables(variables, true), do: Jason.encode!(variables)
+  def do_encode_variables(variables, _), do: variables
 end
