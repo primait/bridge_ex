@@ -1,4 +1,9 @@
 defmodule BridgeEx.Graphql.Formatter.CamelCase do
+
+   @moduledoc """
+  Formatter to format map keys to camelCase.
+  """
+
   @behaviour BridgeEx.Graphql.Formatter.Adapter
 
   @spec format(map()) :: map()
