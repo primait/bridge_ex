@@ -113,7 +113,7 @@ defmodule BridgeEx.Graphql.Client do
       formatter.format(variables)
     rescue
       e ->
-        Logger.error("Type formatter error: ", e)
+        Logger.error("Type formatter #{formatter.name} error: ", e)
         variables
     end
   end
