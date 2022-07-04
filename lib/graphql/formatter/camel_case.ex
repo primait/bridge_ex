@@ -1,6 +1,5 @@
 defmodule BridgeEx.Graphql.Formatter.CamelCase do
-
-   @moduledoc """
+  @moduledoc """
   Formatter to format map keys to camelCase.
   """
 

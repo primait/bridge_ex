@@ -1,5 +1,5 @@
 defmodule BridgeEx.Graphql.Formatter.SnakeCase do
-   @moduledoc """
+  @moduledoc """
   Formatter to format map keys to snake_case.
   """
 

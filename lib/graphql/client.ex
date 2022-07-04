@@ -7,7 +7,7 @@ defmodule BridgeEx.Graphql.Client do
 
   alias BridgeEx.Graphql.Utils
   alias BridgeEx.Graphql.Retry
-    alias BridgeEx.Graphql.Formatter.Adapter
+  alias BridgeEx.Graphql.Formatter.Adapter
   alias BridgeEx.Graphql.Formatter.CamelCase
 
   @type bridge_response ::
