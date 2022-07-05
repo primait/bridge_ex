@@ -61,7 +61,7 @@ defmodule BridgeEx.Graphql do
       @max_attempts Keyword.get(unquote(opts), :max_attempts, 1)
       @log_options Keyword.get(unquote(opts), :log_options, [])
       @format_variables Keyword.get(unquote(opts), :format_variables, false)
-      @variable_types_formatter Keyword.get(unquote(opts), :variable_types_formatter, nil)
+      @variables_formatter Keyword.get(unquote(opts), :variables_formatter, nil)
 
       if Keyword.has_key?(unquote(opts), :max_attempts) do
         IO.warn(
@@ -95,10 +95,9 @@ defmodule BridgeEx.Graphql do
       @spec call(
               query :: String.t(),
               variables :: map(),
-              opts :: Keyword.t(),
-              variable_types_formatter :: Adapter.t() | nil
+              opts :: Keyword.t()
             ) :: Client.bridge_response()
-      def call(query, variables, opts \\ [], variable_types_formatter \\ nil) do
+      def call(query, variables, opts \\ []) do
         http_options = Keyword.merge(@http_options, Keyword.get(opts, :options, []))
         http_headers = Map.merge(@http_headers, Keyword.get(opts, :headers, %{}))
         max_attempts = Keyword.get(opts, :max_attempts, @max_attempts)
@@ -119,7 +118,7 @@ defmodule BridgeEx.Graphql do
             log_options: @log_options,
             retry_options: retry_options,
             format_variables: @format_variables,
-            variable_types_formatter: @variable_types_formatter
+            variables_formatter: @variables_formatter
           )
           |> format_response()
         end

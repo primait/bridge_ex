@@ -56,8 +56,8 @@ defmodule BridgeEx.Graphql.Client do
     http_options = Keyword.merge(@http_options, Keyword.get(opts, :options, []))
     http_headers = Map.merge(@http_headers, Keyword.get(opts, :headers, %{}))
     log_options = Keyword.merge(log_options(), Keyword.get(opts, :log_options))
-    format_variables = Keyword.get(opts, :variables_to_camel_case, false)
-    variable_types_formatter = Keyword.get(opts, :variable_types_formatter, nil)
+    format_variables = Keyword.get(opts, :format_variables, false)
+    variables_formatter = Keyword.get(opts, :variables_formatter, nil)
 
     retry_options =
       opts
@@ -77,7 +77,7 @@ defmodule BridgeEx.Graphql.Client do
     variables =
       variables
       |> do_format_variables(format_variables)
-      |> do_format_variable_types(variable_types_formatter)
+      |> do_format_variables(variables_formatter)
       |> do_encode_variables(encode_variables)
 
     %{query: String.trim(query), variables: variables}
@@ -103,22 +103,21 @@ defmodule BridgeEx.Graphql.Client do
     )
   end
 
-  @spec do_format_variables(any(), bool()) :: any
+  @spec do_format_variables(any(), bool() | Adapter.t()) :: any
   def do_format_variables(variables, true), do: CamelCase.format(variables)
-  def do_format_variables(variables, _), do: variables
+  def do_format_variables(variables, false), do: variables
 
-  @spec do_format_variable_types(map() | nil, Adapter.t() | nil) :: any()
-  def do_format_variable_types(variables, formatter) when not is_nil(formatter) do
+  def do_format_variables(variables, formatter) when not is_nil(formatter) do
     try do
       formatter.format(variables)
     rescue
       e ->
-        Logger.error("Type formatter #{formatter.name} error: ", e)
-        variables
+        raise "Type formatter #{formatter.name} doesn't implement BridgeEx"
+        e
     end
   end
 
-  def do_format_variable_types(variables, nil), do: variables
+  def do_format_variables(variables, _), do: variables
 
   @spec do_encode_variables(any(), bool()) :: any()
   def do_encode_variables(variables, true), do: Jason.encode!(variables)
