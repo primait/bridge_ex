@@ -112,7 +112,7 @@ defmodule BridgeEx.Graphql.Client do
       formatter.format(variables)
     rescue
       e ->
-        raise "Type formatter #{formatter.name} doesn't implement BridgeEx"
+        Logger.error("Formatter #{formatter.name} error", e)
         e
     end
   end
