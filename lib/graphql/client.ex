@@ -108,13 +108,7 @@ defmodule BridgeEx.Graphql.Client do
   def do_format_variables(variables, false), do: variables
 
   def do_format_variables(variables, formatter) when not is_nil(formatter) do
-    try do
       formatter.format(variables)
-    rescue
-      e ->
-        Logger.error("Formatter #{formatter.name} error", e)
-        e
-    end
   end
 
   def do_format_variables(variables, _), do: variables
