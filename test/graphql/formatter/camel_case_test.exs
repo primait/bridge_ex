@@ -24,6 +24,10 @@ defmodule BridgeEx.Graphql.Formatter.CamelCaseTest do
       assert %{} == CamelCase.format(%{})
     end
 
+    test "does not change dates" do
+      assert ~D[2022-01-01] == CamelCase.format(~D[2022-01-01])
+    end
+
     test "does not change maps with camel case keys" do
       assert %{"someKey" => "value"} ==
                CamelCase.format(%{"someKey" => "value"})
