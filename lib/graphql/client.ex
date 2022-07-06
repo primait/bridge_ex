@@ -108,7 +108,7 @@ defmodule BridgeEx.Graphql.Client do
   def do_format_variables(variables, false), do: variables
 
   def do_format_variables(variables, formatter) when not is_nil(formatter) do
-      formatter.format(variables)
+    formatter.format(variables)
   end
 
   def do_format_variables(variables, _), do: variables
