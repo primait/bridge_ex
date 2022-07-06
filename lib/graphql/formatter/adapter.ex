@@ -21,7 +21,7 @@ defmodule BridgeEx.Graphql.Formatter.Adapter do
 
   defmodule MyBridge do
     use BridgeEx.Graphql,
-      variables_formatter: MyCustomAdapter
+      format_variables_with: MyCustomAdapter
   end
   ```
   """

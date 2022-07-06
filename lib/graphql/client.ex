@@ -57,7 +57,7 @@ defmodule BridgeEx.Graphql.Client do
     http_headers = Map.merge(@http_headers, Keyword.get(opts, :headers, %{}))
     log_options = Keyword.merge(log_options(), Keyword.get(opts, :log_options))
     format_variables = Keyword.get(opts, :format_variables, false)
-    variables_formatter = Keyword.get(opts, :variables_formatter, nil)
+    format_variables_with = Keyword.get(opts, :format_variables_with, nil)
 
     retry_options =
       opts
@@ -77,7 +77,7 @@ defmodule BridgeEx.Graphql.Client do
     variables =
       variables
       |> do_format_variables(format_variables)
-      |> do_format_variables(variables_formatter)
+      |> do_format_variables(format_variables_with)
       |> do_encode_variables(encode_variables)
 
     %{query: String.trim(query), variables: variables}
