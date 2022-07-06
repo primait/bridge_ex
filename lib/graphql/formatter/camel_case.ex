@@ -8,12 +8,15 @@ defmodule BridgeEx.Graphql.Formatter.CamelCase do
   @spec format(any()) :: map()
   def format(variable) when is_map(variable) do
     case Enumerable.impl_for(variable) do
-      nil -> variable
-      _ -> variable
-          |> Enum.map(fn
-              {key, value} -> {format_key(key), format(value)}
-             end)
-          |> Map.new()
+      nil ->
+        variable
+
+      _ ->
+        variable
+        |> Enum.map(fn
+          {key, value} -> {format_key(key), format(value)}
+        end)
+        |> Map.new()
     end
   end
 
