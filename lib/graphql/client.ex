@@ -3,8 +3,11 @@ defmodule BridgeEx.Graphql.Client do
   Graphql client for BridgeEx.
   """
 
+  require Logger
+
   alias BridgeEx.Graphql.Utils
   alias BridgeEx.Graphql.Retry
+  alias BridgeEx.Graphql.Formatter.CamelCase
 
   @type bridge_response ::
           {:ok, term()}
@@ -52,6 +55,7 @@ defmodule BridgeEx.Graphql.Client do
     http_options = Keyword.merge(@http_options, Keyword.get(opts, :options, []))
     http_headers = Map.merge(@http_headers, Keyword.get(opts, :headers, %{}))
     log_options = Keyword.merge(log_options(), Keyword.get(opts, :log_options))
+    format_variables = Keyword.get(opts, :format_variables, false)
 
     retry_options =
       opts
@@ -69,9 +73,9 @@ defmodule BridgeEx.Graphql.Client do
       )
 
     variables =
-      if encode_variables,
-        do: Jason.encode!(variables),
-        else: variables
+      variables
+      |> do_format_variables(format_variables)
+      |> do_encode_variables(encode_variables)
 
     %{query: String.trim(query), variables: variables}
     |> Jason.encode()
@@ -89,22 +93,18 @@ defmodule BridgeEx.Graphql.Client do
     )
   end
 
-  @doc """
-  Formats a GraphQL query response to make it Absinthe compliant
-  """
-  @spec format_response(%{atom() => any()} | [%{atom() => any()}]) ::
-          %{atom() => any()} | [%{atom() => any()}]
-  def format_response(response) when is_list(response) do
-    Enum.map(response, &format_response(&1))
-  end
-
-  def format_response(response) when is_map(response), do: Utils.normalize_inner_fields(response)
-  def format_response(response), do: response
-
   defp log_options do
     Application.get_env(:bridge_ex, :log_options,
       log_query_on_error: false,
       log_response_on_error: false
     )
   end
+
+  @spec do_format_variables(any(), bool()) :: any
+  def do_format_variables(variables, true), do: CamelCase.format(variables)
+  def do_format_variables(variables, false), do: variables
+
+  @spec do_encode_variables(any(), bool()) :: any()
+  def do_encode_variables(variables, true), do: Jason.encode!(variables)
+  def do_encode_variables(variables, false), do: variables
 end
