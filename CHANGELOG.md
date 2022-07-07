@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Next]
 
+## [2.1.0] - 2022-07-07
+
+### Added
+
+- New `format_variables` option to format query `variables` keys as camelCase, as per GraphQL conventions
+- New `BridgeEx.Graphql.Formatter.SnakeCase` and `BridgeEx.Graphql.Formatter.CamelCase` formatters
+
 ## [2.0.0] - 2022-05-19
 
 ### Changed
@@ -110,7 +117,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation of `bridge_ex`
 
-[Next]: https://github.com/primait/bridge_ex/compare/2.0.0...HEAD
+[Next]: https://github.com/primait/bridge_ex/compare/2.1.0...HEAD
+[2.1.0]: https://github.com/primait/bridge_ex/compare/2.0.0...2.1.0
 [2.0.0]: https://github.com/primait/bridge_ex/compare/1.2.0...2.0.0
 [1.2.0]: https://github.com/primait/bridge_ex/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/primait/bridge_ex/compare/1.0.1...1.1.0
