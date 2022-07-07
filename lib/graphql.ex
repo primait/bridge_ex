@@ -10,7 +10,8 @@ defmodule BridgeEx.Graphql do
     * `auth0`: enable and configure Auth0 for authentication of requests. Takes the form of `[enabled: false, audience: "target-audience"]`.
     * `encode_variables`: if true, encode the Graphql variables to JSON. Defaults to `false`.
     * `format_response`: transforms camelCase keys in response to snake_case. Defaults to `false`.
-    * `format_variables`: transforms snake_case variable names in compliant camelCase`.
+    * `format_variables`: transforms snake_case variable names to camelCase`. Defaults to `false`.
+    * `format_variables_with`: accepts a transformer used to manipulatate variables input before using it. Defaults to `nil`. See [BridgeEx.Graphql.Formatter.Adapter]
     * `http_headers`: HTTP headers for the request. Defaults to `%{"Content-type": "application/json"}`
     * `http_options`: HTTP options to be passed to Telepoison. Defaults to `[timeout: 1_000, recv_timeout: 16_000]`.
     * `log_options`: override global configuration for logging errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`
@@ -44,6 +45,8 @@ defmodule BridgeEx.Graphql do
 
       alias BridgeEx.Auth0AuthorizationProvider
       alias BridgeEx.Graphql.Client
+      alias BridgeEx.Graphql.Formatter.SnakeCase
+      alias BridgeEx.Graphql.Formatter.Adapter
 
       # local config
       # mandatory opts
@@ -57,6 +60,8 @@ defmodule BridgeEx.Graphql do
       @http_headers Keyword.get(unquote(opts), :http_headers, %{})
       @max_attempts Keyword.get(unquote(opts), :max_attempts, 1)
       @log_options Keyword.get(unquote(opts), :log_options, [])
+      @format_variables Keyword.get(unquote(opts), :format_variables, false)
+      @format_variables_with Keyword.get(unquote(opts), :format_variables_with, nil)
 
       if Keyword.has_key?(unquote(opts), :max_attempts) do
         IO.warn(
@@ -106,27 +111,23 @@ defmodule BridgeEx.Graphql do
           @endpoint
           |> Client.call(
             query,
-            format_variables(variables),
+            variables,
             options: http_options,
             headers: http_headers,
             encode_variables: @encode_variables,
             log_options: @log_options,
-            retry_options: retry_options
+            retry_options: retry_options,
+            format_variables: @format_variables,
+            format_variables_with: @format_variables_with
           )
           |> format_response()
         end
       end
 
       if Keyword.get(unquote(opts), :format_response, false) do
-        defp format_response({ret, response}), do: {ret, Client.format_response(response)}
+        defp format_response({ret, response}), do: {ret, SnakeCase.format(response)}
       else
         defp format_response({ret, response}), do: {ret, response}
-      end
-
-      if Keyword.get(unquote(opts), :format_variables, false) do
-        defp format_variables(variables), do: Client.format_variables(variables)
-      else
-        defp format_variables(variables), do: variables
       end
 
       if @audience == nil && @auth0_enabled do
