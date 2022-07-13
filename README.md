@@ -30,6 +30,7 @@ Besides `endpoint`, the following parameters can be optionally set when `use`ing
 - `auth0`
 - `encode_variables`
 - `format_response`
+- `format_variables`
 - `http_headers`
 - `http_options`
 - `log_options`
@@ -158,8 +159,8 @@ defmodule MyApp.SomeServiceBridgeMock do
     |> Json.decode!(keys: :atoms)
     # required to parse data
     |> Utils.parse_response()
-    # optional, if you want to format response
-    # |> BridgeEx.Graphql.Client.format_response()
+    # optional, if you want to format the response
+    # |> BridgeEx.Graphql.Formatter.SnakeCase.format()
   end
 end
 ```
