@@ -101,10 +101,10 @@ defmodule BridgeEx.Graphql.Client do
   end
 
   @spec do_format_variables(any(), bool()) :: any
-  def do_format_variables(variables, true), do: CamelCase.format(variables)
-  def do_format_variables(variables, false), do: variables
+  defp do_format_variables(variables, true), do: CamelCase.format(variables)
+  defp do_format_variables(variables, false), do: variables
 
   @spec do_encode_variables(any(), bool()) :: any()
-  def do_encode_variables(variables, true), do: Jason.encode!(variables)
-  def do_encode_variables(variables, false), do: variables
+  defp do_encode_variables(variables, true), do: Jason.encode!(variables)
+  defp do_encode_variables(variables, false), do: variables
 end
