@@ -40,8 +40,6 @@ defmodule BridgeEx.Graphql do
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defmacro __using__(opts) when is_list(opts) do
     quote do
-      require Logger
-
       alias BridgeEx.Auth0AuthorizationProvider
       alias BridgeEx.Graphql.Client
       alias BridgeEx.Graphql.Formatter.SnakeCase
@@ -62,7 +60,7 @@ defmodule BridgeEx.Graphql do
       @format_variables Keyword.get(unquote(opts), :format_variables, false)
 
       if Keyword.has_key?(unquote(opts), :max_attempts) do
-        Logger.warning(
+        IO.warn(
           "max_attemps is deprecated, please use retry_options[:max_retries] instead",
           Macro.Env.stacktrace(__ENV__)
         )
