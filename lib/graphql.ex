@@ -62,7 +62,7 @@ defmodule BridgeEx.Graphql do
       @format_variables Keyword.get(unquote(opts), :format_variables, false)
 
       if Keyword.has_key?(unquote(opts), :max_attempts) do
-        IO.warn(
+        Logger.warning(
           "max_attemps is deprecated, please use retry_options[:max_retries] instead",
           Macro.Env.stacktrace(__ENV__)
         )

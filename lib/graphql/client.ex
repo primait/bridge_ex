@@ -94,9 +94,17 @@ defmodule BridgeEx.Graphql.Client do
   end
 
   defp log_options do
-    Application.get_env(:bridge_ex, :log_options,
-      log_query_on_error: false,
-      log_response_on_error: false
+    global_log_options = Application.get_env(:bridge_ex, :log_options, [])
+
+    if length(global_log_options) != 0 do
+      Logger.warning(
+        "Global log_options is deprecated and will be removed in the future, please use the local ones"
+      )
+    end
+
+    Keyword.merge(
+      [log_query_on_error: false, log_response_on_error: false],
+      global_log_options
     )
   end
 
