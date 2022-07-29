@@ -40,8 +40,6 @@ defmodule BridgeEx.Graphql do
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defmacro __using__(opts) when is_list(opts) do
     quote do
-      require Logger
-
       alias BridgeEx.Auth0AuthorizationProvider
       alias BridgeEx.Graphql.Client
       alias BridgeEx.Graphql.Formatter.SnakeCase
