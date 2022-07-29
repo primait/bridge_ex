@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Next]
 
+## [2.1.1] - 2022-07-29
+
+### Changed
+
+- **Deprecation**: a warning is emitted if global `log_options` config is set. This option was introduced to save some boilerplate when multiple bridges are used in the same app, but it's a footgun for umbrella apps and a bad design pattern for libraries
+
 ## [2.1.0] - 2022-07-07
 
 ### Added

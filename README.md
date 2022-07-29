@@ -100,11 +100,13 @@ end
 BridgeWithCustomRetry.call("myquery", %{}, retry_options: [policy: retry_policy, max_retries: 2])
 ```
 
-### Global configuration
+### (Deprecated) Global configuration
 
 The following configuration parameters can be set globally for all bridges in the app, by setting them inside your `config.exs`:
 
 - `config :bridge_ex, log_options: [log_query_on_error: true, log_response_on_error: false]` to customize logging in your bridges
+
+Please note that this config has been **deprecated** since it's a footgun for umbrella apps and bad library design in general.
 
 ### Authenticating calls via Auth0
 
