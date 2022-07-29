@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Next]
 
+## [2.1.1] - 2022-07-29
+
+### Added
+
+- A warning is emitted if global `log_options` config is set
+- New `.versions.yml` so that we can `suite-py bump`!
+
 ## [2.1.0] - 2022-07-07
 
 ### Added
