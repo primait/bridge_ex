@@ -24,16 +24,23 @@ defmodule BridgeEx.Graphql.Utils do
           {:ok, HTTPoison.Response.t() | HTTPoison.AsyncResponse.t()}
           | {:error, HTTPoison.Error.t()},
           String.t(),
+          (String.t() -> client_response()),
           Keyword.t()
         ) :: client_response()
-  def decode_http_response({:ok, %HTTPoison.Response{status_code: 200, body: body_string}}, _, _) do
-    Jason.decode(body_string, keys: :atoms)
+  def decode_http_response(
+        {:ok, %HTTPoison.Response{status_code: 200, body: body_string}},
+        _,
+        decoder,
+        _
+      ) do
+    decoder.(body_string)
   end
 
   def decode_http_response(
         {:ok,
          %HTTPoison.Response{status_code: code, body: body_string, request_url: request_url}},
         query,
+        _,
         log_options
       ) do
     log_response_on_error = Keyword.get(log_options, :log_response_on_error, false)
@@ -52,6 +59,7 @@ defmodule BridgeEx.Graphql.Utils do
   def decode_http_response(
         {:error, %HTTPoison.Error{reason: reason}},
         query,
+        _,
         log_options
       ) do
     log_query_on_error = Keyword.get(log_options, :log_query_on_error, false)
@@ -65,8 +73,14 @@ defmodule BridgeEx.Graphql.Utils do
   def parse_response({:error, error}), do: {:error, error}
 
   def parse_response({:ok, %{errors: errors}}), do: {:error, errors}
+  def parse_response({:ok, %{"errors" => errors}}), do: {:error, errors}
 
   def parse_response({:ok, %{data: data}}), do: {:ok, data}
+  def parse_response({:ok, %{"data" => data}}), do: {:ok, data}
+
+  def atom_decoder(body), do: Jason.decode(body, keys: :atoms)
+  def existing_atom_decoder(body), do: Jason.decode(body, keys: :atoms!)
+  def string_decoder(body), do: Jason.decode(body)
 
   defp prepend_if(list, false, _), do: list
   defp prepend_if(list, true, value), do: [value | list]

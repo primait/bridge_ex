@@ -38,23 +38,53 @@ defmodule BridgeEx.Graphql.Client do
     * `retry_options`: configures retry attempts. Takes the form of `[max_retries: 1, timing: :exponential]`
     * `log_options`: configures logging on errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`.
   """
-
+  @deprecated "This call uses `Json.decode` with `keys: :atoms` which is discouraged as it dynamically creates atoms which are not garbage collected. Please use `call/5` with a decoder instead. For instance, you can use `Client.call(url, query, variables, &Utils.string_decoder/1, opts)` which will be the default behavior in the future."
   @spec call(
           url :: String.t(),
           query :: String.t(),
           variables :: map(),
           opts :: Keyword.t()
         ) :: bridge_response()
+  def call(url, query, variables, opts),
+    do: call(url, query, variables, &Utils.atom_decoder/1, opts)
+
+  @doc """
+  Calls a GraphQL endpoint and decodes the response
+
+  ## Parameters
+
+    * `url`: URL of the endpoint.
+    * `query`: Graphql query or mutation.
+    * `variables`: variables for Graphql query or mutation.
+    * `decoder`: decoder for the response. Takes the form of `(String.t() -> client_response())`, several decoders are provided in the `BridgeEx.Graphql.Utils` module.
+    * `opts`: various options.
+
+  ## Options
+
+    * `options`: extra HTTP options to be passed to Telepoison.
+    * `headers`: extra HTTP headers.
+    * `encode_variables`: whether to JSON encode variables or not.
+    * `retry_options`: configures retry attempts. Takes the form of `[max_retries: 1, timing: :exponential]`
+    * `log_options`: configures logging on errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`.
+  """
+  @spec call(
+          url :: String.t(),
+          query :: String.t(),
+          variables :: map(),
+          decoder :: (String.t() -> bridge_response()),
+          opts :: Keyword.t()
+        ) :: bridge_response()
   def call(
         url,
         query,
         variables,
+        decoder,
         opts
       ) do
     encode_variables = Keyword.get(opts, :encode_variables, false)
     http_options = Keyword.merge(@http_options, Keyword.get(opts, :options, []))
     http_headers = Map.merge(@http_headers, Keyword.get(opts, :headers, %{}))
-    log_options = Keyword.merge(log_options(), Keyword.get(opts, :log_options))
+    log_options = Keyword.merge(log_options(), Keyword.get(opts, :log_options, []))
     format_variables = Keyword.get(opts, :format_variables, false)
 
     retry_options =
@@ -85,7 +115,7 @@ defmodule BridgeEx.Graphql.Client do
         fn query ->
           url
           |> Telepoison.post(query, http_headers, http_options)
-          |> Utils.decode_http_response(query, log_options)
+          |> Utils.decode_http_response(query, decoder, log_options)
           |> Utils.parse_response()
         end,
         retry_options
