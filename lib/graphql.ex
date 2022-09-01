@@ -15,6 +15,7 @@ defmodule BridgeEx.Graphql do
     * `http_options`: HTTP options to be passed to Telepoison. Defaults to `[timeout: 1_000, recv_timeout: 16_000]`.
     * `log_options`: override global configuration for logging errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`
     * `max_attempts`: number of times the request will be retried upon failure. Defaults to `1`. ⚠️ Deprecated: use retry_options instead.
+    * `decoder`: selects which decoder to use for decoding responses. Defaults to atom_decoder which is deprecated and will be replaced by string_decoder.
     * `retry_options`: override configuration regarding retries, namely
       * `delay`: meaning depends on `timing`
         * `:constant`: retry ever `delay` ms
@@ -44,6 +45,7 @@ defmodule BridgeEx.Graphql do
       alias BridgeEx.Graphql.Client
       alias BridgeEx.Graphql.Formatter.SnakeCase
       alias BridgeEx.Graphql.Formatter.Adapter
+      alias BridgeEx.Graphql.Utils
 
       # local config
       # mandatory opts
@@ -58,10 +60,18 @@ defmodule BridgeEx.Graphql do
       @max_attempts Keyword.get(unquote(opts), :max_attempts, 1)
       @log_options Keyword.get(unquote(opts), :log_options, [])
       @format_variables Keyword.get(unquote(opts), :format_variables, false)
+      @decoder Keyword.get(unquote(opts), :decoder, &Utils.atom_decoder/1)
 
       if Keyword.has_key?(unquote(opts), :max_attempts) do
         IO.warn(
           "max_attemps is deprecated, please use retry_options[:max_retries] instead",
+          Macro.Env.stacktrace(__ENV__)
+        )
+      end
+
+      if !Keyword.has_key?(unquote(opts), :decoder) do
+        IO.warn(
+          "missing decoder option in graphql bridge creation. Currently fallbacks to the discouraged atom decoder which may lead to memory leak and raise security concerns. It will be replaced by a safer string decoder in a future major release",
           Macro.Env.stacktrace(__ENV__)
         )
       end
@@ -108,6 +118,7 @@ defmodule BridgeEx.Graphql do
           |> Client.call(
             query,
             variables,
+            @decoder,
             options: http_options,
             headers: http_headers,
             encode_variables: @encode_variables,

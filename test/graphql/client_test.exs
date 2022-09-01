@@ -13,15 +13,16 @@ defmodule BridgeEx.Graphql.ClientTest do
 
   test "call using deprecated atom decoder", %{bypass: bypass} do
     Bypass.expect(bypass, "POST", "/", fn conn ->
-      Plug.Conn.resp(conn, 200, Jason.encode!(%{data: %{result: "ok"}}))
+      Plug.Conn.resp(conn, 200, ~s[{"data": {"result": "ok"}}])
     end)
 
-    assert {:ok, %{result: "ok"}} = Client.call("localhost:55000/", "", %{}, [])
+    assert {:ok, %{result: "ok"}} =
+             Client.call("localhost:55000/", "", %{}, &Utils.atom_decoder/1, [])
   end
 
   test "call using safer string decoder", %{bypass: bypass} do
     Bypass.expect(bypass, "POST", "/", fn conn ->
-      Plug.Conn.resp(conn, 200, Jason.encode!(%{data: %{result: "ok"}}))
+      Plug.Conn.resp(conn, 200, ~s[{"data": {"result": "ok"}}])
     end)
 
     assert {:ok, %{"result" => "ok"}} =
@@ -30,7 +31,7 @@ defmodule BridgeEx.Graphql.ClientTest do
 
   test "call using new enforced atom decoder", %{bypass: bypass} do
     Bypass.expect(bypass, "POST", "/", fn conn ->
-      Plug.Conn.resp(conn, 200, Jason.encode!(%{data: %{"new_atom" => "ok"}}))
+      Plug.Conn.resp(conn, 200, ~s[{"data": {"new_atom": "ok"}}])
     end)
 
     assert {:ok, %{new_atom: "ok"}} =
