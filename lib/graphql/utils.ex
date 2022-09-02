@@ -78,10 +78,6 @@ defmodule BridgeEx.Graphql.Utils do
   def parse_response({:ok, %{data: data}}), do: {:ok, data}
   def parse_response({:ok, %{"data" => data}}), do: {:ok, data}
 
-  def json_decoder(:atoms), do: &Jason.decode(&1, keys: :atoms)
-  def json_decoder(:existing_atoms), do: &Jason.decode(&1, keys: :atoms!)
-  def json_decoder(:strings), do: &Jason.decode(&1)
-
   defp prepend_if(list, false, _), do: list
   defp prepend_if(list, true, value), do: [value | list]
 end

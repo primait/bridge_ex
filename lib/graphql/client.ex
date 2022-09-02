@@ -75,7 +75,7 @@ defmodule BridgeEx.Graphql.Client do
           opts :: Keyword.t()
         ) :: bridge_response()
   def call(url, query, variables, keys_decoder, opts) when is_atom(keys_decoder),
-    do: call(url, query, variables, Utils.json_decoder(keys_decoder), opts)
+    do: call(url, query, variables, json_decoder(keys_decoder), opts)
 
   def call(
         url,
@@ -148,4 +148,9 @@ defmodule BridgeEx.Graphql.Client do
   @spec do_encode_variables(any(), bool()) :: any()
   defp do_encode_variables(variables, true), do: Jason.encode!(variables)
   defp do_encode_variables(variables, false), do: variables
+
+  @spec json_decoder(atom()) :: (String.t() -> bridge_response())
+  defp json_decoder(:atoms), do: &Jason.decode(&1, keys: :atoms)
+  defp json_decoder(:existing_atoms), do: &Jason.decode(&1, keys: :atoms!)
+  defp json_decoder(:strings), do: &Jason.decode(&1)
 end
