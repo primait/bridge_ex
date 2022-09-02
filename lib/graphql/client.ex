@@ -56,7 +56,7 @@ defmodule BridgeEx.Graphql.Client do
     * `url`: URL of the endpoint.
     * `query`: Graphql query or mutation.
     * `variables`: variables for Graphql query or mutation.
-    * `decoder`: decoder for the response. Can be an atom (:strings, :atoms, :existing_atoms) for JSON parsing or a function which transforms a body into a {:ok, any} or {:error, any} tuple. Some basic decoders are provided in the `BridgeEx.Graphql.Utils` module.
+    * `decoder`: decoder for the response. Can be an atom (:strings, :atoms, :existing_atoms) for JSON parsing or a function which transforms a body into a {:ok, any} or {:error, any} tuple.
     * `opts`: various options.
 
   ## Options

@@ -36,7 +36,7 @@ Besides `endpoint` and `decoder`, the following parameters can be optionally set
 - `log_options`
 - `max_attempts` `⚠ Deprecated in favour of retry_options in call method`
 
-The option `decoder` determines how JSON keys are decoded. By default it is set to `:atoms` which is the previous behavior and is deprecated since it may raise security concerns. See ["Decoding keys to atoms" in Jason documentation](https://hexdocs.pm/jason/Jason.html#decode/2-decoding-keys-to-atoms) for more information. In the future, a basic string decoder will be used.
+The option `decoder` determines how JSON keys are decoded. By default it is set to `:atoms` which is the previous behavior and is deprecated since it may raise security concerns. See ["Decoding keys to atoms" in Jason documentation](https://hexdocs.pm/jason/Jason.html#decode/2-decoding-keys-to-atoms) for more information. Other options include `:strings` and `:existing_atoms` which are safer, but a custom function can also be used. In the future, `:strings` decoder will be used by default.
 
 Refer to [the documentation](https://hexdocs.pm/bridge_ex/BridgeEx.Graphql.html) for more details.
 

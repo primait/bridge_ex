@@ -50,7 +50,7 @@ defmodule BridgeEx.GraphqlTest do
     defmodule TestSimpleBridgeStrings do
       use BridgeEx.Graphql,
         endpoint: "http://localhost:#{bypass.port}/graphql",
-        decoder: &BridgeEx.Graphql.Utils.string_decoder/1
+        decoder: :strings
     end
 
     assert {:ok, %{"key" => "value"}} = TestSimpleBridgeStrings.call("myquery", %{})
@@ -66,7 +66,7 @@ defmodule BridgeEx.GraphqlTest do
     defmodule TestSimpleBridgeExistingAtoms do
       use BridgeEx.Graphql,
         endpoint: "http://localhost:#{bypass.port}/graphql",
-        decoder: &BridgeEx.Graphql.Utils.existing_atom_decoder/1
+        decoder: :existing_atoms
     end
 
     assert {:ok, %{key: "value"}} = TestSimpleBridgeExistingAtoms.call("myquery", %{})

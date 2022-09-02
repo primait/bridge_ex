@@ -2,7 +2,6 @@ defmodule BridgeEx.Graphql.ClientTest do
   use ExUnit.Case
 
   alias BridgeEx.Graphql.Client
-  alias BridgeEx.Graphql.Utils
 
   alias Bypass
 
@@ -16,8 +15,7 @@ defmodule BridgeEx.Graphql.ClientTest do
       Plug.Conn.resp(conn, 200, ~s[{"data": {"result": "ok"}}])
     end)
 
-    assert {:ok, %{result: "ok"}} =
-             Client.call("localhost:55000/", "", %{}, &Utils.atom_decoder/1, [])
+    assert {:ok, %{result: "ok"}} = Client.call("localhost:55000/", "", %{}, :atoms, [])
   end
 
   test "call using safer string decoder", %{bypass: bypass} do
@@ -25,8 +23,7 @@ defmodule BridgeEx.Graphql.ClientTest do
       Plug.Conn.resp(conn, 200, ~s[{"data": {"result": "ok"}}])
     end)
 
-    assert {:ok, %{"result" => "ok"}} =
-             Client.call("localhost:55000/", "", %{}, &Utils.string_decoder/1, [])
+    assert {:ok, %{"result" => "ok"}} = Client.call("localhost:55000/", "", %{}, :strings, [])
   end
 
   test "call using new enforced atom decoder", %{bypass: bypass} do
@@ -35,14 +32,6 @@ defmodule BridgeEx.Graphql.ClientTest do
     end)
 
     assert {:ok, %{new_atom: "ok"}} =
-             Client.call("localhost:55000/", "", %{}, &Utils.existing_atom_decoder/1, [])
-  end
-
-  test "call also accepts a atom to be used as the decoder", %{bypass: bypass} do
-    Bypass.expect(bypass, "POST", "/", fn conn ->
-      Plug.Conn.resp(conn, 200, ~s[{"data": {"result": "ok"}}])
-    end)
-
-    assert {:ok, %{result: "ok"}} = Client.call("localhost:55000/", "", %{}, :existing_atoms, [])
+             Client.call("localhost:55000/", "", %{}, :existing_atoms, [])
   end
 end
