@@ -46,7 +46,7 @@ defmodule BridgeEx.Graphql.Client do
           opts :: Keyword.t()
         ) :: bridge_response()
   def call(url, query, variables, opts),
-    do: call(url, query, variables, &Utils.atom_decoder/1, opts)
+    do: call(url, query, variables, :atoms, opts)
 
   @doc """
   Calls a GraphQL endpoint and decodes the response
@@ -56,7 +56,7 @@ defmodule BridgeEx.Graphql.Client do
     * `url`: URL of the endpoint.
     * `query`: Graphql query or mutation.
     * `variables`: variables for Graphql query or mutation.
-    * `decoder`: decoder for the response. Takes the form of `(String.t() -> client_response())`, several decoders are provided in the `BridgeEx.Graphql.Utils` module.
+    * `decoder`: decoder for the response. Can be an atom (:strings, :atoms, :existing_atoms) for JSON parsing or a function which transforms a body into a {:ok, any} or {:error, any} tuple. Some basic decoders are provided in the `BridgeEx.Graphql.Utils` module.
     * `opts`: various options.
 
   ## Options
@@ -71,9 +71,12 @@ defmodule BridgeEx.Graphql.Client do
           url :: String.t(),
           query :: String.t(),
           variables :: map(),
-          decoder :: (String.t() -> bridge_response()),
+          keys_decoder :: (String.t() -> bridge_response()) | atom(),
           opts :: Keyword.t()
         ) :: bridge_response()
+  def call(url, query, variables, keys_decoder, opts) when is_atom(keys_decoder),
+    do: call(url, query, variables, Utils.json_decoder(keys_decoder), opts)
+
   def call(
         url,
         query,

@@ -15,7 +15,7 @@ defmodule BridgeEx.Graphql do
     * `http_options`: HTTP options to be passed to Telepoison. Defaults to `[timeout: 1_000, recv_timeout: 16_000]`.
     * `log_options`: override global configuration for logging errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`
     * `max_attempts`: number of times the request will be retried upon failure. Defaults to `1`. ⚠️ Deprecated: use retry_options instead.
-    * `decoder`: selects which decoder to use for decoding responses. Defaults to atom_decoder which is deprecated and will be replaced by string_decoder.
+    * `decoder`: selects which decoder to use for decoding responses. In order to decode JSON files, it's possible to use one of the three basic strategies (`:atoms`, `:existing_atoms`, `:strings`), but it's also possible to implement a custom decoder as a function which takes a body as parameter and returns a `{:ok, any}` or `{:error, any}` tuple. Defaults to `atoms` which is deprecated and will be replaced by `strings` in a future version of this lib.
     * `retry_options`: override configuration regarding retries, namely
       * `delay`: meaning depends on `timing`
         * `:constant`: retry ever `delay` ms
@@ -60,7 +60,7 @@ defmodule BridgeEx.Graphql do
       @max_attempts Keyword.get(unquote(opts), :max_attempts, 1)
       @log_options Keyword.get(unquote(opts), :log_options, [])
       @format_variables Keyword.get(unquote(opts), :format_variables, false)
-      @decoder Keyword.get(unquote(opts), :decoder, &Utils.atom_decoder/1)
+      @decoder Keyword.get(unquote(opts), :decoder, :atoms)
 
       if Keyword.has_key?(unquote(opts), :max_attempts) do
         IO.warn(
@@ -71,7 +71,7 @@ defmodule BridgeEx.Graphql do
 
       if !Keyword.has_key?(unquote(opts), :decoder) do
         IO.warn(
-          "missing decoder option in graphql bridge creation. Currently fallbacks to the discouraged atom decoder which may lead to memory leak and raise security concerns. It will be replaced by a safer string decoder in a future major release",
+          "missing decoder option in graphql bridge creation. Currently fallbacks to the discouraged atom decoder which may lead to memory leak and raise security concerns. It will be replaced by a safer string decoder in a future major release. If you want to keep the current behavior and hide this warning, just add `decoder: :atoms` to your bridge creation options.",
           Macro.Env.stacktrace(__ENV__)
         )
       end

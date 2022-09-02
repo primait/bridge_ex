@@ -37,4 +37,12 @@ defmodule BridgeEx.Graphql.ClientTest do
     assert {:ok, %{new_atom: "ok"}} =
              Client.call("localhost:55000/", "", %{}, &Utils.existing_atom_decoder/1, [])
   end
+
+  test "call also accepts a atom to be used as the decoder", %{bypass: bypass} do
+    Bypass.expect(bypass, "POST", "/", fn conn ->
+      Plug.Conn.resp(conn, 200, ~s[{"data": {"result": "ok"}}])
+    end)
+
+    assert {:ok, %{result: "ok"}} = Client.call("localhost:55000/", "", %{}, :existing_atoms, [])
+  end
 end
