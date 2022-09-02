@@ -71,11 +71,11 @@ defmodule BridgeEx.Graphql.Client do
           url :: String.t(),
           query :: String.t(),
           variables :: map(),
-          keys_decoder :: (String.t() -> bridge_response()) | atom(),
+          decoder :: (String.t() -> bridge_response()) | atom(),
           opts :: Keyword.t()
         ) :: bridge_response()
-  def call(url, query, variables, keys_decoder, opts) when is_atom(keys_decoder),
-    do: call(url, query, variables, json_decoder(keys_decoder), opts)
+  def call(url, query, variables, decoder, opts) when is_atom(decoder),
+    do: call(url, query, variables, json_decoder(decoder), opts)
 
   def call(
         url,
