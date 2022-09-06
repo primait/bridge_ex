@@ -38,7 +38,7 @@ defmodule BridgeEx.Graphql.Client do
     * `retry_options`: configures retry attempts. Takes the form of `[max_retries: 1, timing: :exponential]`
     * `log_options`: configures logging on errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`.
   """
-  @deprecated "This call uses `Json.decode` with `keys: :atoms` which is discouraged as it dynamically creates atoms which are not garbage collected. Please use `call/5` with a decoder instead. For instance, you can use `Client.call(url, query, variables, &Utils.string_decoder/1, opts)` which will be the default behavior in the future."
+  @deprecated "This call uses `Json.decode` with `keys: :atoms` which is discouraged as it dynamically creates atoms which are not garbage collected. Please use `call/5` with a decoder instead. For instance, you can use `Client.call(url, query, variables, :strings, opts)` which will be the default behavior in the future."
   @spec call(
           url :: String.t(),
           query :: String.t(),
