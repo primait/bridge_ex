@@ -69,7 +69,7 @@ defmodule BridgeEx.Graphql do
         )
       end
 
-      if !Keyword.has_key?(unquote(opts), :decode_keys) do
+      unless Keyword.has_key?(unquote(opts), :decode_keys) do
         IO.warn(
           "missing decode_keys option in graphql bridge creation. Currently fallbacks to the discouraged atom keys decoder which may lead to memory leak and raise security concerns. It will be replaced with the safer :strings keys decoder in a future major release. If you want to keep the current behavior and hide this warning, just add `decode_keys: :atoms` to your bridge creation options.",
           Macro.Env.stacktrace(__ENV__)
