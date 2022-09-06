@@ -30,7 +30,7 @@ defmodule BridgeEx.Auth0AuthenticationTest do
       use BridgeEx.Graphql,
         endpoint: "http://localhost:#{bypass.port}/graphql",
         auth0: [audience: "my-audience", enabled: true],
-        decoder: :atoms
+        decode_keys: :atoms
     end
 
     assert {:ok, %{key: "value"}} = TestBridgeWithAuth0.call("myquery", %{})
@@ -48,7 +48,7 @@ defmodule BridgeEx.Auth0AuthenticationTest do
       use BridgeEx.Graphql,
         endpoint: "http://localhost:#{bypass.port}/graphql",
         auth0: [audience: "my-audience", enabled: true],
-        decoder: :atoms
+        decode_keys: :atoms
     end
 
     catch_exit(TestBridgeWithAuth0EnabledOnlyInBridge.call("myquery", %{}))

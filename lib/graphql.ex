@@ -60,7 +60,7 @@ defmodule BridgeEx.Graphql do
       @max_attempts Keyword.get(unquote(opts), :max_attempts, 1)
       @log_options Keyword.get(unquote(opts), :log_options, [])
       @format_variables Keyword.get(unquote(opts), :format_variables, false)
-      @decoder Keyword.get(unquote(opts), :decoder, :atoms)
+      @decode_keys Keyword.get(unquote(opts), :decode_keys, :atoms)
 
       if Keyword.has_key?(unquote(opts), :max_attempts) do
         IO.warn(
@@ -69,9 +69,9 @@ defmodule BridgeEx.Graphql do
         )
       end
 
-      if !Keyword.has_key?(unquote(opts), :decoder) do
+      if !Keyword.has_key?(unquote(opts), :decode_keys) do
         IO.warn(
-          "missing decoder option in graphql bridge creation. Currently fallbacks to the discouraged atom decoder which may lead to memory leak and raise security concerns. It will be replaced by a safer string decoder in a future major release. If you want to keep the current behavior and hide this warning, just add `decoder: :atoms` to your bridge creation options.",
+          "missing decode_keys option in graphql bridge creation. Currently fallbacks to the discouraged atom keys decoder which may lead to memory leak and raise security concerns. It will be replaced with the safer :strings keys decoder in a future major release. If you want to keep the current behavior and hide this warning, just add `decode_keys: :atoms` to your bridge creation options.",
           Macro.Env.stacktrace(__ENV__)
         )
       end
@@ -118,13 +118,13 @@ defmodule BridgeEx.Graphql do
           |> Client.call(
             query,
             variables,
-            @decoder,
             options: http_options,
             headers: http_headers,
             encode_variables: @encode_variables,
             log_options: @log_options,
             retry_options: retry_options,
-            format_variables: @format_variables
+            format_variables: @format_variables,
+            decode_keys: @decode_keys
           )
           |> format_response()
         end

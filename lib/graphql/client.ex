@@ -35,35 +35,7 @@ defmodule BridgeEx.Graphql.Client do
     * `options`: extra HTTP options to be passed to Telepoison.
     * `headers`: extra HTTP headers.
     * `encode_variables`: whether to JSON encode variables or not.
-    * `retry_options`: configures retry attempts. Takes the form of `[max_retries: 1, timing: :exponential]`
-    * `log_options`: configures logging on errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`.
-  """
-  @deprecated "This call uses `Json.decode` with `keys: :atoms` which is discouraged as it dynamically creates atoms which are not garbage collected. Please use `call/5` with a decoder instead. For instance, you can use `Client.call(url, query, variables, :strings, opts)` which will be the default behavior in the future."
-  @spec call(
-          url :: String.t(),
-          query :: String.t(),
-          variables :: map(),
-          opts :: Keyword.t()
-        ) :: bridge_response()
-  def call(url, query, variables, opts),
-    do: call(url, query, variables, :atoms, opts)
-
-  @doc """
-  Calls a GraphQL endpoint and decodes the response
-
-  ## Parameters
-
-    * `url`: URL of the endpoint.
-    * `query`: Graphql query or mutation.
-    * `variables`: variables for Graphql query or mutation.
-    * `decoder`: decoder for the response. Can be an atom (:strings, :atoms, :existing_atoms) for JSON parsing or a function which transforms a body into a {:ok, any} or {:error, any} tuple.
-    * `opts`: various options.
-
-  ## Options
-
-    * `options`: extra HTTP options to be passed to Telepoison.
-    * `headers`: extra HTTP headers.
-    * `encode_variables`: whether to JSON encode variables or not.
+    * `decode_keys`: how JSON keys are decoded. Valid options are :strings (recommended), :atoms (currently the default, but discouraged due to security concerns - will be changed to :strings in a future version), :existing_atoms (safest, but may crash the application if an unexpected key is received)
     * `retry_options`: configures retry attempts. Takes the form of `[max_retries: 1, timing: :exponential]`
     * `log_options`: configures logging on errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`.
   """
@@ -71,17 +43,12 @@ defmodule BridgeEx.Graphql.Client do
           url :: String.t(),
           query :: String.t(),
           variables :: map(),
-          decoder :: (String.t() -> bridge_response()) | atom(),
           opts :: Keyword.t()
         ) :: bridge_response()
-  def call(url, query, variables, decoder, opts) when is_atom(decoder),
-    do: call(url, query, variables, json_decoder(decoder), opts)
-
   def call(
         url,
         query,
         variables,
-        decoder,
         opts
       ) do
     encode_variables = Keyword.get(opts, :encode_variables, false)
@@ -89,6 +56,13 @@ defmodule BridgeEx.Graphql.Client do
     http_headers = Map.merge(@http_headers, Keyword.get(opts, :headers, %{}))
     log_options = Keyword.merge(log_options(), Keyword.get(opts, :log_options, []))
     format_variables = Keyword.get(opts, :format_variables, false)
+    decode_keys = Keyword.get(opts, :decode_keys, :atoms)
+
+    unless Keyword.has_key?(opts, :decode_keys),
+      do:
+        Logger.warning(
+          "BridgeEx.Client.call will decode keys using atoms. This is discouraged and will be changed in a future version. To silence this warning, pass decode_keys: :atoms to the call function."
+        )
 
     retry_options =
       opts
@@ -118,7 +92,7 @@ defmodule BridgeEx.Graphql.Client do
         fn query ->
           url
           |> Telepoison.post(query, http_headers, http_options)
-          |> Utils.decode_http_response(query, decoder, log_options)
+          |> Utils.decode_http_response(query, decode_keys, log_options)
           |> Utils.parse_response()
         end,
         retry_options
@@ -148,9 +122,4 @@ defmodule BridgeEx.Graphql.Client do
   @spec do_encode_variables(any(), bool()) :: any()
   defp do_encode_variables(variables, true), do: Jason.encode!(variables)
   defp do_encode_variables(variables, false), do: variables
-
-  @spec json_decoder(atom()) :: (String.t() -> bridge_response())
-  defp json_decoder(:atoms), do: &Jason.decode(&1, keys: :atoms)
-  defp json_decoder(:existing_atoms), do: &Jason.decode(&1, keys: :atoms!)
-  defp json_decoder(:strings), do: &Jason.decode(&1)
 end

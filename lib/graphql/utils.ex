@@ -24,17 +24,16 @@ defmodule BridgeEx.Graphql.Utils do
           {:ok, HTTPoison.Response.t() | HTTPoison.AsyncResponse.t()}
           | {:error, HTTPoison.Error.t()},
           String.t(),
-          (String.t() -> client_response()),
+          :strings | :atoms | :existing_atoms,
           Keyword.t()
         ) :: client_response()
   def decode_http_response(
         {:ok, %HTTPoison.Response{status_code: 200, body: body_string}},
         _,
-        decoder,
+        decode_keys,
         _
-      ) do
-    decoder.(body_string)
-  end
+      ),
+      do: decode_json(body_string, decode_keys)
 
   def decode_http_response(
         {:ok,
@@ -80,4 +79,10 @@ defmodule BridgeEx.Graphql.Utils do
 
   defp prepend_if(list, false, _), do: list
   defp prepend_if(list, true, value), do: [value | list]
+
+  @spec decode_json(String.t(), :strings | :atoms | :existing_atoms) ::
+          {:ok, map()} | {:error, any()}
+  defp decode_json(body, :strings), do: Jason.decode(body)
+  defp decode_json(body, :atoms), do: Jason.decode(body, keys: :atoms)
+  defp decode_json(body, :existing_atoms), do: Jason.decode(body, keys: :atoms!)
 end
