@@ -10,11 +10,11 @@ defmodule BridgeEx.Graphql do
     * `auth0`: enable and configure Auth0 for authentication of requests. Takes the form of `[enabled: false, audience: "target-audience"]`.
     * `encode_variables`: if true, encode the Graphql variables to JSON. Defaults to `false`.
     * `format_response`: transforms camelCase keys in response to snake_case. Defaults to `false`.
-    * `format_variables`: transforms snake_case variable names to camelCase`. Defaults to `false`.
-    * `http_headers`: HTTP headers for the request. Defaults to `%{"Content-type": "application/json"}`
+    * `format_variables`: transforms snake_case variable names to camelCase. Defaults to `false`.
+    * `http_headers`: HTTP headers for the request. Defaults to `%{"Content-type": "application/json"}`.
     * `http_options`: HTTP options to be passed to Telepoison. Defaults to `[timeout: 1_000, recv_timeout: 16_000]`.
-    * `log_options`: override global configuration for logging errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`
-    * `max_attempts`: number of times the request will be retried upon failure. Defaults to `1`. ⚠️ Deprecated: use retry_options instead.
+    * `log_options`: override global configuration for logging errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`.
+    * `max_attempts`: number of times the request will be retried upon failure. Defaults to `1`. ⚠️ Deprecated: use `retry_options` instead.
     * `decode_keys`: determines how JSON keys in GraphQL responses are decoded. Can be set to `:atoms`, `:strings` or `:existing_atoms`. Currently, the default mode is `:atoms` but will be changed to `:strings` in a future version of this library. You are highly encouraged to set this option to `:strings` to avoid [memory leaks and security concerns](https://hexdocs.pm/jason/Jason.html#decode/2-decoding-keys-to-atoms).
     * `retry_options`: override configuration regarding retries, namely
       * `delay`: meaning depends on `timing`
