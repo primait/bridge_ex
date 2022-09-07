@@ -15,7 +15,7 @@ defmodule BridgeEx.Graphql do
     * `http_options`: HTTP options to be passed to Telepoison. Defaults to `[timeout: 1_000, recv_timeout: 16_000]`.
     * `log_options`: override global configuration for logging errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`
     * `max_attempts`: number of times the request will be retried upon failure. Defaults to `1`. ⚠️ Deprecated: use retry_options instead.
-    * `decode_keys`: selects which key decoder to use for decoding responses: `:atoms`, `:strings`, `:existing_atoms` . Defaults to `atoms` which is deprecated and will be replaced by `strings` in a future version of this lib.
+    * `decode_keys`: determines how JSON keys in GraphQL responses are decoded. Can be set to `:atoms`, `:strings` or `:existing_atoms`. Currently, the default mode is `:atoms` but will be changed to `:strings` in a future version of this library. You are highly encouraged to set this option to `:strings` to avoid [memory leaks and security concerns](https://hexdocs.pm/jason/Jason.html#decode/2-decoding-keys-to-atoms).
     * `retry_options`: override configuration regarding retries, namely
       * `delay`: meaning depends on `timing`
         * `:constant`: retry ever `delay` ms
@@ -71,7 +71,7 @@ defmodule BridgeEx.Graphql do
 
       unless Keyword.has_key?(unquote(opts), :decode_keys) do
         IO.warn(
-          "missing decode_keys option in graphql bridge creation. Currently fallbacks to the discouraged atom keys decoder which may lead to memory leak and raise security concerns. It will be replaced with the safer :strings keys decoder in a future major release. If you want to keep the current behavior and hide this warning, just add `decode_keys: :atoms` to your bridge creation options.",
+          "missing decode_keys option for this GraphQL bridge. Currently fallbacks to :atoms which may lead to memory leaks and raise security concerns. If you want to keep the current behavior and hide this warning, just add `decode_keys: :atoms` to the options of this bridge. You should however consider migrating to `decode_keys: :strings`.",
           Macro.Env.stacktrace(__ENV__)
         )
       end

@@ -36,7 +36,7 @@ Besides `endpoint` and `decode_keys`, the following parameters can be optionally
 - `log_options`
 - `max_attempts` `⚠ Deprecated in favour of retry_options in call method`
 
-The option `decode_keys` determines how JSON keys are decoded. By default it is set to `:atoms` which is the previous behavior and is deprecated since it may raise security concerns. See ["Decoding keys to atoms" in Jason documentation](https://hexdocs.pm/jason/Jason.html#decode/2-decoding-keys-to-atoms) for more information. Other options include `:strings` and `:existing_atoms` which are safer. In the future, `:strings` keys decoder will be used by default.
+The option `decode_keys` determines how JSON keys in GraphQL responses are decoded. If you don't provide it, it is set by default to `:atoms`, which is **highly discouraged** since it may raise security concerns (see ["Decoding keys to atoms" in Jason documentation](https://hexdocs.pm/jason/Jason.html#decode/2-decoding-keys-to-atoms) for more information). Other decoding modes are `:strings` and `:existing_atoms` which are safer. In a future version, this option will be set by default to `:strings`.
 
 Refer to [the documentation](https://hexdocs.pm/bridge_ex/BridgeEx.Graphql.html) for more details.
 

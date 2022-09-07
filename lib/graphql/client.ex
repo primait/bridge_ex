@@ -35,7 +35,7 @@ defmodule BridgeEx.Graphql.Client do
     * `options`: extra HTTP options to be passed to Telepoison.
     * `headers`: extra HTTP headers.
     * `encode_variables`: whether to JSON encode variables or not.
-    * `decode_keys`: how JSON keys are decoded. Valid options are :strings (recommended), :atoms (currently the default, but discouraged due to security concerns - will be changed to :strings in a future version), :existing_atoms (safest, but may crash the application if an unexpected key is received)
+    * `decode_keys`: how JSON keys in GraphQL responses are decoded. Can be set to `:strings` (recommended), `:atoms` (discouraged due to [security concerns](https://hexdocs.pm/jason/Jason.html#decode/2-decoding-keys-to-atoms) - currently the default, but will be changed to :strings in a future version) or `:existing_atoms` (safer, but may crash the application if an unexpected key is received)
     * `retry_options`: configures retry attempts. Takes the form of `[max_retries: 1, timing: :exponential]`
     * `log_options`: configures logging on errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`.
   """
@@ -61,7 +61,7 @@ defmodule BridgeEx.Graphql.Client do
     unless Keyword.has_key?(opts, :decode_keys),
       do:
         Logger.warning(
-          "BridgeEx.Client.call will decode keys using atoms. This is discouraged and will be changed in a future version. To silence this warning, pass decode_keys: :atoms to the call function."
+          "BridgeEx.Client.call will decode keys using atoms. This is discouraged and will be changed in a future version. To silence this warning, pass `decode_keys: :atoms` to this function or migrate to the safer `decode_keys: :strings` option."
         )
 
     retry_options =
