@@ -24,16 +24,22 @@ defmodule BridgeEx.Graphql.Utils do
           {:ok, HTTPoison.Response.t() | HTTPoison.AsyncResponse.t()}
           | {:error, HTTPoison.Error.t()},
           String.t(),
+          :strings | :atoms | :existing_atoms,
           Keyword.t()
         ) :: client_response()
-  def decode_http_response({:ok, %HTTPoison.Response{status_code: 200, body: body_string}}, _, _) do
-    Jason.decode(body_string, keys: :atoms)
-  end
+  def decode_http_response(
+        {:ok, %HTTPoison.Response{status_code: 200, body: body_string}},
+        _,
+        decode_keys,
+        _
+      ),
+      do: decode_json(body_string, decode_keys)
 
   def decode_http_response(
         {:ok,
          %HTTPoison.Response{status_code: code, body: body_string, request_url: request_url}},
         query,
+        _,
         log_options
       ) do
     log_response_on_error = Keyword.get(log_options, :log_response_on_error, false)
@@ -52,6 +58,7 @@ defmodule BridgeEx.Graphql.Utils do
   def decode_http_response(
         {:error, %HTTPoison.Error{reason: reason}},
         query,
+        _,
         log_options
       ) do
     log_query_on_error = Keyword.get(log_options, :log_query_on_error, false)
@@ -65,9 +72,17 @@ defmodule BridgeEx.Graphql.Utils do
   def parse_response({:error, error}), do: {:error, error}
 
   def parse_response({:ok, %{errors: errors}}), do: {:error, errors}
+  def parse_response({:ok, %{"errors" => errors}}), do: {:error, errors}
 
   def parse_response({:ok, %{data: data}}), do: {:ok, data}
+  def parse_response({:ok, %{"data" => data}}), do: {:ok, data}
 
   defp prepend_if(list, false, _), do: list
   defp prepend_if(list, true, value), do: [value | list]
+
+  @spec decode_json(String.t(), :strings | :atoms | :existing_atoms) ::
+          {:ok, map()} | {:error, any()}
+  defp decode_json(body, :strings), do: Jason.decode(body)
+  defp decode_json(body, :atoms), do: Jason.decode(body, keys: :atoms)
+  defp decode_json(body, :existing_atoms), do: Jason.decode(body, keys: :atoms!)
 end

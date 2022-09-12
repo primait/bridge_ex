@@ -17,7 +17,7 @@ Bridges to Graphql services are defined by `use`ing the `BridgeEx.Graphql` macro
 
 ```elixir
 defmodule MyApp.SomeServiceBridge do
-  use BridgeEx.Graphql, endpoint: "http://some_service.example.com"
+  use BridgeEx.Graphql, endpoint: "http://some_service.example.com", decode_keys: :strings
 
   def my_query(%{} = variables) do
     call("a graphql query or mutation", variables, retry_policy: [max_retries: 1])
@@ -25,7 +25,7 @@ defmodule MyApp.SomeServiceBridge do
 end
 ```
 
-Besides `endpoint`, the following parameters can be optionally set when `use`ing `BridgeEx.Graphql`:
+Besides `endpoint` and `decode_keys`, the following parameters can be optionally set when `use`ing `BridgeEx.Graphql`:
 
 - `auth0`
 - `encode_variables`
@@ -36,6 +36,8 @@ Besides `endpoint`, the following parameters can be optionally set when `use`ing
 - `log_options`
 - `max_attempts` `⚠ Deprecated in favour of retry_options in call method`
 
+The option `decode_keys` determines how JSON keys in GraphQL responses are decoded. If you don't provide it, it is set by default to `:atoms`, which is **highly discouraged** since it may raise security concerns (see ["Decoding keys to atoms" in Jason documentation](https://hexdocs.pm/jason/Jason.html#decode/2-decoding-keys-to-atoms) for more information). Other decoding modes are `:strings` and `:existing_atoms` which are safer. In a future version, this option will be set by default to `:strings`.
+
 Refer to [the documentation](https://hexdocs.pm/bridge_ex/BridgeEx.Graphql.html) for more details.
 
 If you need more control on your requests you can use [`BridgeEx.Graphql.Client.call`](https://hexdocs.pm/bridge_ex/BridgeEx.Graphql.Client.html#call/7) directly.
@@ -44,7 +46,7 @@ The library supports preloading queries from external files via the `BridgeEx.Ex
 
 ```elixir
 defmodule MyApp.SomeServiceBridge do
-  use BridgeEx.Graphql, endpoint: "http://some_service.example.com"
+  use BridgeEx.Graphql, endpoint: "http://some_service.example.com", decode_keys: :strings
   use BridgeEx.Extensions.ExternalResources, resources: [my_query: "my_query.graphql"]
 
   def my_query(%{} = variables), do: call(my_query(), variables)
@@ -94,7 +96,7 @@ end
 
 defmodule BridgeWithCustomRetry do
   use BridgeEx.Graphql,
-    endpoint: "http://some_service.example.com/graphql"
+    endpoint: "http://some_service.example.com/graphql", decode_keys: :strings
 end
 
 BridgeWithCustomRetry.call("myquery", %{}, retry_options: [policy: retry_policy, max_retries: 2])
@@ -122,6 +124,7 @@ Then configure your bridge with the audience of the target service:
 ```elixir
 use BridgeEx.Graphql,
   endpoint: "...",
+  decode_keys: :strings,
   auth0: [enabled: true, audience: "target_audience"]
 ```
 

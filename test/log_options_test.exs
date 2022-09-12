@@ -21,7 +21,9 @@ defmodule BridgeEx.LogOptionsTest do
       end)
 
       defmodule TestBridgeForErrorsNoLogs do
-        use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+        use BridgeEx.Graphql,
+          endpoint: "http://localhost:#{bypass.port}/graphql",
+          decode_keys: :atoms
       end
 
       err_log =
@@ -45,7 +47,8 @@ defmodule BridgeEx.LogOptionsTest do
       defmodule TestForErrorsAllLogsLocal do
         use BridgeEx.Graphql,
           endpoint: "http://localhost:#{bypass.port}/graphql",
-          log_options: [log_query_on_error: true, log_response_on_error: true]
+          log_options: [log_query_on_error: true, log_response_on_error: true],
+          decode_keys: :atoms
       end
 
       err_log =
@@ -71,7 +74,9 @@ defmodule BridgeEx.LogOptionsTest do
       on_exit(fn -> reload_app(_start_prima_auth0_ex? = false) end)
 
       defmodule TestForErrorsAllLogsGlobal do
-        use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+        use BridgeEx.Graphql,
+          endpoint: "http://localhost:#{bypass.port}/graphql",
+          decode_keys: :atoms
       end
 
       err_log =
@@ -95,7 +100,8 @@ defmodule BridgeEx.LogOptionsTest do
       defmodule TestForErrorsDisabledLogsLocally do
         use BridgeEx.Graphql,
           endpoint: "http://localhost:#{bypass.port}/graphql",
-          log_options: [log_query_on_error: false, log_response_on_error: false]
+          log_options: [log_query_on_error: false, log_response_on_error: false],
+          decode_keys: :atoms
       end
 
       err_log =
@@ -121,7 +127,9 @@ defmodule BridgeEx.LogOptionsTest do
       on_exit(fn -> reload_app(_start_prima_auth0_ex? = false) end)
 
       defmodule TestForErrorsDisabledLogsGlobal do
-        use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+        use BridgeEx.Graphql,
+          endpoint: "http://localhost:#{bypass.port}/graphql",
+          decode_keys: :atoms
       end
 
       err_log =
@@ -143,7 +151,9 @@ defmodule BridgeEx.LogOptionsTest do
       Bypass.down(bypass)
 
       defmodule TestForHTTPErrorNoLogs do
-        use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+        use BridgeEx.Graphql,
+          endpoint: "http://localhost:#{bypass.port}/graphql",
+          decode_keys: :atoms
       end
 
       err_log =
@@ -166,7 +176,8 @@ defmodule BridgeEx.LogOptionsTest do
       defmodule TestForHTTPErrorWithLogsLocal do
         use BridgeEx.Graphql,
           endpoint: "http://localhost:#{bypass.port}/graphql",
-          log_options: [log_query_on_error: true]
+          log_options: [log_query_on_error: true],
+          decode_keys: :atoms
       end
 
       err_log =
@@ -191,7 +202,9 @@ defmodule BridgeEx.LogOptionsTest do
       on_exit(fn -> reload_app(_start_prima_auth0_ex? = false) end)
 
       defmodule TestForHTTPErrorWithLogsGlobal do
-        use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+        use BridgeEx.Graphql,
+          endpoint: "http://localhost:#{bypass.port}/graphql",
+          decode_keys: :atoms
       end
 
       err_log =
@@ -214,7 +227,8 @@ defmodule BridgeEx.LogOptionsTest do
       defmodule TestForHTTPErrorDisabledLogsLocal do
         use BridgeEx.Graphql,
           endpoint: "http://localhost:#{bypass.port}/graphql",
-          log_options: [log_query_on_error: false]
+          log_options: [log_query_on_error: false],
+          decode_keys: :atoms
       end
 
       err_log =
@@ -239,7 +253,9 @@ defmodule BridgeEx.LogOptionsTest do
       on_exit(fn -> reload_app(_start_prima_auth0_ex? = false) end)
 
       defmodule TestForHTTPErrorDisabledLogsGlobal do
-        use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+        use BridgeEx.Graphql,
+          endpoint: "http://localhost:#{bypass.port}/graphql",
+          decode_keys: :atoms
       end
 
       err_log =

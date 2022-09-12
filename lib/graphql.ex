@@ -10,11 +10,12 @@ defmodule BridgeEx.Graphql do
     * `auth0`: enable and configure Auth0 for authentication of requests. Takes the form of `[enabled: false, audience: "target-audience"]`.
     * `encode_variables`: if true, encode the Graphql variables to JSON. Defaults to `false`.
     * `format_response`: transforms camelCase keys in response to snake_case. Defaults to `false`.
-    * `format_variables`: transforms snake_case variable names to camelCase`. Defaults to `false`.
-    * `http_headers`: HTTP headers for the request. Defaults to `%{"Content-type": "application/json"}`
+    * `format_variables`: transforms snake_case variable names to camelCase. Defaults to `false`.
+    * `http_headers`: HTTP headers for the request. Defaults to `%{"Content-type": "application/json"}`.
     * `http_options`: HTTP options to be passed to Telepoison. Defaults to `[timeout: 1_000, recv_timeout: 16_000]`.
-    * `log_options`: override global configuration for logging errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`
-    * `max_attempts`: number of times the request will be retried upon failure. Defaults to `1`. ⚠️ Deprecated: use retry_options instead.
+    * `log_options`: override global configuration for logging errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`.
+    * `max_attempts`: number of times the request will be retried upon failure. Defaults to `1`. ⚠️ Deprecated: use `retry_options` instead.
+    * `decode_keys`: determines how JSON keys in GraphQL responses are decoded. Can be set to `:atoms`, `:strings` or `:existing_atoms`. Currently, the default mode is `:atoms` but will be changed to `:strings` in a future version of this library. You are highly encouraged to set this option to `:strings` to avoid [memory leaks and security concerns](https://hexdocs.pm/jason/Jason.html#decode/2-decoding-keys-to-atoms).
     * `retry_options`: override configuration regarding retries, namely
       * `delay`: meaning depends on `timing`
         * `:constant`: retry ever `delay` ms
@@ -44,6 +45,7 @@ defmodule BridgeEx.Graphql do
       alias BridgeEx.Graphql.Client
       alias BridgeEx.Graphql.Formatter.SnakeCase
       alias BridgeEx.Graphql.Formatter.Adapter
+      alias BridgeEx.Graphql.Utils
 
       # local config
       # mandatory opts
@@ -58,10 +60,18 @@ defmodule BridgeEx.Graphql do
       @max_attempts Keyword.get(unquote(opts), :max_attempts, 1)
       @log_options Keyword.get(unquote(opts), :log_options, [])
       @format_variables Keyword.get(unquote(opts), :format_variables, false)
+      @decode_keys Keyword.get(unquote(opts), :decode_keys, :atoms)
 
       if Keyword.has_key?(unquote(opts), :max_attempts) do
         IO.warn(
           "max_attemps is deprecated, please use retry_options[:max_retries] instead",
+          Macro.Env.stacktrace(__ENV__)
+        )
+      end
+
+      unless Keyword.has_key?(unquote(opts), :decode_keys) do
+        IO.warn(
+          "missing decode_keys option for this GraphQL bridge. Currently fallbacks to :atoms which may lead to memory leaks and raise security concerns. If you want to keep the current behavior and hide this warning, just add `decode_keys: :atoms` to the options of this bridge. You should however consider migrating to `decode_keys: :strings`.",
           Macro.Env.stacktrace(__ENV__)
         )
       end
@@ -113,7 +123,8 @@ defmodule BridgeEx.Graphql do
             encode_variables: @encode_variables,
             log_options: @log_options,
             retry_options: retry_options,
-            format_variables: @format_variables
+            format_variables: @format_variables,
+            decode_keys: @decode_keys
           )
           |> format_response()
         end

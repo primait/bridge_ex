@@ -21,6 +21,7 @@ defmodule BridgeEx.GraphqlTest do
     defmodule TestBridgeDeprecatedOption do
       use BridgeEx.Graphql,
         endpoint: "http://localhost:#{bypass.port}/graphql",
+        decode_keys: :atoms,
         max_attempts: 2
     end
 
@@ -33,10 +34,42 @@ defmodule BridgeEx.GraphqlTest do
     end)
 
     defmodule TestSimpleBridge do
-      use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+      use BridgeEx.Graphql,
+        endpoint: "http://localhost:#{bypass.port}/graphql",
+        decode_keys: :atoms
     end
 
     assert {:ok, %{key: "value"}} = TestSimpleBridge.call("myquery", %{})
+  end
+
+  test "runs graphql queries over the provided endpoint, decoding as strings", %{bypass: bypass} do
+    Bypass.expect(bypass, "POST", "/graphql", fn conn ->
+      Plug.Conn.resp(conn, 200, ~s[{"data": {"key": "value"}}])
+    end)
+
+    defmodule TestSimpleBridgeStrings do
+      use BridgeEx.Graphql,
+        endpoint: "http://localhost:#{bypass.port}/graphql",
+        decode_keys: :strings
+    end
+
+    assert {:ok, %{"key" => "value"}} = TestSimpleBridgeStrings.call("myquery", %{})
+  end
+
+  test "runs graphql queries over the provided endpoint, decoding as existing atoms", %{
+    bypass: bypass
+  } do
+    Bypass.expect(bypass, "POST", "/graphql", fn conn ->
+      Plug.Conn.resp(conn, 200, ~s[{"data": {"key": "value"}}])
+    end)
+
+    defmodule TestSimpleBridgeExistingAtoms do
+      use BridgeEx.Graphql,
+        endpoint: "http://localhost:#{bypass.port}/graphql",
+        decode_keys: :existing_atoms
+    end
+
+    assert {:ok, %{key: "value"}} = TestSimpleBridgeExistingAtoms.call("myquery", %{})
   end
 
   @tag capture_log: true
@@ -51,7 +84,8 @@ defmodule BridgeEx.GraphqlTest do
 
     defmodule TestBridgeRetriesOnBadResponse do
       use BridgeEx.Graphql,
-        endpoint: "http://localhost:#{bypass.port}/graphql"
+        endpoint: "http://localhost:#{bypass.port}/graphql",
+        decode_keys: :atoms
     end
 
     assert {:ok, %{key: "value"}} =
@@ -73,7 +107,8 @@ defmodule BridgeEx.GraphqlTest do
 
     defmodule TestBridgeRetriesOnError do
       use BridgeEx.Graphql,
-        endpoint: "http://localhost:#{bypass.port}/graphql"
+        endpoint: "http://localhost:#{bypass.port}/graphql",
+        decode_keys: :atoms
     end
 
     assert {:ok, %{key: "value"}} =
@@ -88,7 +123,9 @@ defmodule BridgeEx.GraphqlTest do
     end)
 
     defmodule TestBridgeWithCustomHeaders do
-      use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+      use BridgeEx.Graphql,
+        endpoint: "http://localhost:#{bypass.port}/graphql",
+        decode_keys: :atoms
     end
 
     TestBridgeWithCustomHeaders.call("myquery", %{},
@@ -106,7 +143,9 @@ defmodule BridgeEx.GraphqlTest do
     end)
 
     defmodule TestBridgeForErrors do
-      use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+      use BridgeEx.Graphql,
+        endpoint: "http://localhost:#{bypass.port}/graphql",
+        decode_keys: :atoms
     end
 
     assert {:error,
@@ -136,7 +175,9 @@ defmodule BridgeEx.GraphqlTest do
     end
 
     defmodule TestBridgePreventsRetryWithCustomPolicy do
-      use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+      use BridgeEx.Graphql,
+        endpoint: "http://localhost:#{bypass.port}/graphql",
+        decode_keys: :atoms
     end
 
     assert {:error, {:bad_response, _}} =
@@ -166,7 +207,9 @@ defmodule BridgeEx.GraphqlTest do
     end
 
     defmodule TestBridgeRetriesWithGivenPolicy do
-      use BridgeEx.Graphql, endpoint: "http://localhost:#{bypass.port}/graphql"
+      use BridgeEx.Graphql,
+        endpoint: "http://localhost:#{bypass.port}/graphql",
+        decode_keys: :atoms
     end
 
     assert {:ok, %{key: "value"}} =

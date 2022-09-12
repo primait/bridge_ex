@@ -15,7 +15,8 @@ defmodule BridgeEx.ConfigValidationTest do
       defmodule TestBridgeWithAuth0EnabledButNoAudience do
         use BridgeEx.Graphql,
           endpoint: "http://localhost:#{bypass.port}/graphql",
-          auth0: [enabled: true]
+          auth0: [enabled: true],
+          decode_keys: :atoms
       end
     end
   end

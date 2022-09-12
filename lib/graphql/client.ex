@@ -35,10 +35,10 @@ defmodule BridgeEx.Graphql.Client do
     * `options`: extra HTTP options to be passed to Telepoison.
     * `headers`: extra HTTP headers.
     * `encode_variables`: whether to JSON encode variables or not.
+    * `decode_keys`: how JSON keys in GraphQL responses are decoded. Can be set to `:strings` (recommended), `:atoms` (discouraged due to [security concerns](https://hexdocs.pm/jason/Jason.html#decode/2-decoding-keys-to-atoms) - currently the default, but will be changed to :strings in a future version) or `:existing_atoms` (safer, but may crash the application if an unexpected key is received)
     * `retry_options`: configures retry attempts. Takes the form of `[max_retries: 1, timing: :exponential]`
     * `log_options`: configures logging on errors. Takes the form of `[log_query_on_error: false, log_response_on_error: false]`.
   """
-
   @spec call(
           url :: String.t(),
           query :: String.t(),
@@ -54,8 +54,15 @@ defmodule BridgeEx.Graphql.Client do
     encode_variables = Keyword.get(opts, :encode_variables, false)
     http_options = Keyword.merge(@http_options, Keyword.get(opts, :options, []))
     http_headers = Map.merge(@http_headers, Keyword.get(opts, :headers, %{}))
-    log_options = Keyword.merge(log_options(), Keyword.get(opts, :log_options))
+    log_options = Keyword.merge(log_options(), Keyword.get(opts, :log_options, []))
     format_variables = Keyword.get(opts, :format_variables, false)
+    decode_keys = Keyword.get(opts, :decode_keys, :atoms)
+
+    unless Keyword.has_key?(opts, :decode_keys),
+      do:
+        Logger.warning(
+          "BridgeEx.Client.call will decode keys using atoms. This is discouraged and will be changed in a future version. To silence this warning, pass `decode_keys: :atoms` to this function or migrate to the safer `decode_keys: :strings` option."
+        )
 
     retry_options =
       opts
@@ -85,7 +92,7 @@ defmodule BridgeEx.Graphql.Client do
         fn query ->
           url
           |> Telepoison.post(query, http_headers, http_options)
-          |> Utils.decode_http_response(query, log_options)
+          |> Utils.decode_http_response(query, decode_keys, log_options)
           |> Utils.parse_response()
         end,
         retry_options
