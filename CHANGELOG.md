@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Next]
 
+## [2.2.0] - 2022-09-19
+
+### Added
+
+- New `:decode_keys` option to determine how JSON keys in GraphQL responses are decoded
+
 ## [2.1.1] - 2022-07-29
 
 ### Changed
@@ -134,7 +140,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.4.0]: https://github.com/primait/bridge_ex/compare/0.3.1...0.4.0
 [0.3.1]: https://github.com/primait/bridge_ex/compare/0.3.0-rc.1...0.3.1
 [0.3.0-rc.1]: https://github.com/primait/bridge_ex/compare/0.2.0-rc.1.1...0.3.0-rc.1
-[0.2.0-rc.1.1]: https://github.com/primait/bridge_ex/compare/0.2.0-rc.1...0.2.0-rc.1.1
 [0.2.0-rc.1]: https://github.com/primait/bridge_ex/compare/0.1.1...0.2.0-rc.1
-[0.1.1]: https://github.com/primait/bridge_ex/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/primait/bridge_ex/releases/tag/0.1.0
