@@ -4,13 +4,13 @@ This document describes the current status and the upcoming milestones of the `b
 
 | Status | Goal | Breaking| Card | PR |
 | :----: | :- | :-: | :-: | :-: |
-| ✔ | Add a CHANGELOG | - | - | #6 |
-| ✔ | Add a ROADMAP for future developments | - | - | #30 |
+| ✔ | Add a CHANGELOG | - | - | [#6](https://github.com/primait/bridge_ex/pull/6) |
+| ✔ | Add a ROADMAP for future developments | - | - | [#30](https://github.com/primait/bridge_ex/pull/30) |
 | ❌ | [Support all possible outcomes of a GraphQL query](#support-all-possible-outcomes-of-a-graphql-query) | 💣 | - |
 | ❌ | [Log queries safely](#log-queries-safely) | - | - | - |
-| ✔️ | [Use strings instead of atoms when deserializing GraphQL response](#use-strings-instead-of-atoms-when-deserializing-graphql-response) | - | - | #69 |
-| ✔ | [Flexible retry policy](#make-retry-policy-more-flexible) | 💣 | [341](https://prima-assicurazioni-spa.myjetbrains.com/youtrack/issue/PLATFORM-341) | #39 |
-| ✔ | [Exponential retry policy](#add-exponential-retry-policy) | - | [367](https://prima-assicurazioni-spa.myjetbrains.com/youtrack/issue/PLATFORM-367) | #41 |
+| ✔️ | [Use strings instead of atoms when deserializing GraphQL response](#use-strings-instead-of-atoms-when-deserializing-graphql-response) | - | - | [#69](https://github.com/primait/bridge_ex/pull/69) |
+| ✔ | [Flexible retry policy](#make-retry-policy-more-flexible) | 💣 | [341](https://prima-assicurazioni-spa.myjetbrains.com/youtrack/issue/PLATFORM-341) | [#39](https://github.com/primait/bridge_ex/pull/39) |
+| ✔ | [Exponential retry policy](#add-exponential-retry-policy) | - | [367](https://prima-assicurazioni-spa.myjetbrains.com/youtrack/issue/PLATFORM-367) | [#41](https://github.com/primait/bridge_ex/pull/41) |
 | ✔️ | [Better renaming of `max_attempts`](#better-naming-of-max-attempts) | - | - | ? |
 
 ## Support all possible outcomes of a GraphQL query
