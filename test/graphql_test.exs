@@ -1,6 +1,8 @@
 defmodule BridgeEx.GraphqlTest do
   use ExUnit.Case, async: false
 
+  import BridgeEx.TestHelper
+
   doctest BridgeEx.Graphql
 
   setup do
@@ -216,5 +218,31 @@ defmodule BridgeEx.GraphqlTest do
              TestBridgeRetriesWithGivenPolicy.call("myquery", %{},
                retry_options: [policy: retry_policy, max_retries: 1]
              )
+  end
+
+  test "bridge options can be fetched at runtime from application environment", %{bypass: bypass} do
+    Bypass.expect(bypass, "POST", "/graphql", fn conn ->
+      Plug.Conn.resp(conn, 200, ~s[{"data": {"key": "value"}}])
+    end)
+
+    defmodule TestSimpleBridge do
+      use BridgeEx.Graphql, decode_keys: :atoms
+
+      defp runtime_options do
+        [endpoint: Application.fetch_env!(:my_app, :bridge_endpoint)]
+      end
+    end
+
+    set_test_env(:my_app, :bridge_endpoint, "http://localhost:#{bypass.port}/graphql")
+
+    assert {:ok, %{key: "value"}} = TestSimpleBridge.call("myquery", %{})
+  end
+
+  test "raises if endpoint option was not provided neither in compile time options nor in runtime_options" do
+    defmodule TestSimpleBridge do
+      use BridgeEx.Graphql, decode_keys: :atoms
+    end
+
+    assert_raise RuntimeError, fn -> TestSimpleBridge.call("myquery", %{}) end
   end
 end

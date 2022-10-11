@@ -47,9 +47,16 @@ defmodule BridgeEx.Graphql do
       alias BridgeEx.Graphql.Formatter.Adapter
       alias BridgeEx.Graphql.Utils
 
+      defp runtime_options, do: []
+      defoverridable runtime_options: 0
+
       # local config
       # mandatory opts
-      @endpoint Keyword.fetch!(unquote(opts), :endpoint)
+      @endpoint Keyword.get(unquote(opts), :endpoint)
+      defp endpoint,
+        do:
+          runtime_options()[:endpoint] || @endpoint ||
+            raise("endpoint option was not provided for this bridge!")
 
       # optional opts with defaults
       @auth0_enabled get_in(unquote(opts), [:auth0, :enabled]) || false
@@ -64,7 +71,7 @@ defmodule BridgeEx.Graphql do
 
       if Keyword.has_key?(unquote(opts), :max_attempts) do
         IO.warn(
-          "max_attemps is deprecated, please use retry_options[:max_retries] instead",
+          "max_attempts is deprecated, please use retry_options[:max_retries] instead",
           Macro.Env.stacktrace(__ENV__)
         )
       end
@@ -114,7 +121,7 @@ defmodule BridgeEx.Graphql do
           |> then(&Keyword.merge([max_retries: max_attempts - 1], &1))
 
         with {:ok, http_headers} <- with_authorization_headers(http_headers) do
-          @endpoint
+          endpoint()
           |> Client.call(
             query,
             variables,
