@@ -222,27 +222,33 @@ defmodule BridgeEx.GraphqlTest do
 
   test "bridge options can be fetched at runtime from application environment", %{bypass: bypass} do
     Bypass.expect(bypass, "POST", "/graphql", fn conn ->
+      assert {"x-header", "test"} in conn.req_headers
       Plug.Conn.resp(conn, 200, ~s[{"data": {"key": "value"}}])
     end)
 
-    defmodule TestSimpleBridge do
-      use BridgeEx.Graphql, decode_keys: :atoms
+    defmodule TestSimpleBridgeWithRuntimeOptions do
+      use BridgeEx.Graphql
 
       defp runtime_options do
-        [endpoint: Application.fetch_env!(:my_app, :bridge_endpoint)]
+        [
+          endpoint: Application.fetch_env!(:my_app, :bridge_endpoint),
+          http_headers: Application.fetch_env!(:my_app, :bridge_headers),
+          decode_keys: :strings
+        ]
       end
     end
 
     set_test_env(:my_app, :bridge_endpoint, "http://localhost:#{bypass.port}/graphql")
+    set_test_env(:my_app, :bridge_headers, %{"X-Header" => "test"})
 
-    assert {:ok, %{key: "value"}} = TestSimpleBridge.call("myquery", %{})
+    assert {:ok, %{"key" => "value"}} = TestSimpleBridgeWithRuntimeOptions.call("myquery", %{})
   end
 
   test "raises if endpoint option was not provided neither in compile time options nor in runtime_options" do
-    defmodule TestSimpleBridge do
+    defmodule TestSimpleBridgeWithoutEndpoint do
       use BridgeEx.Graphql, decode_keys: :atoms
     end
 
-    assert_raise RuntimeError, fn -> TestSimpleBridge.call("myquery", %{}) end
+    assert_raise RuntimeError, fn -> TestSimpleBridgeWithoutEndpoint.call("myquery", %{}) end
   end
 end
