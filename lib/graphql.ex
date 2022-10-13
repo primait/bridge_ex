@@ -47,41 +47,24 @@ defmodule BridgeEx.Graphql do
       alias BridgeEx.Graphql.Formatter.Adapter
       alias BridgeEx.Graphql.Utils
 
-      defp runtime_options, do: []
-      defoverridable runtime_options: 0
+      # local config
+      # mandatory opts
+      @endpoint Keyword.fetch!(unquote(opts), :endpoint)
 
-      @endpoint Keyword.get(unquote(opts), :endpoint)
-      defp endpoint,
-        do:
-          runtime_options()[:endpoint] || @endpoint ||
-            raise("endpoint option was not provided for this bridge!")
-
+      # optional opts with defaults
       @auth0_enabled get_in(unquote(opts), [:auth0, :enabled]) || false
       @audience get_in(unquote(opts), [:auth0, :audience])
-
       @encode_variables Keyword.get(unquote(opts), :encode_variables, false)
-      defp encode_variables, do: runtime_options()[:encode_variables] || @encode_variables
-
       @http_options Keyword.get(unquote(opts), :http_options, [])
-      defp http_options, do: runtime_options()[:http_options] || @http_options
-
       @http_headers Keyword.get(unquote(opts), :http_headers, %{})
-      defp http_headers, do: runtime_options()[:http_headers] || @http_headers
-
       @max_attempts Keyword.get(unquote(opts), :max_attempts, 1)
-
       @log_options Keyword.get(unquote(opts), :log_options, [])
-      defp log_options, do: runtime_options()[:log_options] || @log_options
-
       @format_variables Keyword.get(unquote(opts), :format_variables, false)
-      defp format_variables, do: runtime_options()[:format_variables] || @format_variables
-
       @decode_keys Keyword.get(unquote(opts), :decode_keys, :atoms)
-      defp decode_keys, do: runtime_options()[:decode_keys] || @decode_keys
 
       if Keyword.has_key?(unquote(opts), :max_attempts) do
         IO.warn(
-          "max_attempts is deprecated, please use retry_options[:max_retries] instead",
+          "max_attemps is deprecated, please use retry_options[:max_retries] instead",
           Macro.Env.stacktrace(__ENV__)
         )
       end
@@ -121,8 +104,8 @@ defmodule BridgeEx.Graphql do
               opts :: Keyword.t()
             ) :: Client.bridge_response()
       def call(query, variables, opts \\ []) do
-        http_options = Keyword.merge(http_options(), Keyword.get(opts, :options, []))
-        http_headers = Map.merge(http_headers(), Keyword.get(opts, :headers, %{}))
+        http_options = Keyword.merge(@http_options, Keyword.get(opts, :options, []))
+        http_headers = Map.merge(@http_headers, Keyword.get(opts, :headers, %{}))
         max_attempts = Keyword.get(opts, :max_attempts, @max_attempts)
 
         retry_options =
@@ -131,17 +114,17 @@ defmodule BridgeEx.Graphql do
           |> then(&Keyword.merge([max_retries: max_attempts - 1], &1))
 
         with {:ok, http_headers} <- with_authorization_headers(http_headers) do
-          endpoint()
+          @endpoint
           |> Client.call(
             query,
             variables,
             options: http_options,
             headers: http_headers,
-            encode_variables: encode_variables(),
-            log_options: log_options(),
+            encode_variables: @encode_variables,
+            log_options: @log_options,
             retry_options: retry_options,
-            format_variables: format_variables(),
-            decode_keys: decode_keys()
+            format_variables: @format_variables,
+            decode_keys: @decode_keys
           )
           |> format_response()
         end
