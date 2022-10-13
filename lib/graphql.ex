@@ -49,7 +49,7 @@ defmodule BridgeEx.Graphql do
 
       # local config
       # mandatory opts
-      @endpoint Keyword.fetch!(unquote(opts), :endpoint)
+      @endpoint Keyword.get(unquote(opts), :endpoint)
 
       # optional opts with defaults
       @auth0_enabled get_in(unquote(opts), [:auth0, :enabled]) || false
@@ -83,6 +83,7 @@ defmodule BridgeEx.Graphql do
 
         * `options`: extra HTTP options to be passed to Telepoison.
         * `headers`: extra HTTP headers.
+        * `endpoint`: override the default endpoint.
         * `max_attempts`: override the configured `max_attempts` parameter. ⚠️ Deprecated: use retry_options instead.
         * `retry_options`: override the default retry options.
 
@@ -104,6 +105,7 @@ defmodule BridgeEx.Graphql do
               opts :: Keyword.t()
             ) :: Client.bridge_response()
       def call(query, variables, opts \\ []) do
+        endpoint = Keyword.get(opts, :endpoint, @endpoint)
         http_options = Keyword.merge(@http_options, Keyword.get(opts, :options, []))
         http_headers = Map.merge(@http_headers, Keyword.get(opts, :headers, %{}))
         max_attempts = Keyword.get(opts, :max_attempts, @max_attempts)
@@ -114,7 +116,7 @@ defmodule BridgeEx.Graphql do
           |> then(&Keyword.merge([max_retries: max_attempts - 1], &1))
 
         with {:ok, http_headers} <- with_authorization_headers(http_headers) do
-          @endpoint
+          endpoint
           |> Client.call(
             query,
             variables,

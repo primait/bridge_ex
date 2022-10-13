@@ -231,7 +231,7 @@ defmodule BridgeEx.GraphqlTest do
         endpoint: "http://not-reached/graphql"
     end
 
-    assert {:ok, %{"key" => "value"}} =
+    assert {:ok, %{key: "value"}} =
              TestSimpleBridgeWithRuntimeOptions.call("myquery", %{},
                endpoint: "http://localhost:#{bypass.port}/graphql",
                headers: %{"x-header" => "test"}
