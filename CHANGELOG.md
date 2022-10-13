@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `:endpoint` is not required anymore
+- base `:endpoint` is not required anymore during `use BridgeEx.Graphql`
 
 ## [2.2.0] - 2022-09-19
 
