@@ -220,7 +220,7 @@ defmodule BridgeEx.GraphqlTest do
              )
   end
 
-  test "bridge options can be fetched at runtime from application environment", %{bypass: bypass} do
+  test "endpoint can be overridden during call", %{bypass: bypass} do
     Bypass.expect(bypass, "POST", "/graphql", fn conn ->
       assert {"x-header", "test"} in conn.req_headers
       Plug.Conn.resp(conn, 200, ~s[{"data": {"key": "value"}}])
