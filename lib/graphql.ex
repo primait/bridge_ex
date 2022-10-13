@@ -6,7 +6,7 @@ defmodule BridgeEx.Graphql do
 
   ## Options
 
-    * `endpoint` (required): URL of the remote Graphql endpoint.
+    * `endpoint`: URL of the remote Graphql endpoint.
     * `auth0`: enable and configure Auth0 for authentication of requests. Takes the form of `[enabled: false, audience: "target-audience"]`.
     * `encode_variables`: if true, encode the Graphql variables to JSON. Defaults to `false`.
     * `format_response`: transforms camelCase keys in response to snake_case. Defaults to `false`.

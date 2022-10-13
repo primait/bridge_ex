@@ -57,8 +57,9 @@ end
 
 When `call`ing you can provide the following options, some of which override the ones provided when `use`ing the bridge:
 
-- `http_headers`
-- `http_options`
+- `endpoint` to override the base endpoint (e.g. if you want runtime-configured endpoints),
+- `headers`
+- `options`
 - `retry_options`
 
 #### Return values
