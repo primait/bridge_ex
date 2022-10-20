@@ -40,7 +40,7 @@ defmodule BridgeEx.Graphql do
   """
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defmacro __using__(config \\ []) when is_list(config) do
-    runtime_config? = length(config) == 0
+    runtime_config? = Enum.empty?(config)
 
     if Keyword.has_key?(config, :max_attempts) do
       IO.warn(
@@ -92,19 +92,19 @@ defmodule BridgeEx.Graphql do
       end
 
       # Mandatory configs
-      defp endpoint(), do: get_config(:endpoint) || raise("Endpoint must be configured!")
+      defp endpoint, do: get_config(:endpoint) || raise("Endpoint must be configured!")
 
       # Optional configs
-      defp auth0_audience(), do: get_config([:auth0, :audience])
-      defp auth0_enabled?(), do: get_config([:auth0, :enabled], false)
-      defp decode_keys(), do: get_config(:decode_keys, :atoms)
-      defp encode_variables?(), do: get_config(:encode_variables?, false)
-      defp format_variables?(), do: get_config(:format_variables?, false)
-      defp format_response?(), do: get_config(:format_response?, false)
-      defp http_options(), do: get_config(:http_options, [])
-      defp http_headers(), do: get_config(:http_headers, %{})
-      defp log_options(), do: get_config(:log_options, [])
-      defp max_attempts(), do: get_config(:max_attempts, 1)
+      defp auth0_audience, do: get_config([:auth0, :audience])
+      defp auth0_enabled?, do: get_config([:auth0, :enabled], false)
+      defp decode_keys, do: get_config(:decode_keys, :atoms)
+      defp encode_variables?, do: get_config(:encode_variables?, false)
+      defp format_variables?, do: get_config(:format_variables?, false)
+      defp format_response?, do: get_config(:format_response?, false)
+      defp http_options, do: get_config(:http_options, [])
+      defp http_headers, do: get_config(:http_headers, %{})
+      defp log_options, do: get_config(:log_options, [])
+      defp max_attempts, do: get_config(:max_attempts, 1)
 
       @doc """
       Run a graphql query or mutation over the configured bridge.
@@ -171,9 +171,7 @@ defmodule BridgeEx.Graphql do
       end
 
       defp with_authorization_headers(headers) do
-        unless auth0_enabled?() do
-          {:ok, headers}
-        else
+        if auth0_enabled?() do
           unless auth0_audience() do
             raise """
             Auth0 is enabled but audience is not set for bridge in module #{__MODULE__}.
@@ -201,6 +199,8 @@ defmodule BridgeEx.Graphql do
                  Auth0AuthorizationProvider.authorization_headers(auth0_audience()) do
             {:ok, Enum.into(authorization_headers, headers)}
           end
+        else
+          {:ok, headers}
         end
       end
     end
