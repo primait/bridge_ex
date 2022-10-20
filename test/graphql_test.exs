@@ -220,20 +220,22 @@ defmodule BridgeEx.GraphqlTest do
              )
   end
 
-  test "endpoint can be overridden during call", %{bypass: bypass} do
+  test "config is read from env if it's not passed to `use`", %{bypass: bypass} do
     Bypass.expect(bypass, "POST", "/graphql", fn conn ->
       assert {"x-header", "test"} in conn.req_headers
       Plug.Conn.resp(conn, 200, ~s[{"data": {"key": "value"}}])
     end)
 
     defmodule TestSimpleBridgeWithRuntimeOptions do
-      use BridgeEx.Graphql,
-        endpoint: "http://not-reached/graphql"
+      use BridgeEx.Graphql
     end
+
+    set_test_env(:bridge_ex, TestSimpleBridgeWithRuntimeOptions,
+      endpoint: "http://localhost:#{bypass.port}/graphql"
+    )
 
     assert {:ok, %{key: "value"}} =
              TestSimpleBridgeWithRuntimeOptions.call("myquery", %{},
-               endpoint: "http://localhost:#{bypass.port}/graphql",
                headers: %{"x-header" => "test"}
              )
   end

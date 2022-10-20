@@ -97,7 +97,7 @@ defmodule BridgeEx.Graphql do
       # Optional configs
       defp auth0_audience(), do: get_config([:auth0, :audience])
       defp auth0_enabled?(), do: get_config([:auth0, :enabled], false)
-      defp decode_keys(), do: get_config(:decode_keys, :atom)
+      defp decode_keys(), do: get_config(:decode_keys, :atoms)
       defp encode_variables?(), do: get_config(:encode_variables?, false)
       defp format_variables?(), do: get_config(:format_variables?, false)
       defp format_response?(), do: get_config(:format_response?, false)
