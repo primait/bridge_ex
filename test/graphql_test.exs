@@ -231,12 +231,10 @@ defmodule BridgeEx.GraphqlTest do
     end
 
     set_test_env(:bridge_ex, TestSimpleBridgeWithRuntimeOptions,
-      endpoint: "http://localhost:#{bypass.port}/graphql"
+      endpoint: "http://localhost:#{bypass.port}/graphql",
+      http_headers: %{"x-header" => "test"}
     )
 
-    assert {:ok, %{key: "value"}} =
-             TestSimpleBridgeWithRuntimeOptions.call("myquery", %{},
-               headers: %{"x-header" => "test"}
-             )
+    assert {:ok, %{key: "value"}} = TestSimpleBridgeWithRuntimeOptions.call("myquery", %{})
   end
 end
