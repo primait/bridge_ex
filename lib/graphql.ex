@@ -39,54 +39,17 @@ defmodule BridgeEx.Graphql do
   ```
   """
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  defmacro __using__(opts \\ []) when is_list(opts) do
-    runtime_config? = length(opts) == 0
+  defmacro __using__(config \\ []) when is_list(config) do
+    runtime_config? = length(config) == 0
 
-    # Generate getter for opts keywords
-    if runtime_config? do
-      quote do
-        defp get_opts(),
-          do:
-            Application.get_env(:bridge_ex, __MODULE__) or
-              raise("No compile time or runtime options defined!")
-      end
-    else
-      quote do
-        defp get_opts(), do: unquote(opts)
-      end
-    end
-
-    quote do
-      defp endpoint(), do: Keyword.fetch!(get_opts(), :endpoint)
-      defp auth0_audience(), do: Keyword.get(get_opts(), [:auth0, :audience])
-      defp auth0_enabled?(), do: Keyword.get(get_opts(), [:auth0, :enabled], false)
-    end
-
-    options = [
-      {:encode_variables?, false},
-      {:http_options, []},
-      {:http_headers, %{}},
-      {:max_attempts, 1},
-      {:log_options, []},
-      {:format_variables?, false},
-      {:format_response?, false},
-      {:decode_keys, :atoms}
-    ]
-
-    Enum.each(options, fn {key, val} ->
-      quote do
-        defp unquote(:"#{key}")(), do: Keyword.get(get_opts(), unquote(key), unquote(val))
-      end
-    end)
-
-    if Keyword.has_key?(opts, :max_attempts) do
+    if Keyword.has_key?(config, :max_attempts) do
       IO.warn(
         "max_attemps is deprecated, please use retry_options[:max_retries] instead",
         Macro.Env.stacktrace(__ENV__)
       )
     end
 
-    unless Keyword.has_key?(opts, :decode_keys) do
+    unless Keyword.has_key?(config, :decode_keys) do
       IO.warn(
         "missing decode_keys option for this GraphQL bridge. Currently fallbacks to :atoms which may lead to memory leaks and raise security concerns. If you want to keep the current behavior and hide this warning, just add `decode_keys: :atoms` to the options of this bridge. You should however consider migrating to `decode_keys: :strings`.",
         Macro.Env.stacktrace(__ENV__)
@@ -99,6 +62,49 @@ defmodule BridgeEx.Graphql do
       alias BridgeEx.Graphql.Formatter.SnakeCase
       alias BridgeEx.Graphql.Formatter.Adapter
       alias BridgeEx.Graphql.Utils
+
+      @compile_config unquote(config)
+
+      if unquote(runtime_config?) do
+        defp get_config(key, default \\ nil)
+
+        defp get_config(key, default) when is_atom(key) do
+          :bridge_ex
+          |> Application.get_env(__MODULE__)
+          |> Keyword.get(key, default)
+        end
+
+        defp get_config(key, default) when is_list(key) do
+          :bridge_ex
+          |> Application.get_env(__MODULE__)
+          |> get_in(key) || default
+        end
+      else
+        defp get_config(key, default \\ nil)
+
+        defp get_config(key, default) when is_atom(key) do
+          Keyword.get(@compile_config, key, default)
+        end
+
+        defp get_config(key, default) when is_list(key) do
+          get_in(@compile_config, key) || default
+        end
+      end
+
+      # Mandatory configs
+      defp endpoint(), do: get_config(:endpoint) || raise("Endpoint must be configured!")
+
+      # Optional configs
+      defp auth0_audience(), do: get_config([:auth0, :audience])
+      defp auth0_enabled?(), do: get_config([:auth0, :enabled], false)
+      defp decode_keys(), do: get_config(:decode_keys, :atom)
+      defp encode_variables?(), do: get_config(:encode_variables?, false)
+      defp format_variables?(), do: get_config(:format_variables?, false)
+      defp format_response?(), do: get_config(:format_response?, false)
+      defp http_options(), do: get_config(:http_options, [])
+      defp http_headers(), do: get_config(:http_headers, %{})
+      defp log_options(), do: get_config(:log_options, [])
+      defp max_attempts(), do: get_config(:max_attempts, 1)
 
       @doc """
       Run a graphql query or mutation over the configured bridge.
