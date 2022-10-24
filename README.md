@@ -11,8 +11,6 @@ A library to build bridges to GraphQL services.
 
 ## Usage
 
-### Graphql
-
 Bridges to Graphql services are defined by `use`ing the `BridgeEx.Graphql` macro as follows:
 
 ```elixir
@@ -53,7 +51,32 @@ defmodule MyApp.SomeServiceBridge do
 end
 ```
 
-#### Call options
+### Runtime options
+
+If you need to configure a certain value at runtime (e.g. because you are using `mix release`), you can do so using `config`!
+
+Each bridge will try to get its options from the ones passed to `use`. If those are not defined it will try to get them from the `:bridge_ex, __MODULE__` env. If all else fail it will resort to default values.
+
+Here's an example
+
+```elixir
+# config.exs
+config :bridge_ex, SomeBridge, endpoint: "http://some-service/graphql"
+
+# some_bridge.ex
+defmodule SomeBridge do
+  use BridgeEx.Graphql
+
+  def my_query(%{} = variables) do
+    # this will call http://some-service/graphql
+    call("a graphql query or mutation", variables)
+  end
+end
+```
+
+NOTE: If you define the same variable both in `config` and `use`, only the `use` one will be `use`d.
+
+### Call options
 
 When `call`ing you can provide the following options, some of which override the ones provided when `use`ing the bridge:
 
@@ -62,7 +85,7 @@ When `call`ing you can provide the following options, some of which override the
 - `options`
 - `retry_options`
 
-#### Return values
+### Return values
 
 `call` can return one of the following values:
 
@@ -71,7 +94,7 @@ When `call`ing you can provide the following options, some of which override the
 - `{:error, {:bad_response, status_code}}` on non 200 status code
 - `{:error, {:http_error, reason}}` on http error e.g. `:econnrefused`
 
-#### Customizing the retry options
+### Customizing the retry options
 
 By default if `max_attempts` is greater than `1`, the bridge retries every error regardless of its value (⚠ This way is deprecated). This behaviour can be customized by providing the `retry_options` to a `call`.
 `retry_options`: override configuration regarding retries, namely
