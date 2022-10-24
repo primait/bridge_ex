@@ -44,7 +44,7 @@ defmodule BridgeEx.Auth0AuthenticationTest do
     reload_app(_start_prima_auth0_ex? = true)
     on_exit(fn -> reload_app(_start_prima_auth0_ex? = false) end)
 
-    defmodule TestBridgeWithAuth0EnabledOnlyInBridge do
+    defmodule TestBridgeWithAuth0EnabledButNotAudience do
       use BridgeEx.Graphql,
         endpoint: "http://localhost:#{bypass.port}/graphql",
         auth0: [enabled: true],
@@ -52,7 +52,7 @@ defmodule BridgeEx.Auth0AuthenticationTest do
     end
 
     assert_raise RuntimeError, fn ->
-      TestBridgeWithAuth0EnabledOnlyInBridge.call("myquery", %{})
+      TestBridgeWithAuth0EnabledButNotAudience.call("myquery", %{})
     end
   end
 
