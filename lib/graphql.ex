@@ -52,13 +52,6 @@ defmodule BridgeEx.Graphql do
       )
     end
 
-    unless Keyword.has_key?(opts, :decode_keys) do
-      IO.warn(
-        "missing decode_keys option for this GraphQL bridge. Currently fallbacks to :atoms which may lead to memory leaks and raise security concerns. If you want to keep the current behavior and hide this warning, just add `decode_keys: :atoms` to the options of this bridge. You should however consider migrating to `decode_keys: :strings`.",
-        Macro.Env.stacktrace(__ENV__)
-      )
-    end
-
     quote do
       alias BridgeEx.Auth0AuthorizationProvider
       alias BridgeEx.Graphql.Client
@@ -93,7 +86,28 @@ defmodule BridgeEx.Graphql do
       # Optional opts
       defp auth0_audience, do: get_opt([:auth0, :audience])
       defp auth0_enabled?, do: get_opt([:auth0, :enabled], false)
-      defp decode_keys, do: get_opt(:decode_keys, :atoms)
+
+      defp decode_keys do
+        opt = get_opt(:decode_keys)
+
+        case opt do
+          nil ->
+            IO.warn(
+              """
+              missing decode_keys option for this GraphQL bridge. Currently fallbacks to :atoms which may lead to memory leaks and raise security concerns.
+              If you want to keep the current behavior and hide this warning, just add `decode_keys: :atoms` to the options of this bridge.
+              You should however consider migrating to `decode_keys: :strings`.
+              """,
+              Macro.Env.stacktrace(__ENV__)
+            )
+
+            :atoms
+
+          _ ->
+            opt
+        end
+      end
+
       defp encode_variables?, do: get_opt(:encode_variables?, false)
       defp format_variables?, do: get_opt(:format_variables?, false)
       defp format_response?, do: get_opt(:format_response?, false)
@@ -109,7 +123,6 @@ defmodule BridgeEx.Graphql do
 
         * `options`: extra HTTP options to be passed to Telepoison.
         * `headers`: extra HTTP headers.
-        * `endpoint`: override the default endpoint.
         * `max_attempts`: override the configured `max_attempts` parameter. ⚠️ Deprecated: use retry_options instead.
         * `retry_options`: override the default retry options.
 
