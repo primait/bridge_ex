@@ -226,15 +226,50 @@ defmodule BridgeEx.GraphqlTest do
       Plug.Conn.resp(conn, 200, ~s[{"data": {"key": "value"}}])
     end)
 
-    defmodule TestSimpleBridgeWithRuntimeOptions do
+    defmodule TestSimpleBridgeWithEnvConfig do
       use BridgeEx.Graphql
     end
 
-    set_test_env(:bridge_ex, TestSimpleBridgeWithRuntimeOptions,
+    set_test_env(:bridge_ex, TestSimpleBridgeWithEnvConfig,
       endpoint: "http://localhost:#{bypass.port}/graphql",
       http_headers: %{"x-header" => "test"}
     )
 
-    assert {:ok, %{key: "value"}} = TestSimpleBridgeWithRuntimeOptions.call("myquery", %{})
+    assert {:ok, %{key: "value"}} = TestSimpleBridgeWithEnvConfig.call("myquery", %{})
+  end
+
+  test "config can be split between `use` and env", %{bypass: bypass} do
+    Bypass.expect(bypass, "POST", "/graphql", fn conn ->
+      assert {"x-header", "test"} in conn.req_headers
+      Plug.Conn.resp(conn, 200, ~s[{"data": {"key": "value"}}])
+    end)
+
+    defmodule TestSimpleBridgeWithSplitConfig do
+      use BridgeEx.Graphql, http_headers: %{"x-header" => "test"}
+    end
+
+    set_test_env(:bridge_ex, TestSimpleBridgeWithSplitConfig,
+      endpoint: "http://localhost:#{bypass.port}/graphql"
+    )
+
+    assert {:ok, %{key: "value"}} = TestSimpleBridgeWithSplitConfig.call("myquery", %{})
+  end
+
+  test "env config is ignored if `use` is configured", %{bypass: bypass} do
+    Bypass.expect(bypass, "POST", "/graphql", fn conn ->
+      assert {"x-header", "use"} in conn.req_headers
+      Plug.Conn.resp(conn, 200, ~s[{"data": {"key": "value"}}])
+    end)
+
+    defmodule TestSimpleBridgeWithOverriddenConfig do
+      use BridgeEx.Graphql, http_headers: %{"x-header" => "use"}
+    end
+
+    set_test_env(:bridge_ex, TestSimpleBridgeWithOverriddenConfig,
+      endpoint: "http://localhost:#{bypass.port}/graphql",
+      http_headers: %{"x-header" => "env"}
+    )
+
+    assert {:ok, %{key: "value"}} = TestSimpleBridgeWithOverriddenConfig.call("myquery", %{})
   end
 end

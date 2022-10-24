@@ -40,8 +40,6 @@ defmodule BridgeEx.Graphql do
   """
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defmacro __using__(config \\ []) when is_list(config) do
-    runtime_config? = Enum.empty?(config)
-
     if Keyword.has_key?(config, :max_attempts) do
       IO.warn(
         "max_attemps is deprecated, please use retry_options[:max_retries] instead",
@@ -65,30 +63,23 @@ defmodule BridgeEx.Graphql do
 
       @compile_config unquote(config)
 
-      if unquote(runtime_config?) do
-        defp get_config(key, default \\ nil)
+      defp get_config(key, default \\ nil)
 
-        defp get_config(key, default) when is_atom(key) do
+      defp get_config(key, default) when is_atom(key) do
+        if Keyword.has_key?(@compile_config, key) do
+          Keyword.get(@compile_config, key, default)
+        else
           :bridge_ex
-          |> Application.get_env(__MODULE__)
+          |> Application.get_env(__MODULE__, [])
           |> Keyword.get(key, default)
         end
+      end
 
-        defp get_config(key, default) when is_list(key) do
+      defp get_config(key, default) when is_list(key) do
+        get_in(@compile_config, key) ||
           :bridge_ex
-          |> Application.get_env(__MODULE__)
+          |> Application.get_env(__MODULE__, [])
           |> get_in(key) || default
-        end
-      else
-        defp get_config(key, default \\ nil)
-
-        defp get_config(key, default) when is_atom(key) do
-          Keyword.get(@compile_config, key, default)
-        end
-
-        defp get_config(key, default) when is_list(key) do
-          get_in(@compile_config, key) || default
-        end
       end
 
       # Mandatory configs
