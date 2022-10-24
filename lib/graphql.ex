@@ -47,7 +47,7 @@ defmodule BridgeEx.Graphql do
   defmacro __using__(opts \\ []) when is_list(opts) do
     if Keyword.has_key?(opts, :max_attempts) do
       IO.warn(
-        "max_attemps is deprecated, please use retry_options[:max_retries] instead",
+        "max_attempts is deprecated, please use retry_options[:max_retries] instead",
         Macro.Env.stacktrace(__ENV__)
       )
     end
