@@ -80,7 +80,6 @@ NOTE: If you define the same variable both in `config` and `use`, only the `use`
 
 When `call`ing you can provide the following options, some of which override the ones provided when `use`ing the bridge:
 
-- `endpoint` to override the base endpoint (e.g. if you want runtime-configured endpoints),
 - `headers`
 - `options`
 - `retry_options`
