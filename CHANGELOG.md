@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `call` accepts an `:endpoint` option to override the base endpoint for a specific call
+- options can be now be configured through `config` for each single bridge
 
 ### Changed
 
