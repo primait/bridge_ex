@@ -37,10 +37,10 @@ defmodule BridgeEx.Graphql do
       auth0: [enabled: true, audience: "target-audience"]
   end
 
-  # If you would like to configure this options to use runtime values,
-  # you can do so through your config e.g.
+  # If you would like to configure these options to use values evaluated at runtime,
+  # you can do so through your application config, e.g.
   config :bridge_ex, MyBridge,
-    endpoint: "http://my-api.com/graphql"
+    endpoint: Application.fetch_env!(:my_app, :service_endpoint)
   ```
   """
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
