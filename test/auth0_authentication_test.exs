@@ -37,21 +37,23 @@ defmodule BridgeEx.Auth0AuthenticationTest do
   end
 
   @tag capture_log: true
-  test "exits when auth0 is enabled for bridge but prima_auth0_ex is not started", %{
+  test "raises when auth0 is enabled for bridge but audience is not set", %{
     bypass: bypass
   } do
     set_auth0_configuration(bypass.port)
-    reload_app(_start_prima_auth0_ex? = false)
+    reload_app(_start_prima_auth0_ex? = true)
     on_exit(fn -> reload_app(_start_prima_auth0_ex? = false) end)
 
-    defmodule TestBridgeWithAuth0EnabledOnlyInBridge do
+    defmodule TestBridgeWithAuth0EnabledButNotAudience do
       use BridgeEx.Graphql,
         endpoint: "http://localhost:#{bypass.port}/graphql",
-        auth0: [audience: "my-audience", enabled: true],
+        auth0: [enabled: true],
         decode_keys: :atoms
     end
 
-    catch_exit(TestBridgeWithAuth0EnabledOnlyInBridge.call("myquery", %{}))
+    assert_raise RuntimeError, fn ->
+      TestBridgeWithAuth0EnabledButNotAudience.call("myquery", %{})
+    end
   end
 
   defp valid_auth0_response do

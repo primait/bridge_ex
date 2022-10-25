@@ -11,8 +11,6 @@ A library to build bridges to GraphQL services.
 
 ## Usage
 
-### Graphql
-
 Bridges to Graphql services are defined by `use`ing the `BridgeEx.Graphql` macro as follows:
 
 ```elixir
@@ -53,15 +51,40 @@ defmodule MyApp.SomeServiceBridge do
 end
 ```
 
-#### Call options
+### Runtime options
 
-When `call`ing you can provide the following options, some of which override the ones provided when `use`ing the bridge:
+The options passed to the `BridgeEx.Graphql` macro are evaluated at compile time. If you need the value of one or more options to be evaluated at runtime (e.g. because they depend on environment variables), you can configure those options for a specific bridge in the application environment.
 
-- `http_headers`
-- `http_options`
+Each bridge will first try to get its options from the ones passed to `use`. If those are not defined, it will try to get them from the `:bridge_ex, __MODULE__` key in the application environment. If the latter are not present either, it will resort to the default values.
+
+Here's an example:
+
+```elixir
+# config.exs
+config :bridge_ex, SomeBridge, endpoint: "http://some-service/graphql"
+
+# some_bridge.ex
+defmodule SomeBridge do
+  use BridgeEx.Graphql
+
+  def my_query(%{} = variables) do
+    # this will call http://some-service/graphql
+    call("a graphql query or mutation", variables)
+  end
+end
+```
+
+NOTE: If you pass the same option both in the application configuration and via `use`, the one passed via `use` (evaluated at compile time) will have the precedence.
+
+### Call options
+
+When `call`ing you can provide the following options, some of which override the ones provided at the bridge level:
+
+- `headers` (overrides `http_headers` bridge option)
+- `options` (overrides `http_options` bridge option)
 - `retry_options`
 
-#### Return values
+### Return values
 
 `call` can return one of the following values:
 
@@ -70,7 +93,7 @@ When `call`ing you can provide the following options, some of which override the
 - `{:error, {:bad_response, status_code}}` on non 200 status code
 - `{:error, {:http_error, reason}}` on http error e.g. `:econnrefused`
 
-#### Customizing the retry options
+### Customizing the retry options
 
 By default if `max_attempts` is greater than `1`, the bridge retries every error regardless of its value (⚠ This way is deprecated). This behaviour can be customized by providing the `retry_options` to a `call`.
 `retry_options`: override configuration regarding retries, namely

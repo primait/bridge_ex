@@ -1,4 +1,4 @@
-ExUnit.start()
+ExUnit.start(capture_log: true)
 
 defmodule BridgeEx.TestHelper do
   import ExUnit.Callbacks
