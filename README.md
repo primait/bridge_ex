@@ -78,7 +78,7 @@ NOTE: If you pass the same option both in the application configuration and via 
 
 ### Call options
 
-When `call`ing you can provide the following options, some of which override the ones provided when `use`ing the bridge:
+When `call`ing you can provide the following options, some of which override the ones provided at the bridge level:
 
 - `headers` (overrides `http_headers` bridge option)
 - `options` (overrides `http_options` bridge option)
