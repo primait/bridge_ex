@@ -108,9 +108,9 @@ defmodule BridgeEx.Graphql do
         end
       end
 
-      defp encode_variables?, do: get_opt(:encode_variables?, false)
-      defp format_variables?, do: get_opt(:format_variables?, false)
-      defp format_response?, do: get_opt(:format_response?, false)
+      defp encode_variables?, do: get_opt(:encode_variables, false)
+      defp format_variables?, do: get_opt(:format_variables, false)
+      defp format_response?, do: get_opt(:format_response, false)
       defp http_options, do: get_opt(:http_options, [])
       defp http_headers, do: get_opt(:http_headers, %{})
       defp log_options, do: get_opt(:log_options, [])
