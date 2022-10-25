@@ -80,8 +80,8 @@ NOTE: If you pass the same option both in the application configuration and via 
 
 When `call`ing you can provide the following options, some of which override the ones provided when `use`ing the bridge:
 
-- `headers`
-- `options`
+- `headers` (overrides `http_headers` bridge option)
+- `options` (overrides `http_options` bridge option)
 - `retry_options`
 
 ### Return values
