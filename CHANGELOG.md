@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [2.3.0] - 2022-10-25
+
 ### Added
 
 - options can now be configured through `config` for each single bridge
@@ -15,11 +19,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - base `:endpoint` is not required anymore during `use BridgeEx.Graphql`
 
+---
+
 ## [2.2.0] - 2022-09-19
 
 ### Added
 
 - New `:decode_keys` option to determine how JSON keys in GraphQL responses are decoded
+
+---
 
 ## [2.1.1] - 2022-07-29
 
@@ -27,12 +35,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Deprecation**: a warning is emitted if global `log_options` config is set. This option was introduced to save some boilerplate when multiple bridges are used in the same app, but it's a footgun for umbrella apps and a bad design pattern for libraries
 
+---
+
 ## [2.1.0] - 2022-07-07
 
 ### Added
 
 - New `format_variables` option to format query `variables` keys as camelCase, as per GraphQL conventions
 - New `BridgeEx.Graphql.Formatter.SnakeCase` and `BridgeEx.Graphql.Formatter.CamelCase` formatters
+
+---
 
 ## [2.0.0] - 2022-05-19
 
@@ -45,6 +57,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `BridgeEx.Graphql.Client.call` accepts only `variables :: map()` once again
 - `BridgeEx.Graphql.Client.call` now performs `variables` encoding internally
 
+---
+
 ## [1.2.0] - 2022-05-16
 
 ### Added
@@ -54,6 +68,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Typespec of `BridgeEx.Graphql.Client.call` function is now compatible with `encode_variables: true` option
+
+---
 
 ## [1.1.0] - 2022-03-07
 
@@ -68,6 +84,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Retry delay starts with 100ms by default,
 - `max_attempts` option is now deprecated in favour of `retry_options`
 
+---
+
 ## [1.0.1] - 2022-03-07
 
 ### Added
@@ -81,6 +99,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - If audience is not set but auth0 is enabled a `RuntimeError` is now raised instead of a `CompileError`
 - Global log options are fetched with `get_env` instead of `compile_env`
 
+---
+
 ## [1.0.0] - 2022-02-18
 
 ### Changed
@@ -93,17 +113,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for global log options i.e. `config :bridge_ex, log_options: [...]`
 - Compile time detection of incorrect auth0 config: if audience is not set but auth0 is enabled a `CompileError` is raised
 
+---
+
 ## [0.4.1] - 2022-02-07
 
 ### Added
 
 - New `log_options` keyword list with options `:log_query_on_error` and `:log_response_on_error` for better control of what the lib logs on HTTP errors/request errors
 
+---
+
 ## [0.4.0] - 2022-02-02
 
 ### Changed
 
 - Require `config :bridge_ex, :auth0_enabled` to be set in order to use auth0 authentication
+
+---
 
 ## [0.3.1]
 
@@ -115,6 +141,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed handling of custom headers
 
+---
+
 ## [0.3.0-rc.1]
 
 ### Added
@@ -125,11 +153,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed typo in bridge for `max_attempts` configuration.
 
+---
+
 ## [0.2.0-rc.1]
 
 ### Added
 
 - Added package publication on hex.pm
+
+---
 
 ## [0.1.0]
 
@@ -137,7 +169,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation of `bridge_ex`
 
-[Unreleased]: https://github.com/primait/bridge_ex/compare/2.2.0...HEAD
+[Unreleased]: https://github.com/primait/bridge_ex/compare/2.3.0...HEAD
+[2.3.0]: https://github.com/primait/bridge_ex/compare/2.2.0...2.3.0
 [2.2.0]: https://github.com/primait/bridge_ex/compare/2.1.1...2.2.0
 [2.1.1]: https://github.com/primait/bridge_ex/compare/2.1.0...2.1.1
 [2.1.0]: https://github.com/primait/bridge_ex/compare/2.0.0...2.1.0
