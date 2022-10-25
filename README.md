@@ -74,7 +74,7 @@ defmodule SomeBridge do
 end
 ```
 
-NOTE: If you define the same variable both in `config` and `use`, only the `use` one will be `use`d.
+NOTE: If you pass the same option both in the application configuration and via `use`, the one passed via `use` (evaluated at compile time) will have the precedence.
 
 ### Call options
 
