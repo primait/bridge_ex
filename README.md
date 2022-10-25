@@ -53,11 +53,11 @@ end
 
 ### Runtime options
 
-If you need to configure a certain value at runtime (e.g. because you are using `mix release`), you can do so using `config`!
+The options passed to the `BridgeEx.Graphql` macro are evaluated at compile time. If you need the value of one or more options to be evaluated at runtime (e.g. because they depend on environment variables), you can configure those options for a specific bridge in the application environment.
 
-Each bridge will try to get its options from the ones passed to `use`. If those are not defined it will try to get them from the `:bridge_ex, __MODULE__` env. If all else fail it will resort to default values.
+Each bridge will first try to get its options from the ones passed to `use`. If those are not defined, it will try to get them from the `:bridge_ex, __MODULE__` key in the application environment. If the latter are not present either, it will resort to the default values.
 
-Here's an example
+Here's an example:
 
 ```elixir
 # config.exs
