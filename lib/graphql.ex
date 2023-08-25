@@ -34,7 +34,7 @@ defmodule BridgeEx.Graphql do
   defmodule MyBridge do
     use BridgeEx.Graphql,
       endpoint: "http://my-api.com/graphql",
-      auth0: [enabled: true, audience: "target-audience"]
+      auth0: [enabled: true, audience: "target-audience", client: :target_client]
   end
 
   # If you would like to configure these options to use values evaluated at runtime,
@@ -85,6 +85,7 @@ defmodule BridgeEx.Graphql do
 
       # Optional opts
       defp auth0_audience, do: get_opt([:auth0, :audience])
+      defp auth0_client, do: get_opt([:auth0, :client])
       defp auth0_enabled?, do: get_opt([:auth0, :enabled], false)
 
       defp decode_keys do
@@ -205,7 +206,10 @@ defmodule BridgeEx.Graphql do
           end
 
           with {:ok, authorization_headers} <-
-                 Auth0AuthorizationProvider.authorization_headers(auth0_audience()) do
+                 Auth0AuthorizationProvider.authorization_headers(
+                   auth0_audience(),
+                   auth0_client()
+                 ) do
             {:ok, Enum.into(authorization_headers, headers)}
           end
         else
