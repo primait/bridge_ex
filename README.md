@@ -148,7 +148,12 @@ Then configure your bridge with the audience of the target service:
 use BridgeEx.Graphql,
   endpoint: "...",
   decode_keys: :strings,
-  auth0: [enabled: true, audience: "target_audience"]
+  auth0: [
+    enabled: true,
+    audience: "target_audience",
+    # You can optionally specify a client (in case you defined multiple ones)
+    # client: :target_client
+  ]
 ```
 
 Note that Auth0 integration **must be explicitly enabled for each bridge** where you want it by setting `auth0: [enable: true]`, as per the example above.
