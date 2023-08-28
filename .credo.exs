@@ -97,7 +97,7 @@
         {Credo.Check.Refactor.PipeChainStart},
         {Credo.Check.Refactor.CyclomaticComplexity},
         {Credo.Check.Refactor.FunctionArity},
-        {Credo.Check.Refactor.LongQuoteBlocks, [ignore_comments: true]},
+        {Credo.Check.Refactor.LongQuoteBlocks, false},
         {Credo.Check.Refactor.MatchInCondition},
         {Credo.Check.Refactor.NegatedConditionsInUnless},
         {Credo.Check.Refactor.NegatedConditionsWithElse},
@@ -126,10 +126,9 @@
         {Credo.Check.Warning.MapGetUnsafePass, false},
 
         # Deprecated checks (these will be deleted after a grace period)
-        {Credo.Check.Readability.Specs, false},
+        {Credo.Check.Readability.Specs, false}
 
         # Custom checks can be created using `mix credo.gen.check`.
-        {Credo.Check.Refactor.LongQuoteBlocks, false}
       ]
     }
   ]
