@@ -27,12 +27,16 @@ defmodule BridgeEx.TestHelper do
   def set_auth0_configuration(port) do
     clients = Application.get_env(:prima_auth0_ex, :clients)
 
-    default_client =
-      clients
-      |> Keyword.get(:default_client)
-      |> Keyword.put(:auth0_base_url, "http://localhost:#{port}")
+    updated_clients =
+      for client_name <- Keyword.keys(clients), reduce: clients do
+        updated_clients ->
+          updated_client =
+            clients
+            |> Keyword.get(client_name)
+            |> Keyword.put(:auth0_base_url, "http://localhost:#{port}")
 
-    updated_clients = Keyword.put(clients, :default_client, default_client)
+          Keyword.put(updated_clients, client_name, updated_client)
+      end
 
     Application.put_env(:prima_auth0_ex, :clients, updated_clients)
 
