@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `auth0` options list now has an optional `:client` property, in case multiple clients have been defined with `prima_auth0_ex`
+
+### Changed
+
+- Minimum `prima_auth0_ex` version is now `0.6`
+
 ---
 
 ## [2.3.0] - 2022-10-25
