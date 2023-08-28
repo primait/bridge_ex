@@ -152,6 +152,7 @@ use BridgeEx.Graphql,
     enabled: true,
     audience: "target_audience",
     # You can optionally specify a client (in case you defined multiple ones)
+    # Otherwise, the :default_client will be used instead
     # client: :target_client
   ]
 ```
