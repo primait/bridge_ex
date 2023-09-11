@@ -25,8 +25,24 @@ defmodule BridgeEx.TestHelper do
   end
 
   def set_auth0_configuration(port) do
-    set_test_env(:prima_auth0_ex, :auth0_base_url, "http://localhost:#{port}")
-    set_test_env(:prima_auth0_ex, :client, client_id: "", client_secret: "", cache_enabled: false)
+    clients = Application.get_env(:prima_auth0_ex, :clients)
+
+    updated_clients =
+      for client_name <- Keyword.keys(clients), reduce: clients do
+        updated_clients ->
+          updated_client =
+            clients
+            |> Keyword.get(client_name)
+            |> Keyword.put(:auth0_base_url, "http://localhost:#{port}")
+
+          Keyword.put(updated_clients, client_name, updated_client)
+      end
+
+    Application.put_env(:prima_auth0_ex, :clients, updated_clients)
+
+    on_exit(fn ->
+      Application.put_env(:prima_auth0_ex, :clients, clients)
+    end)
   end
 
   def set_log_options_configuration(opts) do
