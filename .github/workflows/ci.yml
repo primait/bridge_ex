@@ -4,6 +4,8 @@ on: [push, pull_request]
 
 jobs:
   ci:
+    # Avoid duplicate jobs on PR from a branch on the same repo
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     runs-on: ubuntu-latest
     env:
       MIX_ENV: test
@@ -70,6 +72,6 @@ jobs:
     if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name)
     runs-on: ubuntu-latest
     needs:
-      - test
+      - ci
     steps:
       - run: ${{ !contains(needs.*.result, 'failure') }}
