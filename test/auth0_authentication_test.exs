@@ -8,6 +8,7 @@ defmodule BridgeEx.Auth0AuthenticationTest do
 
   setup do
     bypass = Bypass.open()
+    metadata_endpoint_mock(bypass)
     {:ok, bypass: bypass}
   end
 
@@ -79,6 +80,28 @@ defmodule BridgeEx.Auth0AuthenticationTest do
     assert_raise RuntimeError, fn ->
       TestBridgeWithAuth0EnabledButNotAudience.call("myquery", %{})
     end
+  end
+
+  defp metadata_endpoint_mock(bypass) do
+    Bypass.stub(bypass, "GET", "/.well-known/openid-configuration", fn conn ->
+      Plug.Conn.resp(conn, 200, ~s(
+        {
+          "issuer": "https://prima.localauth0.com/",
+          "authorization_endpoint": "http://localhost:#{bypass.port}/oauth/login",
+          "token_endpoint": "http://localhost:#{bypass.port}/oauth/token",
+          "jwks_uri": "http://localhost:#{bypass.port}/.well-known/jwks.json",
+          "response_types_supported": [
+            "token id_token"
+          ],
+          "subject_types_supported": [
+            "public"
+          ],
+          "id_token_signing_alg_values_supported": [
+            "RS256"
+          ]
+        }
+      ))
+    end)
   end
 
   defp valid_auth0_response do
