@@ -1,6 +1,7 @@
 import Config
 
-config :prima_auth0_ex, :redis, enabled: false
+config :prima_auth0_ex,
+  token_cache: NoopCache
 
 config :prima_auth0_ex, :clients,
   default_client: [
