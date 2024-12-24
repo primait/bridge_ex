@@ -48,7 +48,7 @@ defmodule BridgeEx.MixProject do
       {:jason, "~> 1.2"},
       {:noether, "~> 1.0"},
       {:prima_auth0_ex, "~> 0.6", optional: true},
-      {:telepoison, "~> 1.0"}
+      {:telepoison, "~> 2.0"}
     ]
   end
 
