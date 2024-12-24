@@ -3,9 +3,18 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+and this project adheres to
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+---
+
+## [2.4.1] - 2024-12-24
+
+### Changed
+
+- Allow `telepoison` 2.0
 
 ---
 
@@ -13,7 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `auth0` options list now has an optional `:client` property, in case multiple clients have been defined with `prima_auth0_ex`
+- `auth0` options list now has an optional `:client` property, in case multiple
+  clients have been defined with `prima_auth0_ex`
 
 ### Changed
 
@@ -37,7 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- New `:decode_keys` option to determine how JSON keys in GraphQL responses are decoded
+- New `:decode_keys` option to determine how JSON keys in GraphQL responses are
+  decoded
 
 ---
 
@@ -45,7 +56,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Deprecation**: a warning is emitted if global `log_options` config is set. This option was introduced to save some boilerplate when multiple bridges are used in the same app, but it's a footgun for umbrella apps and a bad design pattern for libraries
+- **Deprecation**: a warning is emitted if global `log_options` config is set.
+  This option was introduced to save some boilerplate when multiple bridges are
+  used in the same app, but it's a footgun for umbrella apps and a bad design
+  pattern for libraries
 
 ---
 
@@ -53,8 +67,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- New `format_variables` option to format query `variables` keys as camelCase, as per GraphQL conventions
-- New `BridgeEx.Graphql.Formatter.SnakeCase` and `BridgeEx.Graphql.Formatter.CamelCase` formatters
+- New `format_variables` option to format query `variables` keys as camelCase,
+  as per GraphQL conventions
+- New `BridgeEx.Graphql.Formatter.SnakeCase` and
+  `BridgeEx.Graphql.Formatter.CamelCase` formatters
 
 ---
 
@@ -62,7 +78,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Breaking**: `BridgeEx.Graphql.Client.call` now accepts an `opts :: Keyword.t()` parameter instead of specific options
+- **Breaking**: `BridgeEx.Graphql.Client.call` now accepts an
+  `opts :: Keyword.t()` parameter instead of specific options
 
 ### Fixed
 
@@ -75,11 +92,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- New `BridgeEx.Extensions.ExternalResources` module useful to embed external resources with less boilerplate
+- New `BridgeEx.Extensions.ExternalResources` module useful to embed external
+  resources with less boilerplate
 
 ### Fixed
 
-- Typespec of `BridgeEx.Graphql.Client.call` function is now compatible with `encode_variables: true` option
+- Typespec of `BridgeEx.Graphql.Client.call` function is now compatible with
+  `encode_variables: true` option
 
 ---
 
@@ -87,12 +106,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- New `retry_options` to `call`: clients can customize how to handle a call retry (more details [here](./README.md#customizing-the-retry-options))
+- New `retry_options` to `call`: clients can customize how to handle a call
+  retry (more details [here](./README.md#customizing-the-retry-options))
 
 ### Changed
 
-- [**Breaking**] More detailed errors on bad response and http error: instead of returning a string, return an atom with some additional info
-- Retries, by default, follow an exponential backoff timing instead of a constant one
+- [**Breaking**] More detailed errors on bad response and http error: instead of
+  returning a string, return an atom with some additional info
+- Retries, by default, follow an exponential backoff timing instead of a
+  constant one
 - Retry delay starts with 100ms by default,
 - `max_attempts` option is now deprecated in favour of `retry_options`
 
@@ -106,9 +128,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `prima_auth0_ex` dependency is now `optional: true` instead of `runtime: false`
-- Removed global `:auth0_enabled` flag support: `prima_auth0_ex` is not "ensured" on start anymore and must be included by the lib user
-- If audience is not set but auth0 is enabled a `RuntimeError` is now raised instead of a `CompileError`
+- `prima_auth0_ex` dependency is now `optional: true` instead of
+  `runtime: false`
+- Removed global `:auth0_enabled` flag support: `prima_auth0_ex` is not
+  "ensured" on start anymore and must be included by the lib user
+- If audience is not set but auth0 is enabled a `RuntimeError` is now raised
+  instead of a `CompileError`
 - Global log options are fetched with `get_env` instead of `compile_env`
 
 ---
@@ -117,13 +142,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- [**Breaking**] Return full graphql error objects instead of just a concatenated error message
+- [**Breaking**] Return full graphql error objects instead of just a
+  concatenated error message
 - Better exdocs
 
 ### Added
 
 - Support for global log options i.e. `config :bridge_ex, log_options: [...]`
-- Compile time detection of incorrect auth0 config: if audience is not set but auth0 is enabled a `CompileError` is raised
+- Compile time detection of incorrect auth0 config: if audience is not set but
+  auth0 is enabled a `CompileError` is raised
 
 ---
 
@@ -131,7 +158,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- New `log_options` keyword list with options `:log_query_on_error` and `:log_response_on_error` for better control of what the lib logs on HTTP errors/request errors
+- New `log_options` keyword list with options `:log_query_on_error` and
+  `:log_response_on_error` for better control of what the lib logs on HTTP
+  errors/request errors
 
 ---
 
@@ -139,7 +168,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Require `config :bridge_ex, :auth0_enabled` to be set in order to use auth0 authentication
+- Require `config :bridge_ex, :auth0_enabled` to be set in order to use auth0
+  authentication
 
 ---
 
@@ -181,8 +211,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation of `bridge_ex`
 
-
-[Unreleased]: https://github.com/primait/bridge_ex/compare/2.4.0...HEAD
+[Unreleased]: https://github.com/primait/bridge_ex/compare/2.4.1...HEAD
+[2.4.1]: https://github.com/primait/bridge_ex/compare/2.4.0-rc.0...2.4.1
 [2.4.0]: https://github.com/primait/bridge_ex/compare/2.3.0...2.4.0
 [2.3.0]: https://github.com/primait/bridge_ex/compare/2.2.0...2.3.0
 [2.2.0]: https://github.com/primait/bridge_ex/compare/2.1.1...2.2.0
