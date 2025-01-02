@@ -15,6 +15,7 @@ and this project adheres to
 ### Changed
 
 - Allow `telepoison` 2.0
+- Bumped minimum elixir version to 1.14
 
 ---
 
