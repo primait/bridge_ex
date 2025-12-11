@@ -103,7 +103,7 @@ defmodule BridgeEx.Graphql.Client do
   defp log_options do
     global_log_options = Application.get_env(:bridge_ex, :log_options, [])
 
-    if length(global_log_options) != 0 do
+    if not Enum.empty?(global_log_options) do
       Logger.warning(
         "Global log_options is deprecated and will be removed in the future, please use the local ones"
       )
