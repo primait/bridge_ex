@@ -23,3 +23,5 @@ erl_crash.dump
 bridge_ex-*.tar
 
 .elixir_ls
+
+.elixir-tools
