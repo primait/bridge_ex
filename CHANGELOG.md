@@ -10,6 +10,14 @@ and this project adheres to
 
 ---
 
+## [2.4.2] - 2026-03-20
+
+### Changed
+
+- Allow `noether` 2.0
+
+---
+
 ## [2.4.1] - 2024-12-24
 
 ### Changed
@@ -212,7 +220,8 @@ and this project adheres to
 
 - Initial implementation of `bridge_ex`
 
-[Unreleased]: https://github.com/primait/bridge_ex/compare/2.4.1...HEAD
+[Unreleased]: https://github.com/primait/bridge_ex/compare/2.4.2...HEAD
+[2.4.2]: https://github.com/primait/bridge_ex/compare/2.4.1...2.4.2
 [2.4.1]: https://github.com/primait/bridge_ex/compare/2.4.0-rc.0...2.4.1
 [2.4.0]: https://github.com/primait/bridge_ex/compare/2.3.0...2.4.0
 [2.3.0]: https://github.com/primait/bridge_ex/compare/2.2.0...2.3.0
