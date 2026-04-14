@@ -99,7 +99,7 @@ defmodule BridgeEx.Graphql.Client do
       attributes: [
         {ServerAttributes.server_address(), uri.host},
         {ServerAttributes.server_port(), uri.port},
-        {URLAttributes.url_full(), url},
+        {URLAttributes.url_full(), uri.to_string()},
         {NetworkAttributes.network_protocol_name(), uri.scheme},
         {RPCAttributes.rpc_system(), "graphql"},
         {GraphqlAttributes.graphql_document(), query},
