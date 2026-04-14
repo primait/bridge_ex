@@ -124,11 +124,24 @@ defmodule BridgeEx.Graphql.Client do
         )
 
       case result do
-        {:ok, _response} -> Tracer.set_status(:ok)
-        {:error, reason} -> Tracer.set_status(:error, inspect(reason))
-      end
+        {:ok, _response} ->
+          result
 
-      result
+        {:error, reason} ->
+          err_msg = error_message(reason)
+          Tracer.set_status(:error, err_msg)
+          Tracer.set_attributes([{:"error.message", err_msg}])
+          result
+      end
+    end
+  end
+
+  defp error_message(reason) do
+    cond do
+      is_exception(reason) -> Exception.message(reason)
+      is_binary(reason) -> reason
+      is_atom(reason) -> Atom.to_string(reason)
+      true -> inspect(reason)
     end
   end
 
