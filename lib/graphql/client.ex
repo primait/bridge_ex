@@ -102,7 +102,6 @@ defmodule BridgeEx.Graphql.Client do
         {URLAttributes.url_full(), URI.to_string(uri)},
         {NetworkAttributes.network_protocol_name(), uri.scheme},
         {RPCAttributes.rpc_system(), "graphql"},
-        {GraphqlAttributes.graphql_document(), query},
         {GraphqlAttributes.graphql_operation_name(), operation_name},
         {GraphqlAttributes.graphql_operation_type(), operation_type}
       ]
