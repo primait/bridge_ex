@@ -94,17 +94,16 @@ defmodule BridgeEx.Graphql.Client do
       |> do_format_variables(format_variables)
       |> do_encode_variables(encode_variables)
 
-    Tracer.with_span span_name, %{
-      kind: :client,
-      attributes: [
-        {ServerAttributes.server_address(), uri.host},
-        {ServerAttributes.server_port(), uri.port},
-        {URLAttributes.url_full(), URI.to_string(uri)},
-        {NetworkAttributes.network_protocol_name(), uri.scheme},
+    span_attributes =
+      [
         {RPCAttributes.rpc_system(), "graphql"},
         {GraphqlAttributes.graphql_operation_name(), operation_name},
         {GraphqlAttributes.graphql_operation_type(), operation_type}
-      ]
+      ] ++ uri_attributes(uri)
+
+    Tracer.with_span span_name, %{
+      kind: :client,
+      attributes: span_attributes
     } do
       result =
         %{query: query, variables: variables}
@@ -143,6 +142,16 @@ defmodule BridgeEx.Graphql.Client do
       true -> inspect(reason)
     end
   end
+
+  defp uri_attributes(%URI{host: nil}), do: []
+
+  defp uri_attributes(%URI{host: host, port: port, scheme: scheme} = uri),
+    do: [
+      {NetworkAttributes.network_protocol_name(), scheme},
+      {ServerAttributes.server_port(), port},
+      {URLAttributes.url_full(), URI.to_string(uri)},
+      {ServerAttributes.server_address(), host}
+    ]
 
   defp log_options do
     global_log_options = Application.get_env(:bridge_ex, :log_options, [])
