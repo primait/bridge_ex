@@ -23,11 +23,11 @@ defmodule BridgeEx.Graphql.UtilsTest do
                )
     end
 
-    test "returns anonymous for a named-less query keyword" do
+    test "returns anonymous for a nameless query keyword" do
       assert {"query", "anonymous"} = Utils.parse_operation_metadata("query { user { id } }")
     end
 
-    test "returns anonymous for a named-less mutation keyword" do
+    test "returns anonymous for a nameless mutation keyword" do
       assert {"mutation", "anonymous"} =
                Utils.parse_operation_metadata("mutation { createUser { id } }")
     end

@@ -104,7 +104,7 @@ defmodule BridgeEx.Graphql.Client do
         {RPCAttributes.rpc_system(), "graphql"},
         {GraphqlAttributes.graphql_document(), query},
         {GraphqlAttributes.graphql_operation_name(), operation_name},
-        {GraphqlAttributes.graphql_operation_type(), String.to_atom(operation_type)}
+        {GraphqlAttributes.graphql_operation_type(), operation_type}
       ]
     } do
       result =
