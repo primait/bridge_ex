@@ -94,6 +94,9 @@ defmodule BridgeEx.Graphql.Utils do
       [_, operation_type, operation_name] when operation_name not in [nil, ""] ->
         {operation_type, operation_name}
 
+      [_, operation_type] ->
+        {operation_type, "anonymous"}
+
       [_, operation_type, _] ->
         {operation_type, "anonymous"}
 
