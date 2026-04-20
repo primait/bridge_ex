@@ -10,6 +10,19 @@ and this project adheres to
 
 ---
 
+## [2.5.0] - 2026-04-20
+
+### Added
+
+- OpenTelemetry tracing support
+
+### Changed
+
+- Bumped `absinthe` to 1.10.0
+- Bumped `credo` to 1.7.18
+
+---
+
 ## [2.4.2] - 2026-03-20
 
 ### Changed
