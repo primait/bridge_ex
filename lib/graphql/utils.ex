@@ -5,6 +5,8 @@ defmodule BridgeEx.Graphql.Utils do
 
   require Logger
 
+  @graphql_operation_regex ~r/^\s*(query|mutation|subscription)\b(?:\s+([_A-Za-z][_0-9A-Za-z]*))?/m
+
   @type client_response :: {:ok, any()} | {:error, any()}
 
   @type graphql_response ::
@@ -85,4 +87,21 @@ defmodule BridgeEx.Graphql.Utils do
   defp decode_json(body, :strings), do: Jason.decode(body)
   defp decode_json(body, :atoms), do: Jason.decode(body, keys: :atoms)
   defp decode_json(body, :existing_atoms), do: Jason.decode(body, keys: :atoms!)
+
+  @spec parse_operation_metadata(String.t()) :: {String.t(), String.t()}
+  def parse_operation_metadata(query) do
+    case Regex.run(@graphql_operation_regex, query) do
+      [_, operation_type, operation_name] when operation_name not in [nil, ""] ->
+        {operation_type, operation_name}
+
+      [_, operation_type] ->
+        {operation_type, "anonymous"}
+
+      [_, operation_type, _] ->
+        {operation_type, "anonymous"}
+
+      _ ->
+        {"query", "anonymous"}
+    end
+  end
 end

@@ -47,6 +47,8 @@ defmodule BridgeEx.MixProject do
       {:ex_doc, "~> 0.28", only: :dev, runtime: false},
       {:jason, "~> 1.2"},
       {:noether, "~> 1.0 or ~> 2.0"},
+      {:opentelemetry_api, "~> 1.5"},
+      {:opentelemetry_semantic_conventions, "~> 1.27"},
       {:prima_auth0_ex, "~> 0.6", optional: true},
       {:telepoison, "~> 1.0 or ~> 2.0"}
     ]

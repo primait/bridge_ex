@@ -4,10 +4,16 @@ defmodule BridgeEx.Graphql.Client do
   """
 
   require Logger
+  require OpenTelemetry.Tracer, as: Tracer
 
   alias BridgeEx.Graphql.Utils
   alias BridgeEx.Graphql.Retry
   alias BridgeEx.Graphql.Formatter.CamelCase
+  alias OpenTelemetry.SemConv.Incubating.GraphqlAttributes
+  alias OpenTelemetry.SemConv.Incubating.RPCAttributes
+  alias OpenTelemetry.SemConv.NetworkAttributes
+  alias OpenTelemetry.SemConv.ServerAttributes
+  alias OpenTelemetry.SemConv.URLAttributes
 
   @type bridge_response ::
           {:ok, term()}
@@ -51,12 +57,16 @@ defmodule BridgeEx.Graphql.Client do
         variables,
         opts
       ) do
+    query = String.trim(query)
+    uri = URI.parse(url)
     encode_variables = Keyword.get(opts, :encode_variables, false)
     http_options = Keyword.merge(@http_options, Keyword.get(opts, :options, []))
     http_headers = Map.merge(@http_headers, Keyword.get(opts, :headers, %{}))
     log_options = Keyword.merge(log_options(), Keyword.get(opts, :log_options, []))
     format_variables = Keyword.get(opts, :format_variables, false)
     decode_keys = Keyword.get(opts, :decode_keys, :atoms)
+    {operation_type, operation_name} = Utils.parse_operation_metadata(query)
+    span_name = "#{operation_type} #{operation_name}"
 
     unless Keyword.has_key?(opts, :decode_keys),
       do:
@@ -84,21 +94,64 @@ defmodule BridgeEx.Graphql.Client do
       |> do_format_variables(format_variables)
       |> do_encode_variables(encode_variables)
 
-    %{query: String.trim(query), variables: variables}
-    |> Jason.encode()
-    |> Noether.Either.bind(
-      &Retry.retry(
-        &1,
-        fn query ->
-          url
-          |> Telepoison.post(query, http_headers, http_options)
-          |> Utils.decode_http_response(query, decode_keys, log_options)
-          |> Utils.parse_response()
-        end,
-        retry_options
-      )
-    )
+    span_attributes =
+      [
+        {RPCAttributes.rpc_system(), "graphql"},
+        {GraphqlAttributes.graphql_operation_name(), operation_name},
+        {GraphqlAttributes.graphql_operation_type(), operation_type}
+      ] ++ uri_attributes(uri)
+
+    Tracer.with_span span_name, %{
+      kind: :client,
+      attributes: span_attributes
+    } do
+      result =
+        %{query: query, variables: variables}
+        |> Jason.encode()
+        |> Noether.Either.bind(
+          &Retry.retry(
+            &1,
+            fn encoded_query ->
+              url
+              |> Telepoison.post(encoded_query, http_headers, http_options)
+              |> Utils.decode_http_response(encoded_query, decode_keys, log_options)
+              |> Utils.parse_response()
+            end,
+            retry_options
+          )
+        )
+
+      case result do
+        {:ok, _response} ->
+          result
+
+        {:error, reason} ->
+          err_msg = error_message(reason)
+          Tracer.set_status(:error, err_msg)
+          Tracer.set_attributes([{:"error.message", err_msg}])
+          result
+      end
+    end
   end
+
+  defp error_message(reason) do
+    cond do
+      is_exception(reason) -> Exception.message(reason)
+      is_binary(reason) -> reason
+      is_atom(reason) -> Atom.to_string(reason)
+      true -> inspect(reason)
+    end
+  end
+
+  defp uri_attributes(%URI{host: nil}), do: []
+
+  defp uri_attributes(%URI{host: host, port: port, scheme: scheme} = uri),
+    do: [
+      {NetworkAttributes.network_protocol_name(), scheme},
+      {ServerAttributes.server_port(), port},
+      {URLAttributes.url_full(), URI.to_string(uri)},
+      {ServerAttributes.server_address(), host}
+    ]
 
   defp log_options do
     global_log_options = Application.get_env(:bridge_ex, :log_options, [])
