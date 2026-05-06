@@ -6,6 +6,8 @@ defmodule BridgeEx.Extensions.ExternalResources do
 
     * `resources` (required): enumerable of resource names (atoms) and their paths (strings).
       Each path is assumed to be relative to the module directory.
+    * `includes` (optional): enumerable of paths (strings) to files that should be prepended to every resource.
+      Each path is assumed to be relative to the module directory.
 
   ## Examples
 
@@ -37,10 +39,14 @@ defmodule BridgeEx.Extensions.ExternalResources do
   ```
   """
 
-  defmacro __using__(resources: resources) do
+  defmacro __using__([resources: resources] = opts) do
+    includes = Keyword.get(opts, :includes, [])
+
     dir = Path.dirname(__CALLER__.file)
     resources = for {name, path} <- resources, do: {name, Path.join(dir, path)}
-    contents = for {name, path} <- resources, into: %{}, do: {name, File.read!(path)}
+
+    include_content = for path <- includes, into: "" do File.read!(path) <> "\n\n" end
+    contents = for {name, path} <- resources, into: %{}, do: {name, include_content <> File.read!(path)}
 
     getters =
       for {name, _path} <- resources do
