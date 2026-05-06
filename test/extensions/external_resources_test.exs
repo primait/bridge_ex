@@ -29,7 +29,7 @@ defmodule BridgeEx.Extensions.ExternalResourcesTest do
         use BridgeEx.Extensions.ExternalResources
       end
 
-    assert_raise FunctionClauseError, fn -> Code.eval_quoted(quoted) end
+    assert_raise ArgumentError, fn -> Code.eval_quoted(quoted) end
   end
 
   test "it fails to compile if a file is missing" do
