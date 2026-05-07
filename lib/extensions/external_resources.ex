@@ -38,18 +38,24 @@ defmodule BridgeEx.Extensions.ExternalResources do
   end
   ```
   """
-
   defmacro __using__(opts) do
-    {resources, opts} = Keyword.pop(opts, :resources)
+    {resources_opt, opts} = Keyword.pop(opts, :resources)
 
-    if not is_list(resources) do
+    if not is_list(resources_opt) do
       raise ArgumentError,
             """
-            resources argument in "use #{__MODULE__}" is mandatory and must be a list, got: #{inspect(opts)}
+            resources argument in "use #{__MODULE__}" is mandatory and must be a list, got: #{inspect(resources_opt)}
             """
     end
 
-    {includes, opts} = Keyword.pop(opts, :includes, [])
+    {includes_opt, opts} = Keyword.pop(opts, :includes, [])
+
+    if not is_list(includes_opt) do
+      raise ArgumentError,
+            """
+            includes argument in "use #{__MODULE__}" must be a list, got: #{inspect(includes_opt)}
+            """
+    end
 
     if not Enum.empty?(opts) do
       raise ArgumentError,
@@ -58,39 +64,75 @@ defmodule BridgeEx.Extensions.ExternalResources do
             """
     end
 
-    dir = Path.dirname(__CALLER__.file)
+    if is_nil(__CALLER__.module) do
+      raise ArgumentError,
+            """
+            "use #{__MODULE__}" must be called inside a module
+            """
+    end
 
-    included_contents =
-      for path <- includes, into: "" do
-        content = dir |> Path.join(path) |> File.read!()
+    includes_section = Enum.map_join(includes_opt, "\n", &read_ext_res!(__CALLER__, &1))
 
-        "#{content}\n"
+    resources =
+      Enum.map(resources_opt, fn {name, path} ->
+        content = read_ext_res!(__CALLER__, path)
+
+        if includes_section == "" do
+          {name, content}
+        else
+          {name, "#{includes_section}\n#{content}"}
+        end
+      end)
+
+    quote bind_quoted: [resources: resources, callback: __MODULE__] do
+      if not Module.has_attribute?(__MODULE__, :bridge_ex_external_resources) do
+        Module.register_attribute(__MODULE__, :bridge_ex_external_resources, accumulate: true)
+        Module.put_attribute(__MODULE__, :before_compile, callback)
       end
 
-    resources_contents =
-      for {name, path} <- resources, into: %{} do
-        content = dir |> Path.join(path) |> File.read!()
+      Module.put_attribute(__MODULE__, :bridge_ex_external_resources, resources)
+    end
+  end
 
-        {name, included_contents <> content}
-      end
+  defmacro __before_compile__(%Macro.Env{} = env) do
+    resources_list =
+      env.module
+      |> Module.get_attribute(:bridge_ex_external_resources, [])
+      |> List.flatten()
+
+    resources_map =
+      Enum.reduce(resources_list, %{}, fn {name, content}, map ->
+        if Map.has_key?(map, name) do
+          raise ArgumentError, """
+          resource names must be unique in "use #{__MODULE__}", got duplicate: #{inspect(name)}
+          """
+        end
+
+        Map.put(map, name, content)
+      end)
 
     getters =
-      for {name, _path} <- resources do
+      for {name, _content} <- resources_map do
         quote do
           @spec unquote(name)() :: String.t()
           def unquote(name)(), do: Map.fetch!(external_resources(), unquote(name))
         end
       end
 
-    external_resource_attributes =
-      for {_name, path} <- resources do
-        quote do: @external_resource(unquote(path))
-      end
-
     quote generated: true do
-      unquote_splicing(external_resource_attributes)
+      @spec external_resources :: %{atom => String.t()}
+      defp external_resources, do: unquote(Macro.escape(resources_map))
+
       unquote_splicing(getters)
-      defp external_resources, do: unquote(Macro.escape(resources_contents))
     end
+  end
+
+  @spec read_ext_res!(Macro.Env.t(), rel_path :: Path.t()) :: binary
+  defp read_ext_res!(%Macro.Env{file: file, module: module}, rel_path) do
+    path = file |> Path.dirname() |> Path.join(rel_path)
+    content = File.read!(path)
+    Module.put_attribute(module, :external_resource, path)
+
+    content
   end
 end
