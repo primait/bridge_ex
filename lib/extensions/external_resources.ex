@@ -6,6 +6,8 @@ defmodule BridgeEx.Extensions.ExternalResources do
 
     * `resources` (required): enumerable of resource names (atoms) and their paths (strings).
       Each path is assumed to be relative to the module directory.
+    * `includes` (optional): enumerable of paths (strings) to files that should be prepended to every resource.
+      Each path is assumed to be relative to the module directory.
 
   ## Examples
 
@@ -36,29 +38,101 @@ defmodule BridgeEx.Extensions.ExternalResources do
   end
   ```
   """
+  defmacro __using__(opts) do
+    {resources_opt, opts} = Keyword.pop(opts, :resources)
 
-  defmacro __using__(resources: resources) do
-    dir = Path.dirname(__CALLER__.file)
-    resources = for {name, path} <- resources, do: {name, Path.join(dir, path)}
-    contents = for {name, path} <- resources, into: %{}, do: {name, File.read!(path)}
+    if not is_list(resources_opt) do
+      raise ArgumentError,
+            """
+            resources argument in "use #{__MODULE__}" is mandatory and must be a list, got: #{inspect(resources_opt)}
+            """
+    end
+
+    {includes_opt, opts} = Keyword.pop(opts, :includes, [])
+
+    if not is_list(includes_opt) do
+      raise ArgumentError,
+            """
+            includes argument in "use #{__MODULE__}" must be a list, got: #{inspect(includes_opt)}
+            """
+    end
+
+    if not Enum.empty?(opts) do
+      raise ArgumentError,
+            """
+            got unexpected argument in "use #{__MODULE__}": #{inspect(opts)}
+            """
+    end
+
+    if is_nil(__CALLER__.module) do
+      raise ArgumentError,
+            """
+            "use #{__MODULE__}" must be called inside a module
+            """
+    end
+
+    includes_section = Enum.map_join(includes_opt, "\n", &read_ext_res!(__CALLER__, &1))
+
+    resources =
+      Enum.map(resources_opt, fn {name, path} ->
+        content = read_ext_res!(__CALLER__, path)
+
+        if includes_section == "" do
+          {name, content}
+        else
+          {name, "#{includes_section}\n#{content}"}
+        end
+      end)
+
+    quote bind_quoted: [resources: resources, callback: __MODULE__] do
+      if not Module.has_attribute?(__MODULE__, :bridge_ex_external_resources) do
+        Module.register_attribute(__MODULE__, :bridge_ex_external_resources, accumulate: true)
+        Module.put_attribute(__MODULE__, :before_compile, callback)
+      end
+
+      Module.put_attribute(__MODULE__, :bridge_ex_external_resources, resources)
+    end
+  end
+
+  defmacro __before_compile__(%Macro.Env{} = env) do
+    resources_list =
+      env.module
+      |> Module.get_attribute(:bridge_ex_external_resources, [])
+      |> List.flatten()
+
+    resources_map =
+      Enum.reduce(resources_list, %{}, fn {name, content}, map ->
+        if Map.has_key?(map, name) do
+          raise ArgumentError, """
+          resource names must be unique in "use #{__MODULE__}", got duplicate: #{inspect(name)}
+          """
+        end
+
+        Map.put(map, name, content)
+      end)
 
     getters =
-      for {name, _path} <- resources do
+      for {name, _content} <- resources_map do
         quote do
           @spec unquote(name)() :: String.t()
           def unquote(name)(), do: Map.fetch!(external_resources(), unquote(name))
         end
       end
 
-    external_resource_attributes =
-      for {_name, path} <- resources do
-        quote do: @external_resource(unquote(path))
-      end
-
     quote generated: true do
-      unquote_splicing(external_resource_attributes)
+      @spec external_resources :: %{atom => String.t()}
+      defp external_resources, do: unquote(Macro.escape(resources_map))
+
       unquote_splicing(getters)
-      defp external_resources, do: unquote(Macro.escape(contents))
     end
+  end
+
+  @spec read_ext_res!(Macro.Env.t(), rel_path :: Path.t()) :: binary
+  defp read_ext_res!(%Macro.Env{file: file, module: module}, rel_path) do
+    path = file |> Path.dirname() |> Path.join(rel_path)
+    content = File.read!(path)
+    Module.put_attribute(module, :external_resource, path)
+
+    content
   end
 end
