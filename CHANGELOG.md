@@ -10,6 +10,20 @@ and this project adheres to
 
 ---
 
+## [2.6.0] - 2026-06-16
+
+### Added
+
+- `BridgeEx.Extensions.ExternalResources` now supports an optional `includes` argument to prepend shared files to every resource.
+
+### Changed
+
+- `BridgeEx.Extensions.ExternalResources` can now be used multiple times within the same module. Resources from all invocations are merged and resource names must remain unique.
+
+---
+
+---
+
 ## [2.5.0] - 2026-04-20
 
 ### Added
@@ -233,7 +247,9 @@ and this project adheres to
 
 - Initial implementation of `bridge_ex`
 
-[Unreleased]: https://github.com/primait/bridge_ex/compare/2.4.2...HEAD
+
+[Unreleased]: https://github.com/primait/bridge_ex/compare/2.6.0...HEAD
+[2.6.0]: https://github.com/primait/bridge_ex/compare/2.5.0...2.6.0
 [2.4.2]: https://github.com/primait/bridge_ex/compare/2.4.1...2.4.2
 [2.4.1]: https://github.com/primait/bridge_ex/compare/2.4.0-rc.0...2.4.1
 [2.4.0]: https://github.com/primait/bridge_ex/compare/2.3.0...2.4.0
