@@ -14,33 +14,112 @@ defmodule BridgeEx.Extensions.ExternalResourcesTest do
     assert "42" == Example.answer()
   end
 
-  test "it marks files as external resources" do
-    paths =
-      for {:external_resource, [path]} <- Example.__info__(:attributes),
-          into: MapSet.new(),
-          do: Path.relative_to(path, __DIR__)
+  defmodule ExampleWithIncludes do
+    use BridgeEx.Extensions.ExternalResources,
+      resources: [
+        question: "resources/question.txt",
+        answer: "resources/answer.txt"
+      ],
+      includes: ["resources/header.txt", "resources/extra.txt"]
+  end
 
-    assert MapSet.new(["resources/question.txt", "resources/answer.txt"]) == paths
+  test "it prepends included files" do
+    assert "header content\nextra content\nHow many roads must a man walk down?" ==
+             ExampleWithIncludes.question()
+  end
+
+  test "it fails to compile if an include file is missing" do
+    quoted =
+      quote do
+        defmodule MissingInclude do
+          use BridgeEx.Extensions.ExternalResources,
+            resources: [question: "resources/question.txt"],
+            includes: ["resources/non_existent.txt"]
+        end
+      end
+
+    assert_raise File.Error, fn -> Code.eval_quoted(quoted) end
+  end
+
+  test "it fails to compile if includes is not a list" do
+    quoted =
+      quote do
+        defmodule BadIncludes do
+          use BridgeEx.Extensions.ExternalResources,
+            resources: [question: "resources/question.txt"],
+            includes: :bad_includes
+        end
+      end
+
+    assert_raise ArgumentError, fn -> Code.eval_quoted(quoted) end
   end
 
   test "it fails to compile if no resources are given" do
     quoted =
       quote do
-        use BridgeEx.Extensions.ExternalResources
+        defmodule NoResources do
+          use BridgeEx.Extensions.ExternalResources
+        end
       end
 
-    assert_raise FunctionClauseError, fn -> Code.eval_quoted(quoted) end
+    assert_raise ArgumentError, fn -> Code.eval_quoted(quoted) end
   end
 
   test "it fails to compile if a file is missing" do
     quoted =
       quote do
-        use BridgeEx.Extensions.ExternalResources,
-          resources: [
-            missing: "missing.txt"
-          ]
+        defmodule MissingFile do
+          use BridgeEx.Extensions.ExternalResources,
+            resources: [missing: "missing.txt"]
+        end
       end
 
     assert_raise File.Error, fn -> Code.eval_quoted(quoted) end
+  end
+
+  test "it fails to compile if resources is not a list" do
+    quoted =
+      quote do
+        defmodule BadResources do
+          use BridgeEx.Extensions.ExternalResources,
+            resources: :bad_res
+        end
+      end
+
+    assert_raise ArgumentError, fn -> Code.eval_quoted(quoted) end
+  end
+
+  test "it fails to compile when an unknown option is passed" do
+    quoted =
+      quote do
+        defmodule BadOpt do
+          use BridgeEx.Extensions.ExternalResources,
+            bad_opt: []
+        end
+      end
+
+    assert_raise ArgumentError, fn -> Code.eval_quoted(quoted) end
+  end
+
+  test "it fails to compile if resources contains a bad entry" do
+    quoted =
+      quote do
+        defmodule BadEntry do
+          use BridgeEx.Extensions.ExternalResources,
+            resources: [:bad_entry]
+        end
+      end
+
+    assert_raise FunctionClauseError, fn -> Code.eval_quoted(quoted) end
+  end
+
+  test "it fails to compile if not called inside a module" do
+    quoted =
+      quote do
+        use BridgeEx.Extensions.ExternalResources,
+          resources: [question: "resources/question.txt"]
+      end
+
+    assert_raise ArgumentError, fn -> Code.eval_quoted(quoted) end
   end
 end

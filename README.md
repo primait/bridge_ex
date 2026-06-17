@@ -40,16 +40,57 @@ Refer to [the documentation](https://hexdocs.pm/bridge_ex/BridgeEx.Graphql.html)
 
 If you need more control on your requests you can use [`BridgeEx.Graphql.Client.call`](https://hexdocs.pm/bridge_ex/BridgeEx.Graphql.Client.html#call/7) directly.
 
-The library supports preloading queries from external files via the `BridgeEx.Extensions.ExternalResources` optional macro:
+### Loading queries from external files
+
+The library supports preloading queries from external files via the optional `BridgeEx.Extensions.ExternalResources` macro:
 
 ```elixir
 defmodule MyApp.SomeServiceBridge do
-  use BridgeEx.Graphql, endpoint: "http://some_service.example.com", decode_keys: :strings
-  use BridgeEx.Extensions.ExternalResources, resources: [my_query: "my_query.graphql"]
+  use BridgeEx.Graphql,
+    endpoint: "http://some_service.example.com",
+    decode_keys: :strings
+
+  use BridgeEx.Extensions.ExternalResources,
+    resources: [
+      my_query: "my_query.graphql"
+    ]
 
   def my_query(%{} = variables), do: call(my_query(), variables)
 end
 ```
+
+The `resources` option is required and maps resource names to files. Each file path is resolved relative to the module source file.
+
+If you need to prepend shared content to multiple resources, you can use the optional `includes` option:
+
+```elixir
+use BridgeEx.Extensions.ExternalResources,
+  resources: [
+    get_user: "queries/get_user.graphql",
+    get_policy: "queries/get_policy.graphql"
+  ],
+  includes: [
+    "queries/fragments.graphql"
+  ]
+```
+
+Included files are concatenated, in order, and prepended to every resource.
+
+You can invoke `BridgeEx.Extensions.ExternalResources` multiple times within the same module. Resources from all invocations are merged, allowing different resources to use different include sets:
+
+```elixir
+defmodule MyApp.SomeServiceBridge do
+  use BridgeEx.Extensions.ExternalResources,
+    resources: [get_user: "queries/get_user.graphql"],
+    includes: ["queries/user_fragments.graphql"]
+
+  use BridgeEx.Extensions.ExternalResources,
+    resources: [get_policy: "queries/get_policy.graphql"],
+    includes: ["queries/policy_fragments.graphql"]
+end
+```
+
+Resource names must be unique across all invocations.
 
 ### Runtime options
 
