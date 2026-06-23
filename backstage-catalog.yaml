@@ -1,19 +1,12 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
+metadata:
+  name: bridge_ex
+  description: A library to build bridges to GraphQL services.
+tags:
+- rust
 spec:
   type: library
-  lifecycle: production
-  owner: team-developer-experience
+  lifecycle: experimental
+  owner: group:default/org-prima
   system: prima.it
-metadata:
-  name: bridge_ex 
-  description: A library to build bridges to other services (currently only GraphQL ones are supported)
-  tags:
-    - elixir
-  links:
-    - url: https://hex.pm/packages/bridge_ex
-      icon: link
-      title: Hex.pm
-    - url: https://hexdocs.pm/bridge_ex
-      icon: link
-      title: official documentation
