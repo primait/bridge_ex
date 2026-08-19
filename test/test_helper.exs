@@ -19,6 +19,7 @@ defmodule BridgeEx.TestHelper do
     Application.start(:bridge_ex)
 
     if start_prima_auth0_ex? do
+      Application.stop(:prima_auth0_ex)
       {:ok, _} = Application.ensure_all_started(:prima_auth0_ex)
       on_exit(fn -> Application.stop(:prima_auth0_ex) end)
     end
@@ -31,8 +32,8 @@ defmodule BridgeEx.TestHelper do
       for client_name <- Keyword.keys(clients), reduce: clients do
         updated_clients ->
           updated_client =
-            clients
-            |> Keyword.get(client_name)
+            updated_clients
+            |> Keyword.fetch!(client_name)
             |> Keyword.put(:auth0_base_url, "http://localhost:#{port}")
 
           Keyword.put(updated_clients, client_name, updated_client)
