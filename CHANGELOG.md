@@ -8,17 +8,24 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Changed
+
+- Bumped the minimum Elixir version to 1.15 and OTP version to 26.
+
 ---
 
 ## [2.6.0] - 2026-06-16
 
 ### Added
 
-- `BridgeEx.Extensions.ExternalResources` now supports an optional `includes` argument to prepend shared files to every resource.
+- `BridgeEx.Extensions.ExternalResources` now supports an optional `includes`
+  argument to prepend shared files to every resource.
 
 ### Changed
 
-- `BridgeEx.Extensions.ExternalResources` can now be used multiple times within the same module. Resources from all invocations are merged and resource names must remain unique.
+- `BridgeEx.Extensions.ExternalResources` can now be used multiple times within
+  the same module. Resources from all invocations are merged and resource names
+  must remain unique.
 
 ---
 
@@ -246,7 +253,6 @@ and this project adheres to
 ### Added
 
 - Initial implementation of `bridge_ex`
-
 
 [Unreleased]: https://github.com/primait/bridge_ex/compare/2.6.0...HEAD
 [2.6.0]: https://github.com/primait/bridge_ex/compare/2.5.0...2.6.0
