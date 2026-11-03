@@ -22,9 +22,6 @@ defmodule BridgeEx.Graphql.Client do
           | {:error, list()}
 
   @http_options timeout: 1_000, recv_timeout: 16_000
-  @http_headers %{
-    "Content-type" => "application/json"
-  }
 
   @doc """
   Calls a GraphQL endpoint
@@ -61,7 +58,7 @@ defmodule BridgeEx.Graphql.Client do
     uri = URI.parse(url)
     encode_variables = Keyword.get(opts, :encode_variables, false)
     http_options = Keyword.merge(@http_options, Keyword.get(opts, :options, []))
-    http_headers = Map.merge(@http_headers, Keyword.get(opts, :headers, %{}))
+    http_headers = opts |> Keyword.get(:headers, %{}) |> override_content_type_header()
     log_options = Keyword.merge(log_options(), Keyword.get(opts, :log_options, []))
     format_variables = Keyword.get(opts, :format_variables, false)
     decode_keys = Keyword.get(opts, :decode_keys, :atoms)
@@ -133,6 +130,14 @@ defmodule BridgeEx.Graphql.Client do
       end
     end
   end
+
+  defp override_content_type_header(headers) when is_map(headers) do
+    headers
+    |> Map.reject(fn {key, _value} -> String.downcase(key) == "content-type" end)
+    |> Map.put("Content-type", "application/json")
+  end
+
+  defp override_content_type_header(headers), do: headers
 
   defp error_message(reason) do
     cond do

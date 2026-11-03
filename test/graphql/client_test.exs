@@ -35,4 +35,25 @@ defmodule BridgeEx.Graphql.ClientTest do
     assert {:ok, %{new_atom: "ok"}} =
              Client.call("localhost:55000/", "", %{}, decode_keys: :existing_atoms)
   end
+
+  test "content-type header is rejected", %{bypass: bypass} do
+    Bypass.expect(bypass, "POST", "/", fn conn ->
+      content_type_header_count =
+        Enum.count(conn.req_headers, fn {key, _value} ->
+          String.downcase(key) == "content-type"
+        end)
+
+      assert content_type_header_count == 1
+      assert Plug.Conn.get_req_header(conn, "content-type") == ["application/json"]
+      Plug.Conn.resp(conn, 200, ~s[{"data": {"result": "ok"}}])
+    end)
+
+    headers = %{
+      "Content-Type" => "text/html",
+      "content-type" => "text/css",
+      "Content-type" => "application/json"
+    }
+
+    _ = Client.call("localhost:55000/", "", %{}, headers: headers)
+  end
 end
