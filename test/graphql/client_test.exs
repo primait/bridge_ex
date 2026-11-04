@@ -40,7 +40,7 @@ defmodule BridgeEx.Graphql.ClientTest do
     Bypass.expect(bypass, "POST", "/", fn conn ->
       content_type_header_count =
         Enum.count(conn.req_headers, fn {key, _value} ->
-          String.downcase(key) == "content-type"
+          String.downcase(to_string(key)) == "content-type"
         end)
 
       assert content_type_header_count == 1

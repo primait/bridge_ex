@@ -133,11 +133,9 @@ defmodule BridgeEx.Graphql.Client do
 
   defp override_content_type_header(headers) when is_map(headers) do
     headers
-    |> Map.reject(fn {key, _value} -> String.downcase(key) == "content-type" end)
+    |> Map.reject(fn {key, _value} -> String.downcase(to_string(key)) == "content-type" end)
     |> Map.put("Content-Type", "application/json")
   end
-
-  defp override_content_type_header(headers), do: headers
 
   defp error_message(reason) do
     cond do
