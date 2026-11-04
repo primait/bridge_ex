@@ -10,6 +10,10 @@ and this project adheres to
 
 ---
 
+## [2.7.1] - 2026-11-04
+
+---
+
 ## [2.7.0] - 2026-08-19
 
 ### Changed
@@ -259,7 +263,9 @@ and this project adheres to
 - Initial implementation of `bridge_ex`
 
 
-[Unreleased]: https://github.com/primait/bridge_ex/compare/2.7.0...HEAD
+
+[Unreleased]: https://github.com/primait/bridge_ex/compare/2.7.1...HEAD
+[2.7.1]: https://github.com/primait/bridge_ex/compare/2.7.0...2.7.1
 [2.7.0]: https://github.com/primait/bridge_ex/compare/2.6.0...2.7.0
 [2.6.0]: https://github.com/primait/bridge_ex/compare/2.5.0...2.6.0
 [2.4.2]: https://github.com/primait/bridge_ex/compare/2.4.1...2.4.2
