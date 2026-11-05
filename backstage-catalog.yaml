@@ -10,6 +10,17 @@ metadata:
   description: A library to build bridges to other services (currently only GraphQL ones are supported)
   tags:
     - elixir
+  annotations:
+    prima.it/library-adoption: |
+      {
+        "entityFilter": {
+          "kind": "Component",
+          "type": ["service", "custom", "web", "library"]
+        },
+        "scanFiles": ["mix.exs"],
+        "dependencies": ["primapy-tracing"],
+        "parser": "mix"
+      }
   links:
     - url: https://hex.pm/packages/bridge_ex
       icon: link
