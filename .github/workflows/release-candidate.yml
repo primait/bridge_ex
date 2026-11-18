@@ -1,0 +1,130 @@
+name: Build Release Candidate
+
+on:
+  workflow_dispatch: {}
+
+env:
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  build-rc:
+    name: Build Release Candidate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      pull-requests: write
+    concurrency:
+      group: bridge-ex-release-candidate
+      cancel-in-progress: false
+    steps:
+      - name: Check out selected branch and tags
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '26'
+          elixir-version: '1.15.8'
+
+      - name: Install Hex and Rebar
+        run: |
+          mix local.hex --force
+          mix local.rebar --force
+
+      - name: Get dependencies
+        run: mix deps.get
+
+      - name: Read draft release version
+        id: base-version
+        run: |
+          gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
+            "/repos/${GITHUB_REPOSITORY}/releases" \
+            --jq '.[] | select(.draft == true)' -X GET --paginate > "$RUNNER_TEMP/draft.json"
+          DRAFT=$(jq -sc 'if length == 1 then .[0] else error("Expected exactly one draft release") end' "$RUNNER_TEMP/draft.json")
+          VERSION=$(jq -r '.tag_name' <<< "$DRAFT")
+
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid base version: $VERSION (expected X.Y.Z)"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build release candidate
+        id: candidate
+        env:
+          VERSION: ${{ steps.base-version.outputs.VERSION }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          PACKAGE_VERSION="${VERSION}-rc.${RUN_NUMBER}"
+          ARTIFACT_NAME="bridge_ex-${PACKAGE_VERSION}"
+
+          sed -i -E "s/^(  @version \").*\"/\1${PACKAGE_VERSION}\"/" mix.exs
+          grep -Fx "  @version \"${PACKAGE_VERSION}\"" mix.exs
+          mix hex.build
+
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### Release candidate: \`${PACKAGE_VERSION}\`"
+            echo "The package was built from \`${GITHUB_SHA}\` and is available as the \`${ARTIFACT_NAME}\` workflow artifact."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload release candidate artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.candidate.outputs.ARTIFACT_NAME }}
+          path: bridge_ex-${{ steps.candidate.outputs.PACKAGE_VERSION }}.tar
+          if-no-files-found: error
+          overwrite: true
+
+      - name: Comment on PR with test instructions
+        env:
+          ARTIFACT_NAME: ${{ steps.candidate.outputs.ARTIFACT_NAME }}
+          PACKAGE_VERSION: ${{ steps.candidate.outputs.PACKAGE_VERSION }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          PR=$(gh api "/repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" --paginate --jq '.[]' |
+            jq -sr --arg repo "$GITHUB_REPOSITORY" \
+              '[.[] | select(.state == "open" and .head.repo.full_name == $repo)] |
+               if length == 1 then .[0].number else error("Expected exactly one open PR for the selected commit") end')
+
+          MARKER="<!-- bridge-ex-rc-artifact -->"
+          BODY_FILE=$(mktemp)
+          cat > "$BODY_FILE" <<EOF
+          ${MARKER}
+          A test package for \`{:bridge_ex, "== ${PACKAGE_VERSION}"}\` was built from commit \`${GITHUB_SHA}\`.
+
+          To download and extract it in an Elixir project:
+
+          \`\`\`bash
+          gh run download ${RUN_ID} --repo ${GITHUB_REPOSITORY} --name ${ARTIFACT_NAME} --dir .bridge-ex-rc
+          mkdir -p .bridge-ex-rc/bridge_ex-${PACKAGE_VERSION}
+          tar -xf .bridge-ex-rc/bridge_ex-${PACKAGE_VERSION}.tar -C .bridge-ex-rc
+          tar -xzf .bridge-ex-rc/contents.tar.gz -C .bridge-ex-rc/bridge_ex-${PACKAGE_VERSION}
+          \`\`\`
+
+          Temporarily replace the dependency in \`mix.exs\` (preserving any existing options):
+
+          \`\`\`elixir
+          {:bridge_ex, path: ".bridge-ex-rc/bridge_ex-${PACKAGE_VERSION}"}
+          \`\`\`
+
+          Run \`mix deps.get && mix test\` to test it. Do not commit the temporary dependency change, lockfile changes, or extracted files.
+          The GitHub CLI must be authenticated with access to \`${GITHUB_REPOSITORY}\`.
+          EOF
+
+          COMMENT_ID=$(gh api "/repos/${GITHUB_REPOSITORY}/issues/${PR}/comments" --paginate |
+            jq -sr --arg marker "$MARKER" \
+              '[.[][] | select(.user.login == "github-actions[bot]" and (.body | contains($marker)))][0].id // empty')
+
+          if [ -n "$COMMENT_ID" ]; then
+            gh api --method PATCH "/repos/${GITHUB_REPOSITORY}/issues/comments/${COMMENT_ID}" \
+              --raw-field "body=$(cat "$BODY_FILE")"
+          else
+            gh pr comment "$PR" --body-file "$BODY_FILE"
+          fi

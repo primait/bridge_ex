@@ -1,0 +1,84 @@
+name: Bump Version and Publish Release
+
+on:
+  workflow_dispatch: {}
+
+env:
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  bump:
+    name: Bump Version and Publish Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    environment:
+      name: release
+      deployment: false
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+
+      - name: Trust workspace directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Read draft release version
+        id: release-version
+        run: |
+          gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
+            "/repos/${GITHUB_REPOSITORY}/releases" --jq '.[] | select(.draft == true)' -X GET --paginate > "$RUNNER_TEMP/draft.json"
+          DRAFT=$(jq -sc 'if length == 1 then .[0] else error("Expected exactly one draft release") end' "$RUNNER_TEMP/draft.json")
+          VERSION=$(jq -r '.tag_name' <<< "$DRAFT")
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid draft release version: $VERSION"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "ID=$(jq -r '.id' <<< "$DRAFT")" >> "$GITHUB_OUTPUT"
+
+      - name: Update package version
+        env:
+          VERSION: ${{ steps.release-version.outputs.VERSION }}
+        run: |
+          sed -i -E "s/^(  @version \").*\"/\1${VERSION}\"/" mix.exs
+          grep -Fx "  @version \"${VERSION}\"" mix.exs
+
+      - name: Commit and push version update
+        env:
+          VERSION: ${{ steps.release-version.outputs.VERSION }}
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          case "$(git remote get-url origin)" in
+            git@github.com:*) ;;
+            *) echo "::error::Expected SSH origin configured with the deploy key"; exit 1 ;;
+          esac
+          git add mix.exs
+          git commit -m "Bump release version to $VERSION"
+          git push
+
+      - name: Create and push release tag
+        env:
+          VERSION: ${{ steps.release-version.outputs.VERSION }}
+        run: |
+          if git rev-parse -q --verify "refs/tags/${VERSION}" >/dev/null; then
+            echo "::error::Release tag ${VERSION} already exists"
+            exit 1
+          fi
+          git tag -a "$VERSION" -m "Release $VERSION"
+          git push origin "refs/tags/${VERSION}"
+
+      - name: Publish GitHub release
+        env:
+          RELEASE_ID: ${{ steps.release-version.outputs.ID }}
+        run: |
+          gh api \
+            --method PATCH \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" \
+            -F "draft=false" -F "prerelease=false"

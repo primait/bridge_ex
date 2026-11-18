@@ -1,0 +1,56 @@
+name-template: "$RESOLVED_VERSION"
+tag-template: "$RESOLVED_VERSION"
+
+categories:
+  - title: Features
+    semver-increment: patch
+    when:
+      label: enhancement
+  - title: Bug Fixes
+    semver-increment: patch
+    when:
+      label: bug
+  - title: Maintenance
+    when:
+      label: chore
+  - title: Documentation
+    when:
+      label: docs
+  - title: Breaking Changes
+    semver-increment: minor
+    when:
+      label: breaking change
+  - title: Dependency Updates
+    when:
+      label: dependencies
+  - title: Big Refactor
+    semver-increment: major
+    when:
+      label: major
+  - type: version-resolver
+    semver-increment: patch
+
+change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
+change-title-escapes: '\<*_&'
+
+template: |
+  ## Changes
+
+  $CHANGES
+
+autolabeler:
+  - label: chore
+    files:
+      - "/.github/**"
+      - ".gitignore"
+  - label: docs
+    files:
+      - "*.md"
+      - "docs/**"
+  - label: dependencies
+    branch:
+      - '/dependabot\/.+/'
+  - label: breaking change
+    body:
+      - "/breaking change/"
+      - "/BREAKING CHANGE/"

@@ -266,6 +266,26 @@ See [example](example) directory for an implementation, it also works in `dev` a
 
 `mix deps.get && mix test`
 
+## Releases
+
+Release Drafter maintains one draft release on `master`, using pull request labels
+to select the next version and group release notes.
+
+- Run **Build Release Candidate** on a branch with an open pull request to build
+  a `X.Y.Z-rc.N` Hex package without publishing it. The workflow uploads the package
+  and comments on the pull request with instructions for testing it locally.
+- Run **Bump Version and Publish Release** on `master` to apply the draft version
+  to `mix.exs`, commit it, push the release tag, and publish the GitHub release.
+- **Release on Tags** runs CI and publishes the matching package and documentation
+  to Hex.pm. This replaces the previous release-published CD workflow.
+
+Repository setup requires a `release` environment with a `DEPLOY_KEY` secret
+containing a write-enabled SSH deploy key, allowed by any branch protection rules,
+and the existing repository secret `HEX_AUTH_KEY` with Hex.pm publishing access.
+The deploy key pushes the commit and tag so they trigger downstream workflows.
+Allow GitHub Actions to write contents and pull request comments.
+All release jobs use `ubuntu-latest` and need no private runners or caches.
+
 ## Installation
 
 The package can be installed by adding `bridge_ex` to your list of dependencies in `mix.exs`:

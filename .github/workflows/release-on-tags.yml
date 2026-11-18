@@ -1,0 +1,90 @@
+name: Release on Tags
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  test-and-build:
+    name: Test and Build Package
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+
+  release:
+    name: Publish Package
+    runs-on: ubuntu-latest
+    needs: test-and-build
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '26'
+          elixir-version: '1.15.8'
+
+      - name: Install Hex and Rebar
+        run: |
+          mix local.hex --force
+          mix local.rebar --force
+
+      - name: Get dependencies
+        run: mix deps.get
+
+      - name: Check package version matches tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: grep -Fx "  @version \"${TAG}\"" mix.exs
+
+      - name: Publish package to Hex.pm
+        run: mix hex.publish --yes
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_AUTH_KEY }}
+
+      - name: Comment on PR with published RC version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if ! [[ "$TAG" =~ ^([0-9]+\.[0-9]+\.[0-9]+)-rc\.([1-9][0-9]*)$ ]]; then
+            exit 0
+          fi
+
+          PACKAGE_VERSION="$TAG"
+          grep -Fx "  @version \"${PACKAGE_VERSION}\"" mix.exs
+          SOURCE_COMMIT=$(git rev-parse HEAD^)
+          PR=$(gh api "/repos/${GITHUB_REPOSITORY}/commits/${SOURCE_COMMIT}/pulls" --paginate --jq '.[]' |
+            jq -sr --arg repo "$GITHUB_REPOSITORY" \
+              '[.[] | select(.state == "open" and .head.repo.full_name == $repo)] |
+               if length == 0 then empty elif length == 1 then .[0].number else error("Multiple open PRs for the RC source commit") end')
+          if [ -z "$PR" ]; then
+            echo "No open PR associated with the RC source commit; skipping the comment."
+            exit 0
+          fi
+
+          MARKER="<!-- bridge-ex-rc:${TAG} -->"
+          COMMENTS=$(gh api "/repos/${GITHUB_REPOSITORY}/issues/${PR}/comments" --paginate --jq '.[].body')
+          if grep -Fq "$MARKER" <<< "$COMMENTS"; then
+            echo "RC instructions already posted to PR #${PR}."
+            exit 0
+          fi
+
+          gh pr comment "$PR" --body "To use this version, change your dependency to:
+
+          \`\`\`elixir
+          {:bridge_ex, \"== ${PACKAGE_VERSION}\"}
+          \`\`\`
+
+          ${MARKER}"
